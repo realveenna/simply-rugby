@@ -1,0 +1,17 @@
+{
+    "name": "raven/test",
+    "authors": [
+        {
+            "name": "Raven Mortega",
+            "email": "realveenna@gmail.com"
+        }
+    ],
+    
+    "require": {},
+
+    "autoload": {
+        "psr-4": {
+        "Test\\": "src/"
+        }
+    }
+}
