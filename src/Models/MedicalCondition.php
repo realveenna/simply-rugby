@@ -81,6 +81,19 @@
             }
             return true;
         }
+
+        // Get Allergies for a specific player/application id
+        public static function getPlayerAllergies($pdo, $player_id, $table, $id_name)
+        {
+            $statement = $pdo->prepare(
+                "SELECT * FROM $table
+                JOIN allergy ON $table.allergy_id = allergy.allergy_id
+                WHERE $table.$id_name = :id"
+            );
+
+            $statement->execute([':id' => $player_id]);
+            return $statement->fetchAll(PDO::FETCH_ASSOC);
+        }
     }
 
 ?>

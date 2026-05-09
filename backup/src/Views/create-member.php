@@ -6,12 +6,12 @@
                 <img class="w-8 h-8 mr-2" src="./images/logo/main-logo.png" alt="logo">
                 Account Registration
             </a>  
-              <form class="space-y-4 md:space-y-6" method="post" action="/createAccount">
+              <form class="space-y-4 md:space-y-6" method="post" action="/create-member">
                 <div>
                     <label for="email" class="<?= labelClass() ?>">Email Address</label>
                     <input type="email" name="email" id="email" 
                         value="<?php echo trim($email);?>"
-                        class="<?= inputClass() ?>" placeholder="your@email.com" required="">
+                        class="<?= inputClass() ?>" placeholder="your@email.com" required>
                     <div>
                         <p class="mt-2 text-sm font-xs text-red-500"><?php echo trim($emailErr);?></p>
                     </div>
@@ -19,7 +19,7 @@
                 <div>
                     <label for="rawPassword" class="<?= labelClass() ?>">Password</label>
                     <input type="password" name="rawPassword" id="rawPassword" 
-                        placeholder="Enter Password" class="<?= inputClass() ?>" required="">
+                        placeholder="Enter Password" class="<?= inputClass() ?>" required>
                     <div>
                         <p class="mt-2 text-sm font-xs text-red-500"><?php echo trim($rawPasswordErr);?></p>
                     </div>
@@ -27,20 +27,30 @@
                 <div>
                     <label for="rawConfirmPassword" class="<?= labelClass() ?>">Confirm Password</label>
                     <input type="password" name="rawConfirmPassword" id="rawConfirmPassword" 
-                    placeholder="Enter Confirm Password" class="<?= inputClass() ?>" required="">
+                    placeholder="Enter Confirm Password" class="<?= inputClass() ?>" required>
                     <div>
                         <p class="mt-2 text-sm font-xs text-red-500"><?php echo trim($rawConfirmPasswordErr);?></p>
                     </div> 
                 </div>
-                  <div class="flex items-start">
-                      <div class="flex items-center h-5">
-                        <input id="terms" aria-describedby="terms" type="checkbox" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800" required="">
-                      </div>
-                      <div class="ml-3 text-sm">
-                        <label for="terms" class="font-light text-gray-500 dark:text-gray-300">I accept the <a class="font-medium text-blue-600 hover:underline dark:text-blue-500" href="#">Terms and Conditions</a></label>
-                      </div>
-                  </div>
-                  <button type="submit" class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Create an account</button>
+                 <div>
+                    <label for="selectRole" class="<?= labelClass() ?>">Country </label>
+                    <select class="<?= inputClass()?>"
+                        autocomplete="country" name="selectRole">
+                        <option value="" disabled> Select Country:</option>
+                        <?php foreach ($countries as $c): ?>
+                            <option value="<?= $c ?>"
+                                <?php 
+                                    if($selectRole === $c){
+                                        echo 'selected';
+                                    }
+                                ?>>
+                                <?= $c?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                        <p class="<?= smallError() ?>"><?php echo h($selectRoleErr);?></p>
+                </div>
+                  <button type="submit" class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Create an Member Account</button>
                   <p class="text-sm font-light text-gray-500 dark:text-gray-400">
                       Already have an account? <a href="/login" class="font-medium text-blue-600 hover:underline dark:text-blue-500">Login here</a>
                   </p>

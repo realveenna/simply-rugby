@@ -89,16 +89,12 @@
     ";}
 
     function inputClass(){
-        return "
-            bg-gray-50 border border-gray-300 text-gray-900 rounded-lg 
-            focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 
-            dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 
-            dark:focus:border-blue-500
+        return "bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs placeholder:text-body
     ";}
 
 
     function labelClass(){
-        return "block mb-2 text-sm font-small text-gray-900 dark:text-white";
+        return "block mb-2.5 text-base font-base text-heading dark:text-white";
     }
 
     function formPadding(){
@@ -117,11 +113,17 @@
     function formClass() {
         return "space-y-4 md:space-y-6";
     }
-
+    function badgeBlue(){
+        return "bg-brand-softer border border-brand-subtle text-fg-brand-strong text-xs font-medium px-1.5 py-0.5 rounded-full";
+    }
+    function badgeGray(){
+        return "bg-neutral-secondary-medium border border-default-medium text-heading text-xs font-medium px-1.5 py-0.5 rounded-full";
+    }
+    
     function alert($session,$message, $view){
          // There is an error in the form
         $_SESSION[$session] = $message;
-        header("Location: /$view");
+        header("Location: $view");
         exit;
     }
 ?>

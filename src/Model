@@ -1,0 +1,9 @@
+<?php
+namespace Test;
+use Test\Base;
+
+class Model extends Base
+{
+   
+}
+?>

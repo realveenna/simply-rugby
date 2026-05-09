@@ -3,7 +3,7 @@
       <div class="<?= cardClass() ?>">
         <div class="<?= formPadding() ?>">
             <a href="/" class="flex flex-col items-center justify-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
-                <img class="w-8 h-8 mr-2" src="./images/logo/main-logo.png" alt="logo">
+                <img class="w-8 h-8 mr-2" src="/images/logo/main-logo.png" alt="logo">
                 Player Application Form 
             </a>  
            
@@ -37,7 +37,8 @@
                             <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                                 <svg class="w-4 h-4 text-body" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16m-8-3V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Zm3-7h.01v.01H8V13Zm4 0h.01v.01H12V13Zm4 0h.01v.01H16V13Zm-8 4h.01v.01H8V17Zm4 0h.01v.01H12V17Zm4 0h.01v.01H16V17Z"/></svg>
                             </div>
-                            <input datepicker name="dob" id="dob" type="text" class="block w-full ps-9 pe-3 py-2.5 <?= inputClass()?>" placeholder="Select date">
+                            <input datepicker name="dob" id="dobRegister" type="text" value="<?php echo h($dob);?>"
+                            class="block w-full ps-9 pe-3 py-2.5 <?= inputClass()?>" placeholder="Select date">
                         </div>
                         <div>
                             <p class="<?= smallError() ?>"><?php echo h($dobErr);?></p>
@@ -71,7 +72,25 @@
                             </div>
                         </div>
                     </div>
-                
+                 
+                    <!-- Prompt guardian if they have an exisint login details
+                    <div id="if-existing-login">
+                        <label for="if-existing-login" class="labelClass() ?>">
+                            Do you have an existing parent account?
+                        </label>
+                        <div>
+                            <div class="flex items-center mb-4">
+                                <input id="existing-login" type="radio" value="1" name="existing-login" class="w-4 h-4 text-neutral-primary border-default-medium bg-neutral-secondary-medium rounded-full checked:border-brand focus:ring-2 focus:outline-none focus:ring-brand-subtle border border-default appearance-none">
+                                <label for="existing-login" class="select-none ms-2 text-sm font-medium text-heading">Yes</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input checked id="no-existing-login" type="radio" value="0" name="existing-login" class="w-4 h-4 text-neutral-primary border-default-medium bg-neutral-secondary-medium rounded-full checked:border-brand focus:ring-2 focus:outline-none focus:ring-brand-subtle border border-default appearance-none">
+                                <label for="no-existing-login" class="select-none ms-2 text-sm font-medium text-heading">No</label>
+                            </div>
+                        </div>
+                    </div> -->
+
+
                     <!-- Next Button -->
                     <button type="submit" name="action" value="next" class="<?= primaryBtn() ?>">
                         Next
@@ -115,6 +134,7 @@
                             <p class="<?= smallError() ?>"><?php echo h($nokFNameErr);?></p>
                         </div>
                     </div>
+                    
                     <div>
                         <label for="nokLName" class="<?= labelClass() ?>">Last Name</label>
                         <input type="text" name="nokLName" id="nokLName" 
@@ -150,6 +170,16 @@
                         <!-- include address and mobile form for Nok above-->
                         <?php include '../src/includes/contact.php'?>
                         <?php include '../src/includes/address.php'?>
+
+                        <div>
+                              <label for="applyCoach" class="flex items-center mb-5">
+                                <input id="applyCoach" aria-describedby="applyCoach" name="applyCoach" type="checkbox" value="1" 
+                                class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800">
+                                <p class="ms-2 text-sm text-small text-heading select-none">
+                                    Please tick the box if you wish to apply for a coach position
+                                </p>
+                            </label>
+                        </div>
 
                         <!-- Guardian 2 Details -->
                         <?= h2("Guardian 2 Details")?>

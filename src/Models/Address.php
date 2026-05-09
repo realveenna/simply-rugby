@@ -37,6 +37,7 @@
                 ]);
                 return $pdo->lastInsertId();
             }
+            // If address already exists, fetch the existing address_id
             catch(\PDOException $e){
                 $sql = "SELECT address_id FROM address 
                         WHERE line_1 = :line1 AND postcode = :postcode";
