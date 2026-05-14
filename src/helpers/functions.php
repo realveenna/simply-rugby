@@ -39,6 +39,7 @@
         return trim($_POST[$value]);
     }
 
+
     function h1($text) {
         return "<h1 class='text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white'>$text</h1>";
     }
@@ -75,17 +76,23 @@
 
     function primaryBtn(){
         return "
-            w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none 
-            focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 
-            dark:hover:bg-blue-700 dark:focus:ring-blue-800
+            text-white bg-brand box-border border border-transparent hover:bg-brand-strong focus:ring-4 
+            focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 
+            focus:outline-none
     ";}
 
     function secondaryBtn() {
         return "
-            text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 
-            focus:ring-4 focus:outline-none focus:ring-gray-200 font-medium rounded-lg 
-            text-sm px-5 py-2.5 text-center dark:bg-gray-800 dark:text-white dark:border-gray-600 
-            dark:hover:bg-gray-700 dark:focus:ring-gray-700
+            text-body bg-neutral-secondary-medium box-border border border-default-medium 
+            hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 
+            focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm 
+            px-4 py-2.5 focus:outline-none
+    ";}
+    function dangerBtn() {
+        return "
+            text-white bg-danger box-border border border-transparent hover:bg-danger-strong 
+            focus:ring-4 focus:ring-danger-medium shadow-xs font-medium leading-5 rounded-base text-sm 
+            px-4 py-2.5 focus:outline-none
     ";}
 
     function inputClass(){
@@ -101,9 +108,12 @@
         return "p-6 space-y-4 md:space-y-6 sm:p-8";
     }
 
-
     function cardClass(){
         return "w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-xl xl:p-0 
+            dark:bg-gray-800 dark:border-gray-700";
+    }
+    function cardClassXL(){
+        return "w-full max-w-4xl bg-white rounded-lg shadow dark:border xl:p-0
             dark:bg-gray-800 dark:border-gray-700";
     }
 
@@ -126,4 +136,29 @@
         header("Location: $view");
         exit;
     }
+
+    function randomPassword() {
+        $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+        $pass = array(); //remember to declare $pass as an array
+        $alphaLength = strlen($alphabet) - 1; //put the length -1 in cache
+        for ($i = 0; $i < 8; $i++) {
+            $n = rand(0, $alphaLength);
+            $pass[] = $alphabet[$n];
+        }
+        $pass = implode($pass);
+
+        return $pass; 
+    }
+
+    function hashPassword($rawPassword){
+        $salt ="4g£yc7!L(";
+        return md5($rawPassword.$salt);
+    }
+
+    // function alertSelf($session,$message){
+    //      // There is an error in the form redirect to self
+    //     $_SESSION[$session] = $message;
+    //     header("Location: " . $_SERVER['PHP_SELF']);
+    //     exit;
+    // }
 ?>

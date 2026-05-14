@@ -3,19 +3,19 @@
 
     use Test\Controller;
     use Test\Models\User;
-    
+    use Test\Database;
 
     class LoginController extends Controller
     {
         // Login function
         public function login()
         {
+
             $email = '';
             $emailErr = '';
             $rawPassword = '';
             $rawPasswordErr = '';
 
-            
             if ($_POST) {
                 $email = $_POST['email'] ?? '';
                 $rawPassword = $_POST['rawPassword'] ?? '';
@@ -35,24 +35,30 @@
                     }
                     // Valid Email Check Database
                     else{
-                        $result = User::validate($email, $rawPassword);
-                        if (isset($result['success'])) {
-                            $_SESSION["loggedIn"] = true; 
-                            $_SESSION["member"] = $result['member'];
-                            // header("Location: /dashboard");
-                            // exit();
+                        $isUser = User::findEmail($email);
+                        if (!$isUser) {
+                            $emailErr ='Email is not registered.';
                         }
                         else{
-                            // Display Input Error
-                            if (isset($result['emailError'])) {
-                                $emailErr = $result['emailError'];
-                            }
+                            $member = new User;
+                            $member = $member->getCredentials($isUser['member_id']);
 
-                            if (isset($result['passErr'])) {
-                                $rawPasswordErr = $result['passErr'];
+                            // Check password       
+                            $salt ="4g£yc7!L(";
+                            $password = md5($rawPassword.$salt);
+
+                            // Correct Password
+                            if($member['pass'] === $password){
+                                $_SESSION["loggedIn"] = true; 
+                                $_SESSION["user"] = $member;
+                                $_SESSION['id'] = session_id();
+                                
+                                alert('success','Login Successfully!', '/');
                             }
-                            // header("Location: /login");
-                            // exit();
+                            // Incorrect Password
+                            else{
+                                $rawPasswordErr = 'Incorrect Password.';
+                            }
                         }
                     }
                 }
@@ -63,6 +69,15 @@
                 'rawPasswordErr' => $rawPasswordErr
             ]);
             
+        }
+
+        public function logout(){
+            // remove and destroy session
+            session_unset();
+            session_destroy();
+
+            header("Location: /login");
+            exit();
         }
     }
 ?>

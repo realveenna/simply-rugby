@@ -1,1 +1,11 @@
-this is dashboard user is logged in
+<script>
+ console.log("Dashboard");
+</script>
+
+<pre>
+<?php 
+
+var_dump($_SESSION);
+?>
+
+</pre>

@@ -33,7 +33,7 @@
             if ($uri === '' || $uri === false) {
                 $uri = '/';
             }
-
+            
 
             if (array_key_exists($uri, $this->routes[$method])) {
                 $controller = $this->routes[$method][$uri]['controller'];
@@ -41,6 +41,7 @@
 
                 $controller = new $controller();
                 $controller->$action();
+                
             } else {
                 throw new \Exception("No route found for URI: $uri");
             } 

@@ -358,7 +358,7 @@
                             <option value="0"> None </option>
                              
                             <!-- List medical condition -->
-                            <?php foreach ($medicalConditions as $c): ?>
+                            <?php foreach ($medicalInformation as $c): ?>
                                 <option value="<?= $c['condition_id'] ?>"
                                     <?= in_array($c['condition_id'], $currentCondition) ? 'selected' : '' ?>>
                                     <?= h($c['condition_name']) ?>
@@ -378,7 +378,7 @@
                             <option value="0"> None </option>
 
                             <!-- List medical condition -->
-                            <?php foreach ($medicalConditions as $c): ?>
+                            <?php foreach ($medicalInformation as $c): ?>
                                 <option value="<?= $c['condition_id'] ?>"
                                     <?= in_array($c['condition_id'], $pastCondition) ? 'selected' : '' ?>>
                                     <?= h($c['condition_name']) ?>

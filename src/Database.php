@@ -27,10 +27,10 @@
                 $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                 $this->conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
                 if(!$this->conn){
-                    echo "Database connection can not be established.";
+                    die("Database connection can not be established.");
                 }
             } catch (Exception $ex) {
-                echo $ex->getMessage();
+                die($ex->getMessage());
             }
         }
         // The method to get the singleton instance

@@ -5,7 +5,7 @@
     use Test\Models\User;
     use Test\Models\Role;
     use Test\Models\Address;
-    use Test\Models\MedicalCondition;
+    use Test\Models\MedicalInformation;
     use Test\Models\Application;
     use Test\Models\Doctor;
     use Test\Models\Guardian;
@@ -30,8 +30,131 @@
             
         }
 
+        // Reset Password
+        public function resetPassword()
+        {
+            $pdo = Database::getInstance()->getConnection();
+
+            // Set Default variables
+            $member_id = "";
+            $resetEmail = "";
+
+            $passwords = [
+                'old' => '',
+                'new' => ''
+            ];
+
+            $errors = [
+                'emailErr' => '',
+                'oldPassword' => '',
+                'newPassword' => ''
+            ];
+
         
-//         // Register an account
+            try{
+                // If member_id is set
+                if(isset($_GET['member_id'])){
+                    $member_id = $_GET['member_id'];
+
+                    // Find Email
+                    $resetEmail = Member::selectEmail($member_id);
+                    if(!$resetEmail){
+                        throw new \ErrorException('Email Not Found!');
+                    }
+                }
+
+                if($_POST){
+                    $pdo->beginTransaction();
+                    $resetEmail = trimPost('resetEmail');
+                    $passwords['old'] = trimPost('oldPassword');
+                    $passwords['new'] = trimPost('newPassword');
+
+                     // Validate Empty Email and Password Input
+                    if (empty($passwords['old'])) {
+                        $errors['oldPassword'] = "Password is required";
+                    }
+                    if (empty($passwords['new'])) {
+                        $errors['newPassword'] = "Please enter new password";
+                    }
+
+                    // Get member_id
+                    $member_id = Member::selectIdByEmail($resetEmail);
+                    if(!$member_id){
+                        throw new \ErrorException('Email Not Found!');
+                    }
+
+                    // Get login details
+                    $login = User::findMemberLogin($pdo, $member_id);
+                    if(!$login){
+                        throw new \ErrorException('Login Details Not Found');
+                    }
+                
+                    $member = new User;
+                    $member = $member->getCredentials($member_id);
+                    
+                    // Check password       
+                    $salt ="4g£yc7!L(";
+
+                    // Hash old password 
+                    $oldPasswordHash = md5($passwords['old'] . $salt);
+
+                    // Hash new password 
+                    $newPasswordHash = md5($passwords['new'] . $salt);
+
+                    // Correct Password
+                    if($member['pass'] === $oldPasswordHash){
+                        // Check password length
+                        if(strlen($passwords['new']) < 8){
+                            $errors['newPassword'] = 'Password must be atleast 8 characters<br>';
+                        }
+                        
+                        // More password strength validation
+                        if(!preg_match("#[0-9]+#", $passwords['new'])) {
+                            $errors['newPassword'] .= "Your Password Must Contain At Least 1 Number!<br>";
+                        }
+                        if(!preg_match("#[A-Z]+#", $passwords['new'])) {
+                            $errors['newPassword'] .= "Your Password Must Contain At Least 1 Capital Letter!<br>";
+                        }
+                        if(!preg_match("#[a-z]+#", $passwords['new'])) {
+                            $errors['newPassword'] .= "Your Password Must Contain At Least 1 Lowercase Letter!<br>";
+                        }
+
+                        // Check if same password
+                        if($passwords['new'] === $passwords['old']){
+                            $errors['newPassword'] = "Please a different password.";
+                        }
+                    }
+                    // Incorrect Password
+                    else{
+                        $errors['oldPassword'] = 'Incorrect Password.';
+                    }
+
+                    // No error update password
+                    if(!array_filter($errors)){
+                        $updated = User::updatePassword($pdo, $member_id, $newPasswordHash);
+                        if(!$updated){
+                            throw new \Exception('Password update failed');
+                        }
+                        $pdo->commit();
+                        alert('success', 'Your password has been changed!', '/');
+                    }
+                }
+            }
+            catch (\Exception $e){
+                    if ($pdo->inTransaction()) {
+                        $pdo->rollBack();
+                    }
+                    alert('error', $e->getMessage(), '/account/reset-password');
+                    die($e->getMessage());
+            }
+            
+            $this->render('account/reset-password', [
+                'resetEmail' => $resetEmail,
+                'errors' => $errors,
+                'passwords' => $passwords
+            ]);
+        }
+
 //         public function register()
 //         {
 //             $relationships = [
@@ -50,10 +173,10 @@
 //             ];
 
 //             // Get condition array
-//             $medicalConditions = MedicalCondition::viewAllCondition();
+//             $medicalInformation = MedicalInformation::viewAllCondition();
 
 //              // Get allergy array
-//             $allergies = MedicalCondition::viewAllAllergy();
+//             $allergies = MedicalInformation::viewAllAllergy();
 
 //             $formNum = 1;
 //             $age = '';
@@ -106,7 +229,7 @@
 //             $line1SecondaryErr = $line2SecondaryErr = $citySecondaryErr =  $postcodeSecondaryErr  = $countrySecondaryErr = "";
 
 //             // Medical Information Array
-//             $medicalConditionData = [];
+//             $medicalInformationData = [];
 //             $allergyData = [];
 
 //             $currentCondition = [];
@@ -441,7 +564,7 @@
 //                                 // Medical Condition Data
 //                             // Current Condition
 //                             foreach($currentCondition as $c){
-//                                 $medicalConditionData[] = [
+//                                 $medicalInformationData[] = [
 //                                     'application_id' => $data['application_id'],
 //                                     'condition_id' => $c,
 //                                     'condition_status' => 'current'
@@ -450,7 +573,7 @@
 
 //                             // Past Condition
 //                             foreach($pastCondition as $c){
-//                                 $medicalConditionData[] = [
+//                                 $medicalInformationData[] = [
 //                                     'application_id' => $data['application_id'],
 //                                     'condition_id' => $c,
 //                                     'condition_status' => 'past'
@@ -458,10 +581,10 @@
 //                             }
                                             
 //                             // Insert Medical Condition
-//                             MedicalCondition::insertConditionApplication($pdo, $medicalConditionData);
+//                             MedicalInformation::insertConditionApplication($pdo, $medicalInformationData);
 
 //                             // Insert Allergies
-//                             MedicalCondition::insertAllergyApplication($pdo, $allergyData, $data['application_id']);
+//                             MedicalInformation::insertAllergyApplication($pdo, $allergyData, $data['application_id']);
 
 //                             $primaryGuardianData = [
 //                                 'application_id' => $data['application_id'],
@@ -641,7 +764,7 @@
 //                 'mobileNumSecondaryErr' => $mobileNumSecondaryErr,
 
 //                 // Medical Details
-//                 'medicalConditions' => $medicalConditions,
+//                 'medicalInformation' => $medicalInformation,
 //                 'currentCondition' => $currentCondition,
 //                 'pastCondition' => $pastCondition,
 //                 'allergies' => $allergies,
@@ -1010,14 +1133,5 @@
         //         'roles' => $roles
         //     ]);
         // }
-
-        public function logout(){
-            // remove and destroy session
-            session_unset();
-            session_destroy();
-
-            header("Location: /login");
-            exit();
-        }
     }
 ?>

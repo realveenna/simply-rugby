@@ -19,7 +19,7 @@
         protected $password;
 
         public $allNoLogin = [];
-        
+
 
         public function __construct()
         {
@@ -35,6 +35,11 @@
             $this->password = '';
         }
 
+        // Get member_id 
+        private function getMemberId()
+        {
+            return $this->member_id;
+        }
         public function registerPlayer($email, $rawPassword)
         {
      
@@ -69,7 +74,6 @@
             return  $statement->fetchAll(PDO::FETCH_ASSOC);
         }
 
-
         public function validateInsert($pdo){
             // Check if member already exist 
             $statement = $pdo->prepare(
@@ -90,19 +94,10 @@
         // Insert a new member to the database
         public function insert($pdo)
         {
-            $pdo = Database::getInstance()->getConnection();
-
-            // Check if member already exist before inserting
-            $memberExists = self::validateInsert($pdo);
-            
-            if ($memberExists) {
-                throw new \Exception("Member already exists.");
-            }
-
             // Insert member to database
             $statement = $pdo->prepare
-                ("INSERT INTO member(first_name, last_name, dob, address_id, mobile_num, membership_status) 
-                VALUES (:fname, :lname, :dob, :address_id, :mobileNum, :membershipStatus)");
+                ("INSERT INTO member(first_name, last_name, dob, address_id, mobile_num, membership_status, email) 
+                VALUES (:fname, :lname, :dob, :address_id, :mobileNum, :membershipStatus, :email)");
             
                 $statement->execute([
                     ':fname' => $this->first_name,
@@ -110,7 +105,8 @@
                     ':dob' => $this->dob,
                     ':address_id' => $this->address_id,
                     ':mobileNum' => $this->mobile_num,
-                    ':membershipStatus' => $this->membership_status
+                    ':membershipStatus' => $this->membership_status,
+                    ':email' => $this->email ?? null
                 ]);
 
             $this->member_id = $pdo->lastInsertId();
@@ -126,6 +122,17 @@
             );
 
             $statement->execute([':member_id' => $member_id]);
+            return $statement->fetchColumn();
+        }
+        public static function selectIdByEmail($email)
+        {
+            $pdo = Database::getInstance()->getConnection();
+
+            $statement = $pdo->prepare(
+                "SELECT member_id FROM member WHERE email = :email LIMIT 1"
+            );
+
+            $statement->execute([':email' => $email]);
             return $statement->fetchColumn();
         }
     }

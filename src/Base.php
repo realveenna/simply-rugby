@@ -6,10 +6,10 @@ use Test\Database;
     {
         protected $pdo;
         // 
-        public function __construct()
-        {
-            $this->pdo = Database::getInstance()->getConnection();
-        }
+        // public function __construct()
+        // {
+        //     $this->pdo = Database::getInstance()->getConnection();
+        // }
     }
 
 ?>

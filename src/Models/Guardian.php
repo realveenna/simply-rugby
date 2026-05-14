@@ -8,28 +8,36 @@
     {
         private $guardian_id;
         protected $application_id;
+        protected $member_id;
         protected $address_id;
-        protected $first_name;
-        protected $last_name;
-        protected $relationship;
-        protected $mobile_number;
-        protected $is_primary;
-        protected $apply_coach;
+        protected $contact_member_id;
+        private $first_name;
+        private $last_name;
+        private $relationship;
+        private $mobile_number;
+        private $is_primary;
+        private $apply_coach;
 
-        private $email; // Add email property for coach application
+        private $email; 
+
+        private $access_level; 
 
 
-        public function __construct($data)
+
+        public function __construct($data, $memberId)
         {
             $this->application_id = $data['application_id'] ?? '';
-            $this->address_id = $data['address_id'] ?? '';
+            $this->member_id = $data['member_id'] ?? $memberId ?? '';
+            $this->address_id = $data['address_id'] ?? null;
+            $this->contact_member_id = $data['contact_member_id'] ?? '';
             $this->first_name = $data['first_name'] ?? '';
             $this->last_name = $data['last_name'] ?? '';
             $this->relationship = $data['relationship'] ?? '';
             $this->mobile_number = $data['mobile_number'] ?? '';
             $this->is_primary = $data['is_primary'] ?? 0;
             $this->apply_coach = $data['apply_coach'] ?? 0;
-            $this->email = $data['email'] ?? '';
+            $this->email = $data['email'] ?? null;
+            $this->access_level = $data['access_level'] ?? 'No Access';
         }
         private function setGuardianId($lastInsertId)
         {
@@ -68,18 +76,7 @@
         {
             $this->guardian_id = $lastInsertId;
         }
-        // Get application guardians by application id
-        public static function getApplicationGuardians($pdo, $application_id){
-            $statement = $pdo->prepare(
-                "SELECT * FROM application_guardian
-                JOIN address ON application_guardian.address_id = address.address_id
-                WHERE application_guardian.application_id = :application_id"
-            );
 
-            $statement->execute([':application_id' => $application_id]);
-            return $statement->fetchAll(PDO::FETCH_ASSOC);
-        }
-        
         // // apply coach method
         // private function applyCoach()
         // {
@@ -145,17 +142,31 @@
         //     }
         // }
 
+        public function checkGuardianApplicationExists($pdo)
+        {
+            $statement = $pdo->prepare(
+                "SELECT guardian_id FROM application_guardian
+                WHERE email = :email 
+                    AND mobile_number = :mobile_number 
+                    AND is_primary = 1
+                LIMIT 1"
+            );
+            $statement->execute([
+                ':email' => $this->email,
+                ':mobile_number' => $this->mobile_number
+            ]);
+            return $statement->fetch(PDO::FETCH_COLUMN);
+        }
+
         public function insertGuardianApplication($pdo)
         {
-        try{
+            try{
                 // Check if the email already exists in the logins table
                 $isMember = User::checkEmailExists($this->email, "This email has an existing registration with another player");
                         
                 if($isMember['exists']){
                     throw new \Exception("This email is already a registered member. Please log in.");
                 }
-
-                // $this->checkEmailGuardianExists($pdo);
 
                 $statement = $pdo->prepare(
                     "INSERT INTO application_guardian 
@@ -170,30 +181,29 @@
                         last_name = VALUES(last_name), 
                         apply_coach = VALUES(apply_coach)
                     ;"
-            );
+                );
 
-            $statement->execute([
-                ':address_id' => $this->address_id,
-                ':first_name' => $this->first_name,
-                ':last_name' => $this->last_name,
-                ':relationship' => $this->relationship,
-                ':mobile_number' => $this->mobile_number,
-                ':is_primary' => $this->is_primary,
-                ':email' => $this->email,
-                ':apply_coach' => $this->apply_coach
-            ]);
+                $statement->execute([
+                    ':address_id' => $this->address_id,
+                    ':first_name' => $this->first_name,
+                    ':last_name' => $this->last_name,
+                    ':relationship' => $this->relationship,
+                    ':mobile_number' => $this->mobile_number,
+                    ':is_primary' => $this->is_primary,
+                    ':email' => $this->email ?? null,
+                    ':apply_coach' => $this->apply_coach
+                ]);
 
-            // if($statement->rowCount() === 0){
-            //     throw new \Exception("Failed to insert guardian application");
-            // }
+                // Set the guardian ID after successful insertion
+                $guardianId = $pdo->lastInsertId();
 
-            // Set the guardian ID after successful insertion
-            $this->setGuardianId($pdo->lastInsertId());
-            return $this->guardian_id;
-            
-        }
+                if ($guardianId <= 0) {
+                    throw new \Exception('Failed to get guardian ID.');
+                }
+                return $guardianId;
+            }
             // If guardian exists, then fetch the guardian_id    
-        catch(\PDOException $e){
+            catch(\PDOException $e){
                 $sql = "SELECT guardian_id FROM application_guardian 
                         WHERE first_name = :first_name AND last_name = :last_name AND
                             mobile_number = :mobile_number AND is_primary = :is_primary
@@ -208,14 +218,132 @@
                 ];
 
                 // Return the guardian_id if the guardian already exists
-                $this->guardian_id = Database::errorFetchId($pdo, $sql, $params, $e);
-                return $this->guardian_id;
+                $guardianId = Database::errorFetchId($pdo, $sql, $params, $e);
+                return $guardianId;
             }
         }
+
+        // Insert to player_contact
+        public function insertPlayerContact($pdo)
+        {
+            try{
+                $statement = $pdo->prepare(
+                    "INSERT INTO player_contact (member_id,contact_member_id,relationship,is_primary,access_level) 
+                    VALUES (:member_id, :contact_member_id, :relationship, :is_primary, :access_level)"
+                );
+
+                $statement->execute([
+                    ':member_id' => $this->member_id,
+                    ':contact_member_id' => $this->contact_member_id,
+                    ':relationship' => $this->relationship,
+                    ':is_primary' => $this->is_primary,
+                    ':access_level' => $this->access_level ?? 'No Access'
+                ]);
+
+                if($statement->rowCount() === 0){
+                    throw new \Exception("Failed to insert player contact details.");
+                }
+            }
+            catch(\PDOException $e){
+                throw new \Exception("Database error: " . $e->getMessage());
+            }
+            return true;
+        }
+        
         public function getGuardianId()
         {
             return $this->guardian_id;
         }
-    }
 
+        // Get primary guardian id by application id
+        public static function getGuardianIdByApplicationId($pdo, $application_id, $is_primary = 1)
+        {
+            try{
+                $statement = $pdo->prepare(
+                    "SELECT guardian_id FROM application_guardian
+                    WHERE application_id = :application_id AND is_primary = :is_primary"
+                );
+
+                $statement->execute([
+                    ':application_id' => $application_id,
+                    ':is_primary' => $is_primary
+                ]);
+
+                return $statement->fetchColumn();
+            }
+            catch(\PDOException $e){
+                alert('error', 'There is a database error in fetching primary guardian id', '/player-applications');
+                return null;
+            }
+        }
+        // Get secondary guardian id by application id
+        public static function getSecondaryGuardianIdByApplicationId($pdo, $application_id, $is_primary = 0)
+        {
+            try{
+                $statement = $pdo->prepare(
+                    "SELECT guardian_id FROM application_guardian
+                    WHERE application_id = :application_id AND is_primary = :is_primary"
+                );
+
+                $statement->execute([
+                    ':application_id' => $application_id,
+                    ':is_primary' => $is_primary
+                ]);
+
+                return $statement->fetchColumn();
+            }
+            catch(\PDOException $e){
+                alert('error', 'There is a database error in fetching secondary guardian id.', '/player-applications');
+                return null;    
+            }
+        }
+        // Get application primary guardians by application id
+        public static function getPrimaryApplicationGuardians($pdo, $guardian_id , $is_primary = 1){
+            try{
+                $statement = $pdo->prepare(
+                    "SELECT * FROM application_guardian
+                    LEFT JOIN address ON application_guardian.address_id = address.address_id
+                    WHERE application_guardian.guardian_id = :guardian_id AND application_guardian.is_primary = :is_primary"
+                );
+
+                $statement->execute([
+                    ':guardian_id' => $guardian_id,
+                    ':is_primary' => $is_primary
+                ]);
+
+                $result = $statement->fetch(PDO::FETCH_ASSOC);
+
+                if(!$result){
+                    return null;
+                }
+                return $result;
+            }
+            catch(\PDOException $e){
+                alert('error', 'There is a database error in fetching nok/primary guardians.', '/player-applications');
+            }
+        }
+        // Get application secondary guardians by application id
+        public static function getSecondaryApplicationGuardians($pdo, $guardian_id, $is_primary = 0){
+            try{
+                $statement = $pdo->prepare(
+                "SELECT * FROM application_guardian
+                JOIN address ON application_guardian.address_id = address.address_id
+                WHERE application_guardian.guardian_id = :guardian_id AND application_guardian.is_primary = :is_primary"
+                );
+
+                $statement->execute([
+                    ':guardian_id' => $guardian_id,
+                    ':is_primary' => $is_primary
+                ]);
+                $result = $statement->fetch(PDO::FETCH_ASSOC);
+                if(!$result){
+                    return null;
+                }
+                return $result;
+            }
+            catch(\PDOException $e){
+                alert('error', 'There is a database error in fetching secondary guardians.', '/player-applications');
+            }
+        }
+    }
 ?>

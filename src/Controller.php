@@ -51,7 +51,7 @@ use Test\Base;
             <?php endif ;?>
 
             <main>
-                <div class="px-4 pt-6 my-8">
+                <div class="max-w-7xl mx-auto px-4 pt-6 my-8">
                     <?php include "../src/Views/$view.php"; ?>
                 </div>
             </main>

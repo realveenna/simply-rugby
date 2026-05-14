@@ -16,12 +16,31 @@
 
         public function __construct()
         {
-
+            $this->address_id = null;
+            $this->line_1 = '';
+            $this->line_2 = '';
+            $this->city = '';
+            $this->postcode = '';
+            $this->country = '';
         }
+        
+        // Get address by ID
+        public static function getAddressDetails($pdo, $address_id)
+        {
+            $statement = $pdo->prepare("SELECT * FROM address WHERE address_id = :address_id");
+            $statement->execute([':address_id' => $address_id]);
+            $result = $statement->fetch(PDO::FETCH_ASSOC);
+
+            if(!$result){
+                return null;
+            }
+
+            return $result;
+        }
+
+        // Insert address to database
         public static function insert($pdo, $data)
         {
-            $pdo = Database::getInstance()->getConnection();
-            
             try{
                 // Insert address to database
                 $statement = $pdo->prepare
@@ -29,10 +48,10 @@
                     VALUES (:line1, :line2, :city, :postcode, :country)");
                 
                 $statement->execute([
-                    ':line1' => $data['line1'],
-                    ':line2' => $data['line2'],
+                    ':line1' => ucwords($data['line1']),
+                    ':line2' => ucwords($data['line2']),
                     ':city' => $data['city'],
-                    ':postcode' => $data['postcode'],
+                    ':postcode' => strtoupper($data['postcode']),
                     ':country' => $data['country']
                 ]);
                 return $pdo->lastInsertId();

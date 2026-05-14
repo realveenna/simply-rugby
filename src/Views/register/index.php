@@ -353,7 +353,7 @@
                             class="<?= inputClass()?>">
                             <option disabled>Select Current Medical Conditions</option>
                             <!-- List medical condition -->
-                            <?php foreach ($medicalConditions as $c): ?>
+                            <?php foreach ($medicalInformations as $c): ?>
                                 <option value="<?= $c['condition_id'] ?>"
                                     <?= in_array($c['condition_id'], $currentCondition) ? 'selected' : '' ?>>
                                     <?= h($c['condition_name']) ?>
@@ -371,7 +371,7 @@
                             class="<?= inputClass()?>">
                             <option disabled>Select Past Medical Conditions</option>
                             <!-- List medical condition -->
-                            <?php foreach ($medicalConditions as $c): ?>
+                            <?php foreach ($medicalInformations as $c): ?>
                                 <option value="<?= $c['condition_id'] ?>"
                                     <?= in_array($c['condition_id'], $pastCondition) ? 'selected' : '' ?>>
                                     <?= h($c['condition_name']) ?>

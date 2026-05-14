@@ -7,11 +7,23 @@
         }
     ],
     
-    "require": {},
+    "require": {
+        "phpmailer/phpmailer": "^7.0",
+        "mailersend/mailersend": "^0.38.1",
+        "symfony/http-client": "^7.4",
+        "nyholm/psr7": "^1.8",
+        "railsware/mailtrap-php": "^3.11",
+        "symfony/mime": "^7.4"
+    },
 
     "autoload": {
         "psr-4": {
         "Test\\": "src/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
         }
     }
 }

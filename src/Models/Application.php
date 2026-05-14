@@ -27,6 +27,42 @@
 
         }
 
+        public static function checkApplicationStatus($pdo, $application_id)
+        {
+            $statement = $pdo->prepare(
+                "SELECT application_status
+                FROM player_application
+                WHERE application_id = :application_id"
+            );
+
+            $statement->execute([
+                ':application_id' => $application_id
+            ]);
+
+            return $statement->fetch(PDO::FETCH_COLUMN);
+        }
+
+        public static function updateStatus($pdo, $application_id, $new_status)
+        {
+            $statement = $pdo->prepare(
+                "UPDATE player_application
+                SET application_status = :new_status
+                WHERE application_id = :application_id"
+            );
+
+            $updated = $statement->execute([
+                ':new_status' => $new_status,
+                ':application_id' => $application_id
+            ]);
+
+            // Check if the update was successful
+            if (!$updated) {
+                throw new \Exception('Failed to update application status.');
+            }
+            return true;
+        }
+
+
         // Insert Player Applications
         public static function insert($pdo, $data)
         {
@@ -52,14 +88,14 @@
 
             $statement->execute([
                 ':application_status' => 'applied',
-                ':fName' => $data['fName'],
-                ':lName' => $data['lName'],
+                ':fName' => ucwords($data['fName']),
+                ':lName' => ucwords($data['lName']),
                 ':dob' => $data['dob'],
                 ':address_id' => $data['address_id'],
-                ':nickname' => $data['playerNickname'],
+                ':nickname' => ucfirst($data['playerNickname']),
                 ':playerHeight' => $data['playerHeight'],
                 ':playerWeight' => $data['playerWeight'],
-                ':email' => $data['email'] ?? '',
+                ':email' => strtolower($data['email']) ?? '',
                 ':doctor_id' => $data['doctor_id'],
                 ':mobile' => $data['mobileNum'],
                 ':primary_guardian_id' => $data['primary_guardian_id'],
@@ -112,18 +148,75 @@
         // Get a specific application by ID
         public static function getApplicationById($pdo, $application_id)
         {
-            $statement = $pdo->prepare(
-                "SELECT * FROM player_application
-                WHERE player_application.application_id = :application_id"
-            );
+            try{
+                $statement = $pdo->prepare(
+                    "SELECT application_id FROM player_application
+                    WHERE application_id = :application_id"
+                );
 
-            $statement->execute([':application_id' => $application_id]);
-            $application_id = $statement->fetch(PDO::FETCH_ASSOC);
+                $statement->execute([':application_id' => $application_id]);
+                $application_id = $statement->fetchColumn();
 
-            return $application_id;
+                return $application_id;
+
+            } catch (\PDOException $e) {
+                // Handle any database errors
+                alert('error', 'An error occurred while fetching list of players application details', 'player-applications');
+                return null; 
+            }
+        }
+        // View all player applications details
+        public static function getPlayerApplicationDetails($pdo, $application_id)
+        {
+            try{
+                $statement = $pdo->prepare(
+                    "SELECT * FROM player_application
+                    WHERE player_application.application_id = :application_id");
+                //     --     player_application.*, 
+                //     --     address.*
+
+                //     --     -- primary_guardian.first_name AS primary_fname,
+                //     --     -- primary_guardian.last_name AS primary_lname,
+                //     --     -- primary_guardian.mobile_number AS primary_mobile,
+
+                //     --     -- secondary_guardian.first_name AS secondary_fname,
+                //     --     -- secondary_guardian.last_name AS secondary_lname,
+                //     --     -- secondary_guardian.mobile_number AS secondary_mobile,
+
+                //     -- FROM player_application
+
+                //     -- JOIN address 
+                //     --         ON player_application.address_id = address.address_id
+                //         -- LEFT JOIN application_guardian AS primary_guardian
+                //         --     ON player_application.primary_guardian_id = primary_guardian.guardian_id
+                //         -- LEFT JOIN application_guardian AS secondary_guardian
+                //         --     ON player_application.secondary_guardian_id = secondary_guardian.guardian_id
+
+                //     WHERE player_application.application_id = :application_id"
+                // );
+
+                $statement->execute([':application_id' => $application_id]);
+                $result = $statement->fetch(PDO::FETCH_ASSOC);
+
+                if(!$result){
+                    alert('error', 'Application details not found', '/player-applications');
+                    return null; 
+                }
+                return $result;
+            }
+            catch (\PDOException $e) {
+                // Handle any database errors
+                alert('error', 'There is a database error in fetching application details.', '/player-applications');
+                return null;
+            }
         }
 
 
+        // public static function showAllDetails($pdo, $application_id)
+        // {
+        //     // Check if application exists
+        //     self::getApplicationById($pdo, $application_id); // Check if application exists
 
+        // }
     }
 ?>

@@ -14,10 +14,10 @@
         
         public function __construct()
         {
-            $this->member_id = null;
-            $this->email = '';
-            $this->password = '';
-            $this->role = [];
+            // $this->member_id = null;
+            // $this->email = '';
+            // $this->password = '';
+            // $this->role = [];
         }
         public static function registerPlayer($email, $rawPassword)
         {
@@ -26,32 +26,7 @@
 
         public static function validate($email, $rawPassword)
         {
-           $member = self::findEmail($email);
-
-            // Email is not found
-            if (!$member) {
-                return [
-                    'success' => false,
-                    'emailError' => 'Email is not registered.'
-                ];
-            }
-
-            // Check password
-            $salt ="4g£yc7!L(";
-            $password = md5($rawPassword.$salt);
-
-            if($member['pass'] === $password){
-                return [
-                    'success' => true,
-                    'member' => $member
-                ];
-            }
-            else{
-                return [
-                    'error' => false,
-                    'passErr' => 'Incorrect Password.'
-                ];
-            }
+            
         }
 
         // Find a member by email
@@ -59,7 +34,7 @@
         {
             $pdo = Database::getInstance()->getConnection();
             
-            $statement = $pdo->prepare("SELECT email FROM member WHERE email = :email LIMIT 1");
+            $statement = $pdo->prepare("SELECT * FROM member WHERE email = :email LIMIT 1");
             $statement->bindValue(':email', $email, PDO::PARAM_STR);
             $statement->execute();
 
@@ -71,15 +46,56 @@
         public static function findMemberLogin($pdo, $member_id)
         {
             $pdo = Database::getInstance()->getConnection();
-            
+        
             $statement = $pdo->prepare("SELECT * FROM logins WHERE member_id = :member_id LIMIT 1");
             $statement->bindValue(':member_id', $member_id, PDO::PARAM_INT);
             $statement->execute();
-            
-            return $statement->fetch(PDO::FETCH_ASSOC);
+            $result =  $statement->fetch(PDO::FETCH_ASSOC);
+            if(!$result){
+                return null;
+            }
+            return $result;
+        }
+        
+        // Update Password
+        public static function updatePassword($pdo, $member_id, $newPass)
+        {
+            $statement = $pdo->prepare
+            (
+                "UPDATE logins SET pass = :newPass
+                WHERE member_id = :member_id LIMIT 1"
+            );
+            return $statement->execute([
+                'member_id' => $member_id,
+                'newPass' => $newPass
+            ]);
+
         }
 
 
+
+
+        // // Check Member Login Credentials
+        public static function getCredentials($member_id)
+        {
+            $pdo = Database::getInstance()->getConnection();
+        
+            $statement = $pdo->prepare(
+                "SELECT 
+                    logins.*, 
+                    member.*
+                FROM logins 
+                JOIN member ON member.member_id = logins.member_id
+                WHERE logins.member_id = :member_id LIMIT 1");
+
+            $statement->bindValue(':member_id', $member_id, PDO::PARAM_INT);
+            $statement->execute();
+            $result =  $statement->fetch(PDO::FETCH_ASSOC);
+            if(!$result){
+                return null;
+            }
+            return $result;
+        }
      
         // Check if email already exists in the database and display error message
         public static function checkEmailExists($email, $message)
@@ -114,15 +130,15 @@
             return $statement->execute();
         }
 
-        public static function insertRole($pdo, $data)
-        {
+        public static function insertNewMemberLogin($pdo, $member_id, $password){
             $pdo = Database::getInstance()->getConnection();
 
-            $statement = $pdo->prepare("INSERT INTO member_role(member_id, role_id)
-                VALUES (:member_id, :role_id)");
+            //Pass the variable values to be inserted into the database
+            $statement = $pdo->prepare("INSERT INTO logins(member_id, pass)
+                VALUES (:member_id, :pass)");
 
-            $statement->bindValue(':member_id', $data['member_id'], PDO::PARAM_INT);
-            $statement->bindValue(':role_id', $data['selectedRole'], PDO::PARAM_INT);
+            $statement->bindValue(':member_id', $member_id, PDO::PARAM_INT);
+            $statement->bindValue(':pass', $password, PDO::PARAM_STR);
 
             return $statement->execute();
         }
