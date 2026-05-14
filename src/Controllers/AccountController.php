@@ -123,6 +123,7 @@
                         if($passwords['new'] === $passwords['old']){
                             $errors['newPassword'] = "Please a different password.";
                         }
+                        
                     }
                     // Incorrect Password
                     else{
