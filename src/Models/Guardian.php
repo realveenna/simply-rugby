@@ -345,5 +345,40 @@
                 alert('error', 'There is a database error in fetching secondary guardians.', '/player-applications');
             }
         }
+
+        public static function getPlayerGuardian($pdo, $member_id, $is_primary){
+             $statement = $pdo->prepare(
+                "SELECT
+                    pc.member_id AS player_member_id,
+                    pc.contact_member_id AS guardian_member_id,
+                    pc.relationship,
+                    pc.is_primary,
+                    pc.access_level,
+
+                    m.first_name,
+                    m.last_name,
+                    m.dob,
+                    m.mobile_num,
+                    m.email,
+                    m.membership_status,
+                    
+                    a.*
+                FROM player_contact pc
+                JOIN member m ON m.member_id = pc.contact_member_id
+                lEFT JOIN address a ON m.address_id = a.address_id
+                WHERE pc.member_id = :member_id 
+                AND pc.is_primary = :is_primary
+                
+                LIMIT 1"
+            );
+
+            $statement->execute([
+                ':member_id' => $member_id,
+                'is_primary' => $is_primary
+            ]);
+
+            $result = $statement->fetch(PDO::FETCH_ASSOC);
+            return $result;
+        }
     }
 ?>

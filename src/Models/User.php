@@ -72,9 +72,6 @@
 
         }
 
-
-
-
         // // Check Member Login Credentials
         public static function getCredentials($member_id)
         {

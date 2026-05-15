@@ -4,6 +4,8 @@ use Test\Controllers\LoginController;
 use Test\Controllers\AccountController;
 use Test\Controllers\MemberController;
 use Test\Controllers\ApplicationController;
+use Test\Controllers\PlayerController;
+use Test\Controllers\SquadController;
 
 use Test\Router;
 
@@ -46,6 +48,15 @@ $router->post('/player-applications', ApplicationController::class, 'playerAppli
 
 $router->get('/player-applications/application-details', ApplicationController::class, 'applicationDetails');
 $router->post('/player-applications/application-details', ApplicationController::class, 'applicationDetails');
+
+$router->get('/squad', SquadController::class, 'index');
+$router->post('/squad', SquadController::class, 'index');
+
+// $router->get('/players', PlayerController::class, 'index');
+// $router->post('/players', PlayerController::class, 'index');
+
+$router->get('/player', PlayerController::class, 'displayPlayer');
+
 
 $router->dispatch();
 

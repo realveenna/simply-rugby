@@ -41,7 +41,7 @@
             return isset($this->permissions[$permission]);
         }
         // check if role already exist
-        private static function hasRole($role_name)
+        public static function hasRole($role_name)
         {
             $pdo = Database::getInstance()->getConnection();
 
@@ -91,6 +91,22 @@
             $statement = $pdo->prepare("SELECT * FROM role");
             $statement->execute();
             return $statement->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        // Fetch member role name
+        public static function getMemberRoleName($member_id){
+            $pdo = Database::getInstance()->getConnection();
+            $statement = $pdo->prepare
+            (
+                "SELECT r.role_name FROM member_role mr
+                JOIN role r ON mr.role_id = r.role_id
+                WHERE mr.member_id = :member_id
+            ");
+
+            $statement->execute([
+                ':member_id' => $member_id
+            ]);
+            return $statement->fetchAll(PDO::FETCH_COLUMN);
         }
 
         /////

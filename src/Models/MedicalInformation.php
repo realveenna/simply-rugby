@@ -104,7 +104,7 @@
             ]);
         }
         // Insert player allergy to table
-         public static function copyToPlayerAllergy($pdo, $application_id, $member_id)
+        public static function copyToPlayerAllergy($pdo, $application_id, $member_id)
         {
                $statement = $pdo->prepare
                (
@@ -125,13 +125,12 @@
         // Get Allergies for a specific player/application id
         // Existing Player 
         // $table = player_allergy, $id_name = member_id 
-        // $view = /players
+        // $view = /player
 
         // New Player Application
         // $table = application_allergy, $id_name = application_allergy_id
         // $view = /player-applications
-
-        public static function getPlayerAllergies($pdo, $table, $player_id, $id_name,$view)
+        public static function getPlayerAllergies($pdo, $table, $player_id, $id_name, $view)
         {
             try{
                 $statement = $pdo->prepare(
@@ -186,7 +185,7 @@
 
         // Get Doctor Details for a specific player/application id
         // Existing Player
-        // $table = player, $id_name = player_id
+        // $table = player_profile, $id_name = membber_id
         // $view = /players
         // New Player Application
         // $table = player_application, $id_name = application_id
@@ -198,7 +197,7 @@
                     "SELECT doctor.* FROM $table
                     JOIN doctor ON $table.doctor_id = doctor.doctor_id
                     WHERE $table.$id_name = :id"
-                    );
+                );
 
                 $statement->execute([':id' => $player_id]);
                 return $statement->fetch(PDO::FETCH_ASSOC);
@@ -206,7 +205,6 @@
             catch (\PDOException $e) {
                 // Handle any database errors
                 throw new \Exception('Something went wrong in fetching doctor details.');
-                return null;
             }
         }
 

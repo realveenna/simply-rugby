@@ -28,12 +28,22 @@
         // /player-applications/index 
         public function playerApplications()
         {
+            $applications = Application::getPlayerApplications();
+
+            $this->render('player-applications/index', [
+                'applications' => $applications
+            ]);
+        }
+
+        // Display full application details of a player
+        // /player-applications/application-details with id
+        public function applicationDetails(){
             $pdo = Database::getInstance()->getConnection();
 
             // Admin Access Only
-            if(isset($_GET['id']) && isset($_GET['action'])){
-                $id = $_GET['id'];
-                $action = $_GET['action'];
+            if(isset($_POST['id']) && isset($_POST['action'])){
+                $id = $_POST['id'];
+                $action = $_POST['action'];
 
                 if($action === 'approve'){
                     Application::updateStatus($pdo, $id, 'approved');
@@ -53,17 +63,6 @@
                 }
             }
 
-            $applications = Application::getPlayerApplications();
-
-            $this->render('player-applications/index', [
-                'applications' => $applications
-            ]);
-        }
-
-        // Display full application details of a player
-        // /player-applications/application-details with id
-        public function applicationDetails(){
-            $pdo = Database::getInstance()->getConnection();
 
             $data = [];
             $pGuardian = [];
@@ -75,7 +74,6 @@
 
             if(isset($_GET['id'])){
                 $data['application_id'] = $_GET['id'];
-              
             }
             else{
                 alert('error', 'Application ID is required.', '/player-applications');
@@ -129,7 +127,7 @@
             }
 
             // Identify if player is junior or senior and display correct nok title
-            $isJunior = $data['recommended_squad'] === 'senior' ? false : true;
+            $isJunior = $data['recommended_squad'] === 'Senior' ? false : true;
             $nok = $isJunior === true ? 'Primary Guardian' : 'Next of Kin';
 
             $playerData = [
@@ -211,6 +209,7 @@
                             throw new \Exception('Failed to add player to squad history.');
                         }
 
+
                         // Create primary guardian object
                         $pContactMember = new Member();
                         $pContactMember->first_name = $pGuardian['first_name'];
@@ -248,13 +247,19 @@
                             $roleId = Role::getRoleIdByName($pdo, 'Parent');
 
                             // Insert role of guardian to member role table
-                            Role::insertMemberRoles($pdo, $pContactMember->member_id, $roleId, null);
+                            Role::insertMemberRoles($pdo, $pContactMember->member_id, $roleId, $squadId);
 
                             // If apply coach is selected, insert coach role to member role table
                             if($pGuardian['apply_coach']){
                                 $coachRoleId = Role::getRoleIdByName($pdo, 'Coach');
                                 Role::insertMemberRoles($pdo, $pContactMember->member_id, $coachRoleId, $squadId);
                             }
+
+                            // Get role id for senior player role
+                            $roleId = Role::getRoleIdByName($pdo, 'Junior Player');
+
+                            // Insert role of senior player to member role table
+                            Role::insertMemberRoles($pdo, $member->member_id, $roleId, $squadId);
                         }
                         // Else set to none
                         else{
@@ -265,6 +270,12 @@
 
                             // Insert role of senior player to member role table
                             Role::insertMemberRoles($pdo, $member->member_id, $roleId, $squadId);
+
+                            // Get role id for nok role
+                            $roleIdNOK = Role::getRoleIdByName($pdo, 'Next of Kin');
+
+                            // Insert role of guardian to member role table
+                            Role::insertMemberRoles($pdo, $pContactMember->member_id, $roleIdNOK, $squadId);
                         }
 
                         // Insert primary guardian to player contact table
@@ -274,7 +285,6 @@
                         if (!$inserted) {
                             throw new \Exception('Failed to add primary guardian/nok to contact table.');
                         }
-
 
                         // If secondary guardian details exist, insert to member table and player contact table
                         if(!empty($sGuardian[0])){
@@ -307,8 +317,6 @@
                                 throw new \Exception('Failed to add second guardian/nok details.');
                             }
                             
-
-
                             // Set secondary guardian member id and access level default as none
                             $sGuardian['contact_member_id'] = $sContactMember->member_id;
                             $sGuardian['access_level'] = 'None';
@@ -345,6 +353,7 @@
                             $member_id = $login['member_id'];
                         }
 
+                        // Generate and has password
                         $password = randomPassword();
                         $hashedPassword = hashPassword($password);
 
@@ -356,8 +365,8 @@
                         if($hasParentLogin === true){
                             MailController::newMember($data['applicant_first_name'], $recipient);
                         }
+                        // Insert to login table
                         else{
-                            // Insert to login table
                             $member_id = User::insertNewMemberLogin($pdo, $data['member_id'] = $memberId, $hashedPassword);
                             MailController::newResetPassword($data['applicant_first_name'], $recipient, $member_id, $password);
                         }

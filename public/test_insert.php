@@ -11,45 +11,37 @@ use Mailtrap\MailtrapClient;
 use Mailtrap\Mime\MailtrapEmail;
 use Symfony\Component\Mime\Address;
 
-$password = "Password1234";
-$member_id = 1;
-$fname = "raven";
+use Test\Database;
 
-try {
-    $apiKey = '4d609627dab818729ea0d0cb1f7c5480';
-    $mailtrap = MailtrapClient::initSendingEmails(
-        apiKey: $apiKey,
-        inboxId: 4629275,
-        isSandbox: true,
+$squad_id = 3;
+$member_id = 200;
+
+listSquadPlayer($squad_id);
+
+function listSquadPlayer($squad_id,){
+$pdo = Database::getInstance()->getConnection();
+
+    $statement = $pdo->prepare
+    (
+        "SELECT
+            m.member_id,
+            m.first_name,
+            m.last_name,
+            s.squad_name,
+            pp.*
+        FROM squad_player_history h
+        JOIN member m ON h.member_id = m.member_id
+        JOIN squad s ON h.squad_id = s.squad_id
+        JOIN player_profile pp  ON m.member_id = pp.member_id
+        WHERE h.squad_id = :squad_id AND h.end_date IS NULL"
     );
 
-    $email = (new MailtrapEmail())
-        ->from(new Address('hello@demomailtrap.co', 'Mailtrap Test'))
-        ->to(new Address("vennny25@gmail.com"))
-        ->templateUuid('c494f85b-242f-4bf6-b149-320e5fe9f621')
-        ->templateVariables([
-            'company_info_name' => 'Simply Rugby',
-            'name' => $fname,
-            'company_info_address' => 'Test_Company_info_address',
-            'company_info_city' => 'Test_Company_info_city',
-            'company_info_zip_code' => 'Test_Company_info_zip_code',
-            'company_info_country' => 'Test_Company_info_country',
-            'password' => $password,
-            'reset_password_link' => 'http://localhost:9999/reset-password?id=' . $member_id
-        ])
-    ;
+    $statement->execute(['squad_id' => $squad_id]);
+    $squadPlayer =  $statement->fetchAll(PDO::FETCH_ASSOC);
 
-    $response = $mailtrap->send($email);
-
-    $result = ResponseHelper::toArray($response);
-    if($result['success'] === true){
-        die('Email Sent Successfully');
-    }
-    else{
-        die('Email was not sent');
-    }
-} catch (\Exception $e) {
-    die($mailtrap->$result);
+    var_dump($squadPlayer);
+    exit;
+    return;
 }
 ?>
 

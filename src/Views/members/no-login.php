@@ -8,7 +8,6 @@
                 <th>Date of Birth</th>
                 <th>Mobile Number</th>
                 <th>Membership Status</th>
-                <!-- <th>Roles</th> -->
             </tr>
         </thead>
 
@@ -22,15 +21,15 @@
 
                 <!-- Badge Color for Membership Status -->
                 <td>
-                <?php if($member['membership_status'] === 'active'): ?>
-                    <span class="<?= badgeBlue()?>">
-                        <?= strtoupper($member['membership_status']) ?>
-                    </span>
-                <?php else: ?>
-                    <span class="<?= badgeGray()?>">
-                        <?= strtoupper($member['membership_status']) ?>
-                    </span>
-                <?php endif; ?>
+                    <?php if($member['membership_status'] === 'active'): ?>
+                        <span class="<?= badgeBlue()?>">
+                            <?= strtoupper($member['membership_status']) ?>
+                        </span>
+                    <?php else: ?>
+                        <span class="<?= badgeGray()?>">
+                            <?= strtoupper($member['membership_status']) ?>
+                        </span>
+                    <?php endif; ?>
                 </td>
 
                 <!-- <td> role </td> -->

@@ -71,11 +71,15 @@
                 <!-- Badge Color for Application Status -->
                 <td class="text-center">
                     <?php if($a['application_status'] === 'applied'): ?>
-                        <span class="<?= badgeBlue()?>">
+                        <span class="<?= badgeWarning()?>">
+                            <?= strtoupper($a['application_status']) ?>
+                        </span>
+                    <?php elseif($a['application_status'] === 'rejected'): ?>
+                        <span class="<?= badgeDanger()?>">
                             <?= strtoupper($a['application_status']) ?>
                         </span>
                     <?php else: ?>
-                        <span class="<?= badgeGray()?>">
+                        <span class="<?= badgeBlue()?>">
                             <?= strtoupper($a['application_status']) ?>
                         </span>
                     <?php endif; ?>
@@ -85,34 +89,39 @@
                     <button id="playerApplicationAction<?=h($a['application_id'])?>" data-dropdown-toggle="playerApplicationDots<?=h($a['application_id'])?>" class="text-heading bg-neutral-primary box-border border border-transparent hover:bg-neutral-secondary-medium focus:ring-4 focus:ring-neutral-tertiary font-medium leading-5 rounded-base text-sm p-2 focus:outline-none" type="button"> 
                     <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-width="3" d="M6 12h.01m6 0h.01m5.99 0h.01"/></svg>
                     </button>
-
-                    <!-- Dropdown menu -->
-                    <div id="playerApplicationDots<?=h($a['application_id'])?>" class="z-10 hidden bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg w-44 dark:divide-gray-600">
-                        <ul class="p-2 text-sm text-body font-medium" aria-labelledby="playerApplicationAction<?=h($a['application_id'])?>">
-                        <!-- If decision has been made then hide other actions-->
-                        <?php if($a['application_status'] === 'applied'):?>
+                        <!-- Dropdown menu -->
+                        <div id="playerApplicationDots<?=h($a['application_id'])?>" class="z-10 hidden bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg w-44 dark:divide-gray-600">
+                            <ul class="p-2 text-sm text-body font-medium" aria-labelledby="playerApplicationAction<?=h($a['application_id'])?>">
+                            <!-- If decision has been made then hide other actions-->
+                            <?php if($a['application_status'] === 'applied'):?>
+                                <li>
+                                    <form method="post" action="/player-applications/application-details">
+                                        <input type="hidden" name="id" value="<?= $a['application_id'] ?>">
+                                        <input type="hidden" name="action" value="approve">
+                                        <button type="submit"
+                                            class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
+                                            Approve
+                                        </button>
+                                    </form>
+                                </li>
+                                <li>
+                                    <form method="post" action="/player-applications/application-details">
+                                        <input type="hidden" name="id" value="<?= $a['application_id'] ?>">
+                                        <input type="hidden" name="action" value="reject">
+                                        <button type="submit"
+                                            class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
+                                            Reject
+                                        </button>
+                                    </form>
+                                </li>
+                            <?php endif; ?>
                             <li>
-                                <a href="/player-applications/application-details?id=<?= $a['application_id'] ?>&action=approve" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
-                                    Approve
+                                <a href="/player-applications/application-details?id=<?= $a['application_id'] ?>" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
+                                    View Details
                                 </a>
                             </li>
-                            <li>
-                                <a href="/player-applications/application-details?id=<?= $a['application_id'] ?>&action=reject" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
-                                    Reject
-                                </a>
-                            </li>
-                        <?php endif; ?>
-                        <li>
-                            <a href="/player-applications/application-details?id=<?= $a['application_id'] ?>" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
-                                View Details
-                            </a>
-                        </li>
-                        </ul>
-                        <div class="p-2 text-sm text-body font-medium border-t border-default">
-                        <a href="#" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
-                            Separated link</a>
+                            </ul>
                         </div>
-                    </div>
                 </td>
             </tr>
             <?php endforeach; ?>

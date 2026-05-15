@@ -135,5 +135,19 @@
             $statement->execute([':email' => $email]);
             return $statement->fetchColumn();
         }
+
+        // Get all member details
+         public static function getMemberDetails($pdo, $member_id)
+        {
+            $statement = $pdo->prepare(
+                "SELECT * FROM member
+                WHERE member_id = :member_id");
+
+            $statement->execute([':member_id' => $member_id]);
+            $result = $statement->fetch(PDO::FETCH_ASSOC);
+
+            return $result;
+           
+        }
     }
 ?>

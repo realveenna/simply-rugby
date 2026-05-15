@@ -280,6 +280,9 @@
     --color-heading: var(--color-stone-900);
     --color-fg-brand: var(--color-stone-950);
     --color-fg-brand-strong: var(--color-stone-900);
+    --color-fg-success-strong: var(--color-green-900);
+    --color-fg-danger-strong: var(--color-red-900);
+    --color-fg-warning: var(--color-orange-900);
     --color-fg-disabled: var(--color-stone-400);
     --color-neutral-primary-soft: var(--color-white);
     --color-neutral-primary: var(--color-white);
@@ -294,13 +297,19 @@
     --color-brand: var(--color-blue-700);
     --color-brand-medium: var(--color-blue-200);
     --color-brand-strong: var(--color-blue-800);
+    --color-success-soft: var(--color-emerald-50);
+    --color-danger-soft: var(--color-rose-50);
     --color-danger: var(--color-rose-700);
     --color-danger-medium: var(--color-rose-100);
     --color-danger-strong: var(--color-rose-800);
+    --color-warning-soft: var(--color-orange-50);
     --color-dark: var(--color-gray-800);
     --color-light: var(--color-gray-100);
     --color-default: var(--color-gray-200);
     --color-default-medium: var(--color-gray-200);
+    --color-success-subtle: var(--color-emerald-200);
+    --color-danger-subtle: var(--color-rose-200);
+    --color-warning-subtle: var(--color-orange-200);
     --color-brand-subtle: var(--color-blue-200);
     --color-dark-backdrop: var(--color-gray-950);
   }
@@ -1318,12 +1327,6 @@
   .h-8 {
     height: calc(var(--spacing) * 8);
   }
-  .h-11 {
-    height: calc(var(--spacing) * 11);
-  }
-  .h-56 {
-    height: calc(var(--spacing) * 56);
-  }
   .h-\[calc\(100\%-1rem\)\] {
     height: calc(100% - 1rem);
   }
@@ -1422,9 +1425,6 @@
   .w-8 {
     width: calc(var(--spacing) * 8);
   }
-  .w-11 {
-    width: calc(var(--spacing) * 11);
-  }
   .w-11\/12 {
     width: calc(11 / 12 * 100%);
   }
@@ -1440,11 +1440,14 @@
   .max-w-2xl {
     max-width: var(--container-2xl);
   }
+  .max-w-4xl {
+    max-width: var(--container-4xl);
+  }
+  .max-w-7xl {
+    max-width: var(--container-7xl);
+  }
   .max-w-md {
     max-width: var(--container-md);
-  }
-  .max-w-sm {
-    max-width: var(--container-sm);
   }
   .datatable-input {
     .datatable-wrapper .datatable-search & {
@@ -1529,9 +1532,6 @@
   }
   .transform-none {
     transform: none;
-  }
-  .animate-pulse {
-    animation: var(--animate-pulse);
   }
   .cursor-default {
     cursor: default;
@@ -1784,6 +1784,9 @@
   .border-brand-subtle {
     border-color: var(--color-brand-subtle);
   }
+  .border-danger-subtle {
+    border-color: var(--color-danger-subtle);
+  }
   .border-default {
     border-color: var(--color-default);
   }
@@ -1799,8 +1802,14 @@
   .border-red-400 {
     border-color: var(--color-red-400);
   }
+  .border-success-subtle {
+    border-color: var(--color-success-subtle);
+  }
   .border-transparent {
     border-color: transparent;
+  }
+  .border-warning-subtle {
+    border-color: var(--color-warning-subtle);
   }
   .apexcharts-active {
     .apexcharts-canvas .apexcharts-tooltip-series-group& .apexcharts-tooltip-y-group {
@@ -1851,6 +1860,9 @@
   .bg-danger {
     background-color: var(--color-danger);
   }
+  .bg-danger-soft {
+    background-color: var(--color-danger-soft);
+  }
   .bg-dark-backdrop\/70 {
     background-color: color-mix(in srgb, oklch(13% 0.028 261.692) 70%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -1881,9 +1893,6 @@
   .bg-neutral-primary-soft {
     background-color: var(--color-neutral-primary-soft);
   }
-  .bg-neutral-quaternary {
-    background-color: var(--color-neutral-quaternary);
-  }
   .bg-neutral-secondary-medium {
     background-color: var(--color-neutral-secondary-medium);
   }
@@ -1893,8 +1902,14 @@
   .bg-red-100 {
     background-color: var(--color-red-100);
   }
+  .bg-success-soft {
+    background-color: var(--color-success-soft);
+  }
   .bg-transparent {
     background-color: transparent;
+  }
+  .bg-warning-soft {
+    background-color: var(--color-warning-soft);
   }
   .bg-white {
     background-color: var(--color-white);
@@ -2246,8 +2261,17 @@
   .text-fg-brand-strong {
     color: var(--color-fg-brand-strong);
   }
+  .text-fg-danger-strong {
+    color: var(--color-fg-danger-strong);
+  }
   .text-fg-disabled {
     color: var(--color-fg-disabled);
+  }
+  .text-fg-success-strong {
+    color: var(--color-fg-success-strong);
+  }
+  .text-fg-warning {
+    color: var(--color-fg-warning);
   }
   .text-gray-400 {
     color: var(--color-gray-400);
@@ -2909,7 +2933,6 @@
     }
   }
 }
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 .dark {
   --color-body: var(--color-gray-400);

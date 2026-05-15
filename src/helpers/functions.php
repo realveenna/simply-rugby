@@ -124,10 +124,19 @@
         return "space-y-4 md:space-y-6";
     }
     function badgeBlue(){
-        return "bg-brand-softer border border-brand-subtle text-fg-brand-strong text-xs font-medium px-1.5 py-0.5 rounded-full";
+        return "bg-brand-softer border border-brand-subtle text-fg-brand-strong text-xs font-medium px-1.5 py-0.5 rounded";
     }
     function badgeGray(){
         return "bg-neutral-secondary-medium border border-default-medium text-heading text-xs font-medium px-1.5 py-0.5 rounded-full";
+    }
+    function badgeSuccess(){
+        return "bg-success-soft border border-success-subtle text-fg-success-strong text-xs font-medium px-1.5 py-0.5 rounded";
+    }
+    function badgeWarning(){
+        return"bg-warning-soft border border-warning-subtle text-fg-warning text-xs font-medium px-1.5 py-0.5 rounded";
+    }
+    function badgeDanger(){
+        return "bg-danger-soft border border-danger-subtle text-fg-danger-strong text-xs font-medium px-1.5 py-0.5 rounded";
     }
     
     function alert($session,$message, $view){

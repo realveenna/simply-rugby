@@ -4,6 +4,7 @@
     use Test\Controller;
     use Test\Models\User;
     use Test\Models\Member;
+    use Test\Models\Role;
     
     class MemberController extends Controller
     {
@@ -17,9 +18,14 @@
         {
             
         }
+        // List of all members
         public function index()
         {
             $members = Member::selectAll();
+
+            foreach ($members as &$member ){
+                $member['roles'] = Role::getMemberRoleName($member['member_id']);
+            }
 
             $this->render('members/index', [
                 'members' => $members
