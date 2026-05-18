@@ -8,17 +8,15 @@
     {
         public $member_id;
         public $email;
+        public $member_name;
         public $password;
-        public $role;
         
         
         public function __construct()
         {
-            // $this->member_id = null;
-            // $this->email = '';
-            // $this->password = '';
-            // $this->role = [];
+ 
         }
+
         public static function registerPlayer($email, $rawPassword)
         {
             
@@ -113,22 +111,7 @@
 
         // Create a new login for a member in the database
         // User must be already a member
-        public static function insertLogin($pdo, $data)
-        {
-            $pdo = Database::getInstance()->getConnection();
-
-            //Pass the variable values to be inserted into the database
-            $statement = $pdo->prepare("INSERT INTO logins(member_id, pass)
-                VALUES (:member_id, :pass)");
-
-            $statement->bindValue(':member_id', $data['member_id'], PDO::PARAM_INT);
-            $statement->bindValue(':pass', $data['password'], PDO::PARAM_STR);
-
-            return $statement->execute();
-        }
-
         public static function insertNewMemberLogin($pdo, $member_id, $password){
-            $pdo = Database::getInstance()->getConnection();
 
             //Pass the variable values to be inserted into the database
             $statement = $pdo->prepare("INSERT INTO logins(member_id, pass)

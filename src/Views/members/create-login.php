@@ -1,4 +1,3 @@
-
 <!-- If member_id is set-->
 <section class="bg-gray-50 dark:bg-gray-900">
     <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto lg:py-0">
@@ -8,7 +7,8 @@
                     <img class="w-8 h-8 mr-2" src="/images/logo/main-logo.png" alt="logo">
                     Creating Login Details
                 </a>  
-                <form class="space-y-4 md:space-y-6" method="post" action="/create-login?member_id=<?= h($data['member_id'] ?? '') ?>">
+                <form class="space-y-4 md:space-y-6" method="post" action="">
+                    
                     <!-- Hidden Inputs -->
                     <input type="hidden" name="email" value="<?php echo h($data['email'] ?? ''); ?>">
                     <input type="hidden" name="member_id" value="<?php echo h($data['member_id'] ?? ''); ?>">
@@ -20,24 +20,7 @@
                             <p class="<?= smallError() ?>"><?php echo h($errors['email'] ?? '');?></p>
                         </div>
                     </div>
-                    <div>
-                        <label for="rawPassword" class="<?= labelClass() ?>">Password</label>
-                        <input type="password" name="rawPassword" id="rawPassword" 
-                            value="<?php echo h($data['rawPassword'] ?? ''); ?>"
-                            placeholder="Enter Password" class="<?= inputClass() ?>">
-                        <div>
-                            <p class="<?= smallError() ?>"><?php echo ($errors['rawPassword'] ?? '');?></p>
-                        </div>
-                    </div>
-                    <div>
-                        <label for="rawConfirmPassword" class="<?= labelClass() ?>">Confirm Password</label>
-                        <input type="password" name="rawConfirmPassword" id="rawConfirmPassword" 
-                            value="<?php echo h($data['rawConfirmPassword'] ?? ''); ?>"
-                            placeholder="Enter Confirm Password" class="<?= inputClass() ?>">
-                        <div>
-                            <p class="<?= smallError() ?>"><?php echo ($errors['rawConfirmPassword'] ?? '');?></p>
-                        </div> 
-                    </div>
+                   
                     <!-- Role Selection -->
                     <div>
                         <label for="selectedRole" class="block mb-2.5 text-sm font-medium text-heading dark:text-white">Select an option</label>
@@ -58,6 +41,23 @@
                             <p class="<?= smallError() ?>"><?php echo h($errors['selectedRole'] ?? '');?></p>
                         </div>
                     </div>
+
+                    <!-- Section selection for fixture and section secretary -->
+                    <div id="showSection" class="hidden">
+                        <div class="flex items-center mb-4">
+                            <input id="juniorSection" type="radio" value="2" name="selectSection" class="w-4 h-4 text-neutral-primary border-default-medium bg-neutral-secondary-medium rounded-full checked:border-brand focus:ring-2 focus:outline-none focus:ring-brand-subtle border border-default appearance-none">
+                            <label for="juniorSection" class="select-none ms-2 text-sm font-medium text-heading">Junior Section</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input checked id="seniorSection" type="radio" value="1" name="selectSection" class="w-4 h-4 text-neutral-primary border-default-medium bg-neutral-secondary-medium rounded-full checked:border-brand focus:ring-2 focus:outline-none focus:ring-brand-subtle border border-default appearance-none">
+                            <label for="seniorSection" class="select-none ms-2 text-sm font-medium text-heading">Senior Section</label>
+                        </div>
+                        <div>
+                            <p class="<?= smallError() ?>"><?php echo h($errors['section'] ?? '');?></p>
+                        </div>
+                    </div> 
+
+                    <!-- Button -->
                     <button type="submit" class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Create an Member Account</button>
                     <p class="text-sm font-light text-gray-500 dark:text-gray-400">
                         Already have an account? <a href="/login" class="font-medium text-blue-600 hover:underline dark:text-blue-500">Login here</a>
@@ -67,4 +67,23 @@
         </div>
     </div>
 </section>
+
+<script>
+    
+// Show section selection for fixture and section secretary
+const selectedRole = document.getElementById('selectedRole');
+const showSection = document.getElementById('showSection');
+
+selectedRole.addEventListener('change', function () {
+
+    if (this.value == 3 || this.value == 4) {
+        showSection.classList.remove('hidden');
+    } 
+    else {
+        showSection.classList.add('hidden');
+    }
+});
+
+
+</script>
 

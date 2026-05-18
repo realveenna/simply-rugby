@@ -6,15 +6,21 @@
     
     class Role
     {
-        // private $roles = [];
-        protected $permissions;
+        protected $permissions = [];
 
         protected function __construct() 
         {
             $this->permissions = array();
         }
-        
 
+###############
+        public function hasPermission($permission)
+        {
+            return isset($this->permissions[$permission]) &&
+                $this->permissions[$permission] === true;
+        }
+    ######################
+        
          // return a role object with associated permissions
         public static function getRolePerms($role_id)
         {
@@ -40,6 +46,7 @@
         {
             return isset($this->permissions[$permission]);
         }
+
         // check if role already exist
         public static function hasRole($role_name)
         {
@@ -58,19 +65,18 @@
         }
 
         // insert array of roles for specified member id
-        public static function insertMemberRoles($pdo, $member_id, $role_id, $squad_id)
+        public static function insertMemberRoles($pdo, $member_id, $role_id)
         {
             $pdo = Database::getInstance()->getConnection();
 
             // Using INSERT IGNORE to avoid duplicate entry 
-            $sql = "INSERT IGNORE INTO member_role (member_id, role_id, squad_id) 
-                VALUES (:member_id, :role_id, :squad_id)";
+            $sql = "INSERT IGNORE INTO member_role (member_id, role_id) 
+                VALUES (:member_id, :role_id)";
                 
             $statement = $pdo->prepare($sql);
             $statement->execute([
                 ':member_id' => $member_id,
-                ':role_id' => $role_id,
-                ':squad_id' => $squad_id ?? null
+                ':role_id' => $role_id
             ]);
             return $statement->rowCount();
         }
@@ -108,6 +114,9 @@
             ]);
             return $statement->fetchAll(PDO::FETCH_COLUMN);
         }
+        
+
+
 
         /////
         //// mine below
@@ -183,7 +192,7 @@
         // }
 
         // Get all Permissions
-        public static function getAllRoles($pdo)
+        public static function getAllPermissions($pdo)
         {
             $pdo = Database::getInstance()->getConnection();
 

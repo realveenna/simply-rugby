@@ -237,7 +237,7 @@
                     ':contact_member_id' => $this->contact_member_id,
                     ':relationship' => $this->relationship,
                     ':is_primary' => $this->is_primary,
-                    ':access_level' => $this->access_level ?? 'No Access'
+                    ':access_level' => $this->access_level ?? 'None'
                 ]);
 
                 if($statement->rowCount() === 0){
@@ -345,7 +345,6 @@
                 alert('error', 'There is a database error in fetching secondary guardians.', '/player-applications');
             }
         }
-
         public static function getPlayerGuardian($pdo, $member_id, $is_primary){
              $statement = $pdo->prepare(
                 "SELECT
@@ -361,7 +360,7 @@
                     m.mobile_num,
                     m.email,
                     m.membership_status,
-                    
+
                     a.*
                 FROM player_contact pc
                 JOIN member m ON m.member_id = pc.contact_member_id
@@ -380,5 +379,24 @@
             $result = $statement->fetch(PDO::FETCH_ASSOC);
             return $result;
         }
+
+
+         ################
+        public static function getAccessPlayers($pdo, $member_id)
+        {
+            $statement = $pdo->prepare("
+                SELECT member_id
+                FROM player_contact
+                WHERE contact_member_id = :member_id
+            ");
+
+            $statement->execute([
+                ':member_id' => $member_id
+            ]);
+
+            return $statement->fetchAll(PDO::FETCH_COLUMN);
+        }
+        ##########
+
     }
 ?>

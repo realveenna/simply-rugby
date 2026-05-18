@@ -78,7 +78,6 @@ function toggleExistingParentDetails() {
 };
 
 
-
 // Event listener for the checkbox to toggle the guardian 2 address field
 document.addEventListener("DOMContentLoaded", (event) => {
     const checkbox = document.getElementById('sameAddress');

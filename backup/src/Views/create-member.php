@@ -6,7 +6,7 @@
                 <img class="w-8 h-8 mr-2" src="./images/logo/main-logo.png" alt="logo">
                 Account Registration
             </a>  
-              <form class="space-y-4 md:space-y-6" method="post" action="/create-member">
+              <form class="space-y-4 md:space-y-6" method="post" action="">
                 <div>
                     <label for="email" class="<?= labelClass() ?>">Email Address</label>
                     <input type="email" name="email" id="email" 

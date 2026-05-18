@@ -12,42 +12,63 @@
     {
         public function __construct()
         {
-            
+            parent::__construct();
         }
 
+        // Display Squad with permission check
         // List of all squads
         public function index()
         {
+            // Permission Check
+            authorize('view_squad');
+            
             $pdo = Database::getInstance()->getConnection();
 
-            $squads = Squad::getAllSquads($pdo);
-            $squad_player = [];
+            $squads = Squad::getSquadAccess($pdo, $this->member_id, $this->rbac);
+            
+            $players = [];
 
+            // Forbidden Access
+            if(!$squads ){
+                $error = new Error();
+                $error->forbidden();
+                exit;
+            }
+            
             try{
                 // If searching for squad players
-                if (isset($_GET['type']))
+                if (isset($_GET['name']))
                 {
-                    $squad_type = $_GET['type'];
+                    $squad_name = $_GET['name'];
 
-                    // Get squad id
-                    $squad = Squad::getSquadByType($pdo,$squad_type);
+                    // Get squad details
+                    $squad = Squad::getSquadByName($pdo, $squad_name);
+
                     if(!$squad){
-                        throw new \ErrorException('Squad Not Found!');
+                        $error = new Error();
+                        $error->notFound('Squad Not Found!');
+                        exit;
                     }
 
+                    // Authorization 
+                    if (!Squad::canViewSquad($squad)) {
+                        $error = new Error();
+                        $error->forbidden();
+                        exit;
+                    }
+                    
                     // Get squad players
-                    $squad_player = Squad::listSquadPlayer($pdo, $squad['squad_id']);
+                    $players = Squad::listSquadPlayer($pdo, $squad['squad_id']);
 
                     // Go to page
-                    $this->render('squad/type', [
+                    $this->render('squad/name', [
                         'squad' => $squad,
-                        'players' => $squad_player
+                        'players' => $players
                     ]);
                     return;
                 }
                 $this->render('squad/index', [
-                    'squads' => $squads,
-                    'squadPlayers' => $squad_player
+                    'squads' => $squads
                 ]);
             }
             catch (\Exception $e){
@@ -63,7 +84,7 @@
             $squads = Squad::getAllSquads($pdo);
 
             $squad_player = Squad::listSquadPlayer($pdo, $squads['squad_id']);
-        
+
             $this->render('squad/index', [
                 'squads' => $squads,
                 'squadPlayers' => $squad_player,

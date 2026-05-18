@@ -1,10 +1,51 @@
 <?php
-    // function sanitize($data) {
-    //     $data = trim($data);
-    //     $data = stripslashes($data);
-    //     $data = htmlspecialchars($data);
-    //     return $data;
-    // }
+    use Test\Controllers\Auth;
+
+#############
+    // Helper Authentication function if user has permission
+    function hasPermission($permission)
+    {
+        return Auth::hasPermission($permission);
+    }
+
+    // Helper Authentication function to get role name
+    function hasRole($roleName)
+    {
+        return Auth::hasRole($roleName);
+    }
+
+    // Helper Authentication function to check if user is authorized 
+    function authorize($permission)
+    {
+        return Auth::authorize($permission);
+    }
+
+    function isAdmin()
+    {
+        return Auth::isAdmin();
+    }
+
+    function hasSectionAccess($section_id)
+    {
+        return Auth::hasSectionAccess($section_id);
+    }
+
+    function hasSquadAccess($squad_id)
+    {
+        return Auth::hasSquadAccess($squad_id);
+    }
+
+    function isOwner($currentUser, $member_id)
+    {
+        return Auth::isOwner($currentUser, $member_id);
+    }
+
+    function hasPlayerAccess($member_id)
+    {
+        return Auth::hasPlayerAccess($member_id);
+    }
+
+############
 
     function h($data){
         $data = htmlspecialchars($data);
@@ -28,6 +69,28 @@
         return $yearGap;
     }
 
+    // Format date for db
+    function formatDate($date)
+    {
+        if (empty($date)) {
+            return null;
+        }
+        return date('Y-m-d', strtotime($date));
+    }
+
+    // Date must be in future
+    function isFutureDate($date)
+    {
+        if (empty($date)) {
+            return false;
+        }
+
+        $selectedDate = strtotime($date);
+        $today = strtotime(date('Y-m-d'));
+
+        return $selectedDate >= $today;
+    }
+
     function ifEmpty($value, $message){
         return empty($value) ? $message : '';
     }
@@ -40,8 +103,60 @@
     }
 
 
+    // 
+    //  <div class="flex flex-col items-center">
+    //     <h1 class="<?= heading1() ">All <span class="<?  underline()">Squads</span></h1>
+    // </div>
+    function title($text,$underline){
+        return"
+        <div class='flex flex-col items-center'>
+            <h1 class='mb-4 text-4xl font-semibold tracking-tight text-heading md:text-4l lg:text-5xl'>
+                    $text 
+                <span class='underline underline-offset-3 decoration-4 decoration-brand'>
+                    $underline
+                </span>
+            </h1>
+        </div>";
+    }
+    function titleLeft($text,$underline){
+        return"
+        <div class='flex flex-col items-start text-left'>
+            <h2 class='mb-3 mt-6 text-3xl font-semibold tracking-tight text-heading md:text-3l lg:text-4xl'>
+                    $text 
+                <span class='underline underline-offset-3 decoration-4 decoration-brand'>
+                    $underline
+                </span>
+            </h2>
+        </div>";
+    }
+     function titleLeftSmall($text){
+        return"
+        <div class='flex flex-col items-start text-left'>
+            <h3 class='mb-3 mt-6 text-2xl font-semibold tracking-tight text-heading md:text-2l lg:text-3xl'>
+                    $text 
+            </h3>
+        </div>";
+    }
+
+    function heading4(){
+        return "mb-2 text-2xl font-semibold tracking-tight text-heading";
+    }
+    function heading5(){
+        return "mb-2 text-xl font-semibold tracking-tight text-heading";
+    }
+
+    // function p(){
+    //     return "mb-6 text-body";
+    // }
+
+    function underline(){
+        return "underline underline-offset-3 decoration-4 decoration-brand";
+    }
+    function heading1(){
+        return "underline underline-offset-3 decoration-4 decoration-brand";
+    }
     function h1($text) {
-        return "<h1 class='text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white'>$text</h1>";
+        return "<h1 class='mb-4 text-4xl font-semibold tracking-tight text-heading md:text-4xl lg:text-5xl dark:text-white'>$text</h1>";
     }
 
     function h2($text) {
@@ -116,6 +231,12 @@
         return "w-full max-w-4xl bg-white rounded-lg shadow dark:border xl:p-0
             dark:bg-gray-800 dark:border-gray-700";
     }
+
+    function cardClassXLNoBg(){
+        return "w-full max-w-4xl rounded-lg xl:p-0
+            dark:bg-gray-800 ";
+    }
+
 
     function centerContainer() {
         return "flex flex-col items-center justify-center px-6 py-8 mx-auto lg:py-0";

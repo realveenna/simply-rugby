@@ -2,11 +2,12 @@
     namespace Test\Models;
 
     use Test\Database;
+    use Test\Models\Role;
     use PDO;
 
     class PrivilegedUser extends User
     {
-        private $roles;
+        private $roles = [];
 
         public function __construct()
         {
@@ -14,21 +15,23 @@
         }
 
         // override User method
-        public static function getByUsername($username)
+        public static function getPrivilegedMember($member_id)
         {
             $pdo = Database::getInstance()->getConnection();
 
-            $sql = "SELECT user_id, username, email, created_on FROM users WHERE username = :username";
+            $sql = "SELECT 
+                        *,
+                        CONCAT (first_name, ' ', last_name) AS full_name
+                    FROM member WHERE member_id = :member_id";
             $sth = $pdo->prepare($sql);
-            $sth->execute(array(":username" => $username));
+            $sth->execute(array(":member_id" => $member_id));
             $result = $sth->fetchAll();
 
             if (!empty($result)) {
                 $privUser = new PrivilegedUser();
-                $privUser->user_id = $result[0]["user_id"];
-                $privUser->username = $username;
+                $privUser->member_id = $result[0]["member_id"];
+                $privUser->member_name = $result[0]["full_name"];
                 $privUser->email = $result[0]["email"];
-                $privUser->created_on = $result[0]["created_on"];
                 $privUser->initRoles();
                 return $privUser;
             }
@@ -39,14 +42,13 @@
         protected function initRoles()
         {
             $pdo = Database::getInstance()->getConnection();
-            
 
             $this->roles = array();
-            $sql = "SELECT t1.role_id, t2.role_name FROM user_role AS t1
-                    JOIN roles AS t2 ON t1.role_id = t2.role_id
-                    WHERE t1.user_id = :user_id";
+            $sql = "SELECT t1.role_id, t2.role_name FROM member_role AS t1
+                    JOIN role AS t2 ON t1.role_id = t2.role_id
+                    WHERE t1.member_id = :member_id";
             $sth = $pdo->prepare($sql);
-            $sth->execute(array(":user_id" => $this->user_id));
+            $sth->execute(array(":member_id" => $this->member_id));
 
             while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
                 $this->roles[$row["role_name"]] = Role::getRolePerms($row["role_id"]);
@@ -57,14 +59,27 @@
         public function hasPrivilege($perm)
         {
             foreach ($this->roles as $role) {
-                foreach ($role as $key => $value) {
-                    if (isset($value[$perm])) {
-                        return true;
-                    }
+
+                if ($role->hasPerm($perm)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+
+        ############################
+        public function hasPermission($permission)
+        {
+            foreach ($this->roles as $role) {
+                if ($role->hasPermission($permission)) {
+                    return true;
                 }
             }
             return false;
         }
+        #################################
 
         // check if a user has a specific role
         public function hasRole($role_name)

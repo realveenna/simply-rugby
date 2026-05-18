@@ -5,6 +5,17 @@ use Test\Base;
 
     class Controller extends Base
     {
+        protected $user;
+        protected $member_id;
+        protected $rbac;
+
+        public function __construct()
+        {
+            $this->user = $_SESSION['user'] ?? null;
+            $this->member_id = $this->user['member_id'] ?? null;
+            $this->rbac = $_SESSION['rbac'] ?? null;
+        }
+
         protected function render($view, $data = [])
         {
             

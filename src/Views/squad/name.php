@@ -1,5 +1,9 @@
 <!-- Squad Table -->
 <section class="bg-gray-50 dark:bg-gray-900">
+    <!-- Title -->
+    <?= title($squad['squad_name'],'Squad')?>
+    
+    <!-- Datatable -->
     <table class="datatable">
         <thead>
             <tr>
@@ -91,7 +95,7 @@
                         <ul class="p-2 text-sm text-body font-medium" aria-labelledby="squadPlayerAction<?=h($player['member_id'])?>">
                               <li>
                                 <a href="/player?id=<?=h(($player['member_id']))?>" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
-                                    View Player Details
+                                    View All Players
                                 </a>
                             </li>
                         </ul>

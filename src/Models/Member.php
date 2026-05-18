@@ -46,15 +46,15 @@
 
         }
         
-        // Get all members that do not have a login account
+        // Get all members that has email but do not have a login account 
         public static function selectAllNoLogin()
         {
             $pdo = Database::getInstance()->getConnection();
 
             $statement = $pdo->prepare(
-                "SELECT * FROM member m
+                "SELECT m.* FROM member m
                 LEFT JOIN logins l ON m.member_id = l.member_id
-                WHERE l.member_id IS NULL"
+                WHERE l.member_id IS NULL AND m.email IS NOT NULL"
             );
 
             $statement->execute();

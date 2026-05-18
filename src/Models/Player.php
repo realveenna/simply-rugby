@@ -2,6 +2,8 @@
     namespace Test\Models;
 
     use Test\Database;
+    use Test\Controllers\Auth;
+    use Test\Controllers\Error;
     use PDO;
     
     class Player
@@ -78,14 +80,51 @@
             return true;
         }
 
+        #########################
+        // 
+        public static function canViewPlayer($player, $currentUser, $member_id)
+        {
+            // General permission check
+            if (!$_SESSION['rbac']->hasPermission('view_player_details')) {
+                return false;
+            }
+
+            // If is higher admin
+            if (Auth::isAdmin()) {
+                return true;
+            }
+
+            // User access own details
+            if (Auth::isOwner($currentUser, $member_id)) {
+                return true;
+            }
+
+            // User is parent 
+            if (Auth::hasPlayerAccess($member_id)) {
+                return true;
+            }
+
+            // User is a coach, access own squad
+            if (Auth::hasSquadAccess($player['squad_id'])) {
+                return true;
+            }
+
+            // User has section access to own section junior/senior
+            if (Auth::hasSectionAccess($player['section_id'])) {
+                return true;
+            }
+
+            return false;
+        }
+        #################
+
         public static function playerProfile($pdo, $member_id)
         {
             $statement = $pdo->prepare(
                 "SELECT
                     m.*,
                     pp.*,
-                    s.squad_name,
-                    s.squad_type,
+                    s.*,
                     sph.start_date,
                     sph.end_date
                 FROM member m

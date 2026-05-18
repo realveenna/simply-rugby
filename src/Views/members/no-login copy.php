@@ -1,9 +1,7 @@
 <!-- List of all members with email but no login -->
 <section class="bg-gray-50 dark:bg-gray-900">
-    <?= title('Members Without','Logins')?>
-
-    <!-- Table -->
     <table class="datatable">
+
         <thead>
             <tr>
                 <th class="text-center">
@@ -64,7 +62,7 @@
                     <div id="memberNoLoginDots<?=h($member['member_id'])?>" class="z-10 hidden bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg w-44 dark:divide-gray-600">
                         <ul class="p-2 text-sm text-body font-medium" aria-labelledby="memberNoLoginAction<?=h($member['member_id'])?>">
                         <li>
-                            <a href="/members/create-login?member_id=<?= $member['member_id'] ?>" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
+                            <a href="/members/create-login?id=<?= $member['member_id'] ?>" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
                                 Create Login
                             </a>
                         </li>

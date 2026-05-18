@@ -3,6 +3,10 @@
 
     use Test\Controller;
     use Test\Models\User;
+    use Test\Models\Role;
+    use Test\Models\PrivilegedUser;
+    use Test\Models\Guardian;
+    use Test\Models\Squad;
     use Test\Database;
 
     class LoginController extends Controller
@@ -10,6 +14,8 @@
         // Login function
         public function login()
         {
+
+            $pdo = Database::getInstance()->getConnection();
 
             $email = '';
             $emailErr = '';
@@ -49,10 +55,19 @@
 
                             // Correct Password
                             if($member['pass'] === $password){
-                                $_SESSION["loggedIn"] = true; 
-                                $_SESSION["user"] = $member;
+                                $_SESSION['loggedIn'] = true; 
+                                $_SESSION['user'] = $member;
                                 $_SESSION['id'] = session_id();
-                                
+                                $_SESSION['rbac'] = PrivilegedUser::getPrivilegedMember
+                                    ($_SESSION['user']['member_id']) ?? null;
+
+                                $_SESSION['player_access'] = 
+                                    Guardian::getAccessPlayers($pdo, $_SESSION['user']['member_id']);
+                                $_SESSION['squad_access'] = 
+                                    Squad::getAccessSquads($pdo, $_SESSION['user']['member_id']);
+                                $_SESSION['section_access'] = 
+                                    Squad::getAccessSections($pdo, $_SESSION['user']['member_id']);
+
                                 alert('success','Login Successfully!', '/');
                             }
                             // Incorrect Password

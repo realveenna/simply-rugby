@@ -53,10 +53,12 @@
                     ])
                 ;
                 $response = $mailtrap->send($email);
+                if(!$response){
+                    throw new \Exception("Email not sent");
+                }
                 $result = ResponseHelper::toArray($response);
-
             } catch (\Exception $e) {
-                alert('error', $mailtrap->$result, '/player-applications');
+                alert('error', $mailtrap->$result, '/');
             }
         }
         public static function newMember($fname, $email)

@@ -5,12 +5,19 @@ use Test\Controllers\AccountController;
 use Test\Controllers\MemberController;
 use Test\Controllers\ApplicationController;
 use Test\Controllers\PlayerController;
+use Test\Controllers\TrainingController;
 use Test\Controllers\SquadController;
+
+use Test\Controllers\Error;
+use Test\Controllers\Auth;
 
 use Test\Router;
 
 $router = new Router();
 
+
+$router->get('/403', Error::class, 'forbidden');
+$router->get('/404', Error::class, 'notFound');
 
 $router->get('/', HomeController::class, 'index');
 $router->get('/dashboard', HomeController::class, 'dashboard');
@@ -27,15 +34,14 @@ $router->post('/logout', LoginController::class, 'logout');
 $router->get('/register', ApplicationController::class, 'index');
 $router->post('/register', ApplicationController::class, 'index');
 
-$router->get('/register/create-login', ApplicationController::class, 'createLogin');
-$router->post('/register/create-login', ApplicationController::class, 'createLogin');
+$router->get('/members/create-login', MemberController::class, 'createLogin');
+$router->post('/members/create-login', MemberController::class, 'createLogin');
 
 $router->get('/account/reset-password', AccountController::class, 'resetPassword');
 $router->post('/account/reset-password', AccountController::class, 'resetPassword');
 
-
-$router->get('/register/member', ApplicationController::class, 'registerMember');
-$router->post('/register/member', ApplicationController::class, 'registerMember');
+$router->get('/register/member', MemberController::class, 'registerMember');
+$router->post('/register/member', MemberController::class, 'registerMember');
 
 $router->get('/members', MemberController::class, 'index');
 $router->post('/members', MemberController::class, 'index');
@@ -51,6 +57,12 @@ $router->post('/player-applications/application-details', ApplicationController:
 
 $router->get('/squad', SquadController::class, 'index');
 $router->post('/squad', SquadController::class, 'index');
+
+$router->get('/training', TrainingController::class, 'index');
+$router->post('/training', TrainingController::class, 'index');
+
+$router->get('/training/create', TrainingController::class, 'create');
+$router->post('/training/create', TrainingController::class, 'create');
 
 // $router->get('/players', PlayerController::class, 'index');
 // $router->post('/players', PlayerController::class, 'index');

@@ -46,12 +46,10 @@
                 $action = $_POST['action'];
 
                 if($action === 'approve'){
-                    Application::updateStatus($pdo, $id, 'approved');
                     header("Location: /player-applications/application-details?id=" . $id. "&action=approve");
                     exit();
                 }
                 else if($action === 'reject'){
-                    Application::updateStatus($pdo, $id, 'rejected');
                     header("Location: /player-applications/application-details?id=" . $id. "&action=reject");
                     exit();
                 }
@@ -192,17 +190,13 @@
                         }
 
                         // Insert player to squad
-                        $squadId = Squad::getSquadIdByType($pdo, $data['recommended_squad']);
-                        if (!$squadId) {
+                        $squad = Squad::getSquadByName($pdo, $data['recommended_squad']);
+                        if (!$squad) {
                             throw new \Exception('Recommended squad does not exist.');
                         }
-                        
-                        // Insert player to squad member table
-                        $insertSquadMember = Squad::insertSquadMember($pdo, $squadId, $memberId);
-                        if (!$insertSquadMember) {
-                            throw new \Exception('Failed to add player to squad.');
-                        }
 
+                        $squadId = $squad['squad_id'];
+                        
                         // Insert player to squad_player_history table
                         $insertSquadHistory = Squad::insertSquadHistory($pdo, $squadId, $memberId);
                         if (!$insertSquadHistory) {
@@ -235,31 +229,37 @@
                             $hasParentLogin = true;
                         }
                      
+
                         // Set primary guardian member id and access level
                         $pGuardian['contact_member_id'] = $pContactMember->member_id;
 
                         // If player is a junior 
                         if($isJunior){
                             // Set guardian access level to full access
-                            $pGuardian['access_level'] = 'Full Access';
+                            $pGuardian['access_level'] = 'Full';
 
                             // Get role id for parent role
                             $roleId = Role::getRoleIdByName($pdo, 'Parent');
 
                             // Insert role of guardian to member role table
-                            Role::insertMemberRoles($pdo, $pContactMember->member_id, $roleId, $squadId);
+                            Role::insertMemberRoles($pdo, $pContactMember->member_id, $roleId);
 
                             // If apply coach is selected, insert coach role to member role table
                             if($pGuardian['apply_coach']){
                                 $coachRoleId = Role::getRoleIdByName($pdo, 'Coach');
-                                Role::insertMemberRoles($pdo, $pContactMember->member_id, $coachRoleId, $squadId);
+                                Role::insertMemberRoles($pdo, $pContactMember->member_id, $coachRoleId);
+                                $insert = Squad::insertSquadMember($pdo, $pContactMember->member_id, $squad['squad_id'], $coachRoleId);
+                                
+                                if (!$insert) {
+                                    throw new \Exception('Failed to add coach to squad.');
+                                }
                             }
 
-                            // Get role id for senior player role
+                            // Get role id for junior player role
                             $roleId = Role::getRoleIdByName($pdo, 'Junior Player');
 
                             // Insert role of senior player to member role table
-                            Role::insertMemberRoles($pdo, $member->member_id, $roleId, $squadId);
+                            Role::insertMemberRoles($pdo, $member->member_id, $roleId);
                         }
                         // Else set to none
                         else{
@@ -269,25 +269,31 @@
                             $roleId = Role::getRoleIdByName($pdo, 'Senior Player');
 
                             // Insert role of senior player to member role table
-                            Role::insertMemberRoles($pdo, $member->member_id, $roleId, $squadId);
+                            Role::insertMemberRoles($pdo, $member->member_id, $roleId);
 
-                            // Get role id for nok role
-                            $roleIdNOK = Role::getRoleIdByName($pdo, 'Next of Kin');
+                            // Get role id for parent role
+                            $roleId = Role::getRoleIdByName($pdo, 'Next of Kin');
 
-                            // Insert role of guardian to member role table
-                            Role::insertMemberRoles($pdo, $pContactMember->member_id, $roleIdNOK, $squadId);
+                            // Insert role of nok to member role table
+                            Role::insertMemberRoles($pdo, $pContactMember->member_id, $roleId);
+                        }
+
+
+                        // Insert player to squad member table
+                        $insertPlayer = Squad::insertSquadMember($pdo, $memberId, $squadId, $roleId);
+                        if (!$insertPlayer) {
+                            throw new \Exception('Failed to add player to squad.');
                         }
 
                         // Insert primary guardian to player contact table
                         $primaryContact = new Guardian($pGuardian, $memberId);
                         $inserted = $primaryContact->insertPlayerContact($pdo);
- 
                         if (!$inserted) {
                             throw new \Exception('Failed to add primary guardian/nok to contact table.');
                         }
 
                         // If secondary guardian details exist, insert to member table and player contact table
-                        if(!empty($sGuardian[0])){
+                        if($isJunior){
                             // Create second guardian object
                             $sContactMember = new Member();
                             $sContactMember->first_name = $sGuardian['first_name'];
@@ -316,7 +322,7 @@
                             if (!$sContactMember->member_id) {
                                 throw new \Exception('Failed to add second guardian/nok details.');
                             }
-                            
+
                             // Set secondary guardian member id and access level default as none
                             $sGuardian['contact_member_id'] = $sContactMember->member_id;
                             $sGuardian['access_level'] = 'None';
@@ -347,14 +353,16 @@
                             $recipient = $pGuardian['email'];
                             $memberId = $pContactMember->member_id;
                         }
-                        
+
+                        // Find if member has existing login details and set member_id
                         $login = User::findMemberLogin($pdo, $memberId);
                         if($login){
                             $member_id = $login['member_id'];
                         }
 
-                        // Generate and has password
-                        $password = randomPassword();
+                        // Generate and hash password
+                        // $password = randomPassword(); ###
+                        $password = 'Password123!';
                         $hashedPassword = hashPassword($password);
 
                         if(empty($recipient)){
@@ -370,6 +378,11 @@
                             $member_id = User::insertNewMemberLogin($pdo, $data['member_id'] = $memberId, $hashedPassword);
                             MailController::newResetPassword($data['applicant_first_name'], $recipient, $member_id, $password);
                         }
+
+                        $pdo->commit();
+                        // Success message
+                        alert('success', 'Application ' .ucfirst($action) . ' Successfully!', '/player-applications');
+                        exit();
                     }
 
                     else if ($action === 'reject') {
@@ -378,11 +391,14 @@
                             if (!$deleted) {
                                 throw new \Exception('Failed to delete player details.');
                             }
+                            $pdo->commit();
+                            // Success message
+                            alert('success', 'Application ' .ucfirst($action) . ' Successfully!', '/player-applications');
+                            exit();
                         }
                         else{
-                            throw new \Exception('This player does not exist.');
+                            Application::updateStatus($pdo, $data['application_id'], 'rejected');
                         }
-                        Application::updateStatus($pdo, $data['application_id'], 'rejected');
                     }
                     else if ($action === 'back'){
                         header("Location: /player-applications");
@@ -392,12 +408,6 @@
                         alert('error', 'Invalid action.', '/player-applications/application-details?id=' . $data['application_id']);
                         exit();
                     }
-
-                    $pdo->commit();
-
-                    // Success message
-                    alert('success', 'Application ' .ucfirst($action) . ' Successfully!', '/player-applications');
-                    exit();
                 }
                 catch (\Exception $e) {
                     if ($pdo->inTransaction()) {
@@ -1118,331 +1128,6 @@ $apply_coach = 1;
                     'Other'
                 ],
             ]);
-        }
-
-        public function registerMember()
-        {
-            $data =[
-                'fname' => '',
-                'lname' => '',
-                'email' => '',
-                'mobileNum' => '',
-                'dob' => '',
-                'address_id' => null,
-                'recommended_squad' => ''
-            ]; 
-            
-            $address = [
-                'line1' => '',
-                'line2' => '',
-                'city' => '',
-                'postcode' => '',
-                'country' => ''
-            ];
-
-            $errors = [
-                'fname' => '',
-                'lname' => '',
-                'email' => '',
-                'mobileNum' => '',
-                'dob' => '',
-                'address_id' => ''
-            ];
-            $addressErrors = [
-                'line1' => '',
-                'line2' => '',
-                'city' => '',
-                'postcode' => '',
-                'country' => ''
-            ];
-
-            
-           
-            
-            if ($_POST) {
-                $data['fname'] = trimPost($_POST['fname'] ?? '');
-                $data['lname'] = trimPost($_POST['lname'] ?? '');
-                $data['email'] = trimPost($_POST['email'] ?? '');
-                $data['mobileNum'] = trimPost($_POST['mobileNum'] ?? '');
-                $data['dob'] = trimPost($_POST['dob'] ?? '');
-
-                $address['address_id'] = trimPost($_POST['address_id'] ?? '');
-                $address['line1'] = trimPost($_POST['line1'] ?? '');
-                $address['line2'] = trimPost($_POST['line2'] ?? '');
-                $address['city'] = trimPost($_POST['city'] ?? ''); 
-                $address['postcode'] = trimPost($_POST['postcode'] ?? '');
-                $address['country'] = trimPost($_POST['country'] ?? '');
-
-                $data = [
-                    'fname' => 'Violet',
-                    'lname' => 'McLean',
-                    'email' => 'violet.mclean@example.com',
-                    'mobileNum' => '07456123987',
-                    'dob' => '1990-02-22',
-                    'address_id' => null,
-                ];
-
-                $address = [
-                    'line1' => '34 Queen Street',
-                    'line2' => '',
-                    'city' => 'Manchester',
-                    'postcode' => 'M1 4AB',
-                    'country' => 'United Kingdom'
-                ];
-
-
-                // Validate Empty Email and Password Input
-                if (empty($data['fname'])) {
-                    $errors['fname'] = "First name is required";
-                }
-                if (empty($data['lname'])) {
-                    $errors['lname'] = "Last name is required";
-                }
-                if (empty($data['mobileNum'])) {
-                    $errors['mobileNum'] = "Mobile number is required";
-                }
-                if (empty($data['dob'])) {
-                    $errors['dob'] = "Date of birth is required";
-                }
-
-                // Check empty email
-                if (empty($data['email'])) {
-                    $errors['email'] = "Email is required";
-                } else {
-                    // If invalid email format
-                    if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-                        $errors['email'] = "Invalid email format";
-                    }
-                    else{
-                        // Check if email already exists
-                        $result = User::checkEmailExists($data['email'],'Email already registered. Please log in to continue.');
-
-                        // If email already exists, display error message
-                        $errors['email'] = $result['emailError'] ?? '';
-                    }
-                }
-
-                // Check empty address input
-                if (empty($address['line1'])) {
-                    $addressErrors['line1'] = "Address line 1 is required";
-                }
-                if (empty($address['city'])) {
-                    $addressErrors['city'] = "City is required";
-                }
-                if (empty($address['postcode'])) {
-                    $addressErrors['postcode'] = "Postcode is required";
-                }
-                if (empty($address['country'])) {
-                    $addressErrors['country'] = "Country is required";
-                }
-
-                $pdo = Database::getInstance()->getConnection();
-                try{
-                    // Check for address errors
-                    if (!array_filter($addressErrors)){
-                        $pdo->beginTransaction();
-
-                        // Insert address id to db and store id
-                        $addressId  = Address::insert($pdo, $address);
-                        $data['address_id'] = (int)$addressId;
-                    }
-                    else{
-                        throw new \Exception("Address details are invalid.");
-                    }
-                    // Check for member details errors
-                    if (!array_filter($errors))
-                    {
-                        // Create member object to be inserted to db
-                        $member = new Member();
-                        $member->first_name = $data['fname'];
-                        $member->last_name = $data['lname'];
-                        $member->dob = $data['dob'];
-                        $member->mobile_num = $data['mobileNum'];
-                        $member->address_id = $data['address_id'];
-                        $member->membership_status = $data['membership_status'] ?? 'active';
-
-
-                        // Check if member already exist before inserting
-                        $memberExists = $member->validateInsert($pdo);
-                        
-                        if ($memberExists) {
-                            throw new \Exception("Member already exists.");
-                        }
-                        
-                        // Insert member to db and store id for creating login
-                        $result = $member->insert($pdo);
-
-                        // Commit transaction
-                        $pdo->commit();
-                        
-                        // Clear Errors
-                        unset($errors);
-                        unset($addressErrors);
-
-                        // Success Message and redirect to create login page with member id
-                        alert('success',
-                            'Member created successfully.', 
-                            'create-login?member_id=' . $member->member_id);
-                        exit();
-                    }
-                    else{
-                        throw new \Exception("Member details are invalid.");
-                    }
-                }
-                catch (\Exception $e) {
-                    if ($pdo->inTransaction()) {
-                        $pdo->rollBack();
-                    }
-                    alert('error',$e->getMessage(), 'create-member');
-                    exit;
-                }
-            }
-            $this->render('/register/member', [
-                    'member' => $member ?? null,
-                    'data' => $data,
-                    'errors' => $errors,
-                    'address' => $address,
-                    'addressErrors' => $addressErrors
-                ]);
-        }
-
-         // Create a login for a member
-        public function createLogin()
-        {
-            // Get member id from query
-            $member_id = $_GET['member_id'] ?? null;
-
-            // If no member id is provided, display members without login
-            if($member_id === null){
-                alert('error', 'No member selected. Please <a href="/members-no-login">select a member</a> to create login.', 'members-no-login');
-                exit();
-            }
-
-            // Get all roles for dropdown
-            $roles = Role::getRole();
-
-            // Create login object to be inserted to db
-            $member_login = new User();
-
-            // Set member id for creating login
-            $member_login->member_id = $member_id; 
-            $member_login->email =  Member::selectEmail($member_id) ?? '';
-            $email = $member_login->email ?? '';
-            
-            $data = [
-                'member_id' => $member_id ?? null,
-                'email' => $email ?? null,
-                'rawPassword' => '',
-                'rawConfirmPassword' => '',
-                'selectedRole' => ''
-            ];
-
-
-            $errors = [
-                'email' => '',
-                'rawPassword' => '',
-                'rawConfirmPassword' => '',
-                'selectedRole' => ''
-            ];
-
-            if ($_POST) {
-                $data['rawPassword'] = trim($_POST['rawPassword'] ?? '');
-                $data['rawConfirmPassword'] = trim($_POST['rawConfirmPassword'] ?? '');
-                $data['selectedRole'] = (int)($_POST['selectedRole'] ?? '');
-
-                // Validate Empty Email and Password Input
-                if (empty($data['rawPassword'])) {
-                    $errors['rawPassword'] = "Password is required";
-                }
-                if (empty($data['rawConfirmPassword'])) {
-                    $errors['rawConfirmPassword'] = "Please confirm password";
-                }
-                if ($data['selectedRole'] <= 0) {
-                    $errors['selectedRole'] = "Please select a role";
-                }
-
-                
-                // Check if email already exists
-                $result = User::checkEmailExists($data['email'],'Email is not yet registered.');
-
-                if(!$result['emailError']){
-                    $errors['email'] = 'Email is not yet registered. Please register member first before creating login.';
-                }
-                
-                // Check password length
-                if(strlen($data['rawPassword']) < 8){
-                    $errors['rawPassword'] = 'Password must be atleast 8 characters<br>';
-                }
-                // More password strength validation
-                else
-                {
-                    if(!preg_match("#[0-9]+#", $data['rawPassword'])) {
-                        $errors['rawPassword'] .= "Your Password Must Contain At Least 1 Number!<br>";
-                    }
-                    if(!preg_match("#[A-Z]+#", $data['rawPassword'])) {
-                        $errors['rawPassword'] .= "Your Password Must Contain At Least 1 Capital Letter!<br>";
-                    }
-                    if(!preg_match("#[a-z]+#", $data['rawPassword'])) {
-                        $errors['rawPassword'] .= "Your Password Must Contain At Least 1 Lowercase Letter!<br>";
-                    }
-
-                    // Valid strength, confirm password
-                    // Password not match
-                    if($data['rawPassword'] !== $data['rawConfirmPassword']){
-                        $errors['rawConfirmPassword'] = 'Password does not match';
-                    }
-                    // Password confirmed
-                    else{
-                        //Hash password
-                        $salt ="4g£yc7!L(";
-                        $data['password'] = md5($data['rawPassword'].$salt);
-
-                        // No errors, add to database
-                        if(!array_filter($errors)){
-                                $pdo = Database::getInstance()->getConnection();
-                            try{
-                                $pdo->beginTransaction();
-
-                                $user = new User();
-
-                                $user->email = $data['email'];
-                                $user->password = $data['rawPassword'];
-                                $user->member_id = $data['member_id'];
-                                $user->role = $data['selectedRole'];
-
-                                $exists = User::findMemberLogin($pdo, $user->member_id);
-                                
-                                if($exists){
-                                    throw new \Exception("This user has an existing login details.");
-                                }
-
-                                //Insert login details to db
-                                User::insertLogin($pdo, $data);
-
-                                //Insert role for member
-                                Role::insertMemberRoles($pdo, $user->member_id, $user->role, $squad_id = null);
-
-                                //Commit transaction
-                                $pdo->commit();
-                                alert('success', 'Login Account has been Successfully Created', 'create-login?member_id=' . $data['member_id']);
-                            }
-                            catch (\Exception $e) {
-                                if ($pdo->inTransaction()) {
-                                    $pdo->rollBack();
-                                }
-                                alert('error', $e->getMessage(), '/create-login?member_id=' . $data['member_id']);
-                            }
-                        }
-                    }
-                }
-            }
-
-            
-            $this->render('/register/create-login', [
-                'data' => $data,    
-                'errors' => $errors,
-                'roles' => $roles
-            ]);
-        }
+        }        
     }
 ?>

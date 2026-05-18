@@ -31,6 +31,7 @@
                             <p class="<?= smallError() ?>"><?php echo h($lNameErr);?></p>
                         </div>
                     </div>
+                    <!-- DOB -->
                     <div>
                         <label for="dob" class="<?= labelClass() ?>">Date of Birth</label>
                         <div class="relative">

@@ -9,6 +9,7 @@
     use Test\Models\Player;
     use Test\Models\Guardian;
     use Test\Models\Address;
+    use Test\Controllers\Auth;
     use Test\Database;
 
     
@@ -33,10 +34,15 @@
             // ]);
         }
 
+        
+        // Display player Details with Perm Check
         public function displayPlayer()
         {
-            $pdo = Database::getInstance()->getConnection();
+            // Permission Check
+            authorize('view_player_details');
 
+            $pdo = Database::getInstance()->getConnection();
+            
             $player = [];
             $guardian = [];
 
@@ -46,13 +52,26 @@
                     $member_id = $_GET['id'];
                 }
                 else{
-                    alert('error', 'Player ID is not found.', '/');
+                    $error = new Error();
+                    $error->notFound('Player ID is not found.');
+                    exit;
                 }
 
                 // Get player profile
                 $player = Player::playerProfile($pdo, $member_id);
+
+                // Not a player no access
                 if(!$player){
-                    throw new \ErrorException('Player Not Found');
+                    $error = new Error();
+                    $error->notFound('Player Not Found.');
+                    exit;
+                }
+
+                // Authorization 
+                if (!Player::canViewPlayer($player, $_SESSION['user']['member_id'], $member_id)) {
+                    $error = new Error();
+                    $error->forbidden();
+                    exit;
                 }
 
                 // Get player Guardian/NOK details and addresses
@@ -87,13 +106,12 @@
                     ($pdo, $doctor['doctor_id']);
 
                 // Identify if player is junior or senior and display correct nok title
-                $isJunior = $player['squad_type'] === 'Senior' ? false : true;
+                $isJunior = $player['squad_name'] === 'Senior' ? false : true;
                 $nok = $isJunior === true ? 'Primary Guardian' : 'Next of Kin';
             }
             catch (\Exception $e){
-
+                die($e->getMessage());
             }
-
             
             $this->render('player/index', [
                 'player' => $player,

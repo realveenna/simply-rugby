@@ -43,8 +43,13 @@
                 $controller->$action();
                 
             } else {
-                throw new \Exception("No route found for URI: $uri");
+                http_response_code(404);
+                $controller = new \Test\Controllers\Error();
+                $controller->notFound();
+                exit;
             } 
+
+            
         }
     }
 
