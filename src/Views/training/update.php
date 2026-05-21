@@ -4,37 +4,18 @@
         <div class="<?= formPadding() ?>">
           <a href="/" class="flex flex-col items-center justify-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
               <img class="w-8 h-8 mr-2" src="/images/logo/main-logo.png" alt="logo">
-              Create a Training Session
+              Uodate a Training Session
           </a>  
-          <form class="<?= formClass() ?>" method="post" action="">
+          <form class="<?= formClass() ?>" method="post" action="/training/update">
             <input type="hidden" name="coach_member_id" value="<?= h($_SESSION['user']['member_id'] ?? null) ?>">
-            <input type="hidden" name="training_session_id" value="<?= h($training->training_session_id ?? '') ?>">
+            <input type="hidden" name="training_session_id" value="<?= h($training['training_session_id'] ?? '') ?>">
             
             <!-- Squad Select -->
             <div>
                 <label for="squad_id" class="<?= labelClass() ?>">Squad Name </label>
                 <select class="<?= inputClass() ?>"
                     autocomplete="squad_id" name="squad_id">
-                    <option value="" disabled selected> Select a Squad:</option>
-                    <!-- If there is only one squad in the list set it to default -->
-                    <?php
-                        if(count($squads) === 1){
-                            $training->squad_id = $squads[0]['squad_id'];
-                        }
-                    ?>
-                    <!-- If may squads, list all -->
-                    <?php foreach ($squads as $squad): ?>
-                        <option value="<?= $squad['squad_id'] ?>"
-                            <?php 
-                                // Set selected squad
-                                $selectedSquad = $training->squad_id ?? '';
-                                if($selectedSquad == $squad['squad_id']){
-                                    echo 'selected';
-                                }
-                            ?>>
-                            <?= h($squad['squad_name']) ?>
-                        </option>
-                    <?php endforeach; ?>
+                    <option value="<?= h($training['squad_name']) ?>" disabled selected> <?= h($training['squad_name']) ?></option>
                 </select>
                   <p class="mt-2 text-sm font-xs text-red-500"><?php echo h($error['squad_id'] ?? '');?></p>
             </div>
@@ -45,7 +26,7 @@
                 <textarea rows="4" 
                   name="skills_activities" id="skills_activities" 
                   placeholder="Enter Training Skills and Activities" 
-                  class="<?= inputClass() ?>"><?= h($training->skills_activities ?? '') ?></textarea>
+                  class="<?= inputClass() ?>"><?= h($training['skills_activities'] ?? '') ?></textarea>
                 <div>
                   <p class="<?= smallError() ?>"><?php echo h($error['skills_activities'] ?? '');?></p>
                 </div>
@@ -57,7 +38,7 @@
                     <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                         <svg class="w-4 h-4 text-body" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16m-8-3V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Zm3-7h.01v.01H8V13Zm4 0h.01v.01H12V13Zm4 0h.01v.01H16V13Zm-8 4h.01v.01H8V17Zm4 0h.01v.01H12V17Zm4 0h.01v.01H16V17Z"/></svg>
                     </div>
-                    <input datepicker name="date" type="text" value="<?php echo h($training->date ?? '');?>"
+                    <input datepicker-format="yyyy-mm-dd" name="date" type="text" value="<?php echo h($training['date'] ?? '');?>"
                     class="block w-full ps-9 pe-3 py-2.5 <?= inputClass()?>" placeholder="Select date">
                 </div>
                 <div>
@@ -76,7 +57,7 @@
                     <input type="time" 
                       name="start_time" 
                       id="start_time" 
-                      value="<?= h($training->start_time ?? '') ?>"
+                      value="<?= h($training['start_time'] ?? '') ?>"
                       class="block w-full p-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body" min="09:00" max="18:00" value="00:00" required />
                 </div>
                 <div>
@@ -90,7 +71,7 @@
                         <svg class="w-4 h-4 text-body" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
                     </div>
                     <input type="time" name="end_time" id="end_time" 
-                      value="<?= h($training->end_time ?? '') ?>"
+                      value="<?= h($training['end_time'] ?? '') ?>"
                       class="block w-full p-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body" min="09:00" max="18:00" value="00:00" required />
                 </div>
                 <div>
@@ -106,10 +87,10 @@
                       Clear
                   </button>
                   
-                  <!-- Submit Button -->
-                  <button type="submit" name="action" value="submit" 
+                  <!-- Update Button -->
+                  <button type="submit" name="action" value="update" 
                       class="<?=primaryBtn()?>">
-                      Submit
+                      Update
                   </button>
               </div>
           </form>

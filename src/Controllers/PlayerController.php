@@ -10,6 +10,7 @@
     use Test\Models\Guardian;
     use Test\Models\Address;
     use Test\Controllers\Auth;
+    use Test\Models\AccessControl;
     use Test\Database;
 
     
@@ -52,9 +53,7 @@
                     $member_id = $_GET['id'];
                 }
                 else{
-                    $error = new Error();
-                    $error->notFound('Player ID is not found.');
-                    exit;
+                    abort(404, 'Player ID is not found.');
                 }
 
                 // Get player profile
@@ -62,16 +61,12 @@
 
                 // Not a player no access
                 if(!$player){
-                    $error = new Error();
-                    $error->notFound('Player Not Found.');
-                    exit;
+                    abort(404, 'Player Not Found.');
                 }
 
                 // Authorization 
-                if (!Player::canViewPlayer($player, $_SESSION['user']['member_id'], $member_id)) {
-                    $error = new Error();
-                    $error->forbidden();
-                    exit;
+                if (!AccessControl::canViewPlayer($player, $_SESSION['user']['member_id'], $member_id)) {
+                    abort(404);
                 }
 
                 // Get player Guardian/NOK details and addresses

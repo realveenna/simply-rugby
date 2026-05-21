@@ -80,6 +80,7 @@
                     nickname = VALUES(nickname),
                     playerHeight = VALUES(playerHeight),
                     playerWeight = VALUES(playerWeight),
+                    doctor_id = VALUES(doctor_id),
                     mobile_num = VALUES(mobile_num),
                     primary_guardian_id = VALUES(primary_guardian_id),
                     secondary_guardian_id = VALUES(secondary_guardian_id),

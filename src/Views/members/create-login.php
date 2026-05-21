@@ -57,6 +57,27 @@
                         </div>
                     </div> 
 
+                    <!-- Squad selection for coaches -->
+                    <div id="showSquad" class="hidden">
+                        <label for="selectedSquad" class="block mb-2.5 text-sm font-medium text-heading dark:text-white">Select an option</label>
+                        <select id="selectedSquad" name="selectedSquad" class="block w-full px-3 py-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
+                            <option value="">Select a Squad</option>
+                            <?php foreach ($squads as $squad): ?>
+                                <option value="<?= (int)$squad['squad_id'] ?>"
+                                    <?php 
+                                        if((int)$data['selectedSquad'] === (int)$squad['squad_id']){
+                                            echo 'selected';
+                                        }
+                                    ?>>
+                                    <?= h($squad['squad_name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <div>
+                            <p class="<?= smallError() ?>"><?php echo h($errors['selectedSquad'] ?? '');?></p>
+                        </div>
+                    </div> 
+
                     <!-- Button -->
                     <button type="submit" class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Create an Member Account</button>
                     <p class="text-sm font-light text-gray-500 dark:text-gray-400">
@@ -69,21 +90,27 @@
 </section>
 
 <script>
-    
-// Show section selection for fixture and section secretary
+  
+// On change of selected role, identify role and show hidden divs
 const selectedRole = document.getElementById('selectedRole');
 const showSection = document.getElementById('showSection');
+const showSquad = document.getElementById('showSquad'); 
 
 selectedRole.addEventListener('change', function () {
-
+    // Show section selection for fixture and section secretary
     if (this.value == 3 || this.value == 4) {
         showSection.classList.remove('hidden');
-    } 
-    else {
+    }else{
         showSection.classList.add('hidden');
     }
-});
 
+    // Show squad selection for coaches
+    if(this.value == 5) {
+        showSquad.classList.remove('hidden');
+    }else{
+        showSquad.classList.add('hidden');
+    }
+});
 
 </script>
 

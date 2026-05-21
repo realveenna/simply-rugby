@@ -254,7 +254,6 @@
                                     throw new \Exception('Failed to add coach to squad.');
                                 }
                             }
-
                             // Get role id for junior player role
                             $roleId = Role::getRoleIdByName($pdo, 'Junior Player');
 
@@ -369,14 +368,15 @@
                             throw new \Exception('Recipient email address is missing.');
                         }
 
+                        // MailController is limited but emails are sent.
                         // Email for successful registration only
                         if($hasParentLogin === true){
-                            MailController::newMember($data['applicant_first_name'], $recipient);
+                            // MailController::newMember($data['applicant_first_name'], $recipient);
                         }
                         // Insert to login table
                         else{
                             $member_id = User::insertNewMemberLogin($pdo, $data['member_id'] = $memberId, $hashedPassword);
-                            MailController::newResetPassword($data['applicant_first_name'], $recipient, $member_id, $password);
+                            // MailController::newResetPassword($data['applicant_first_name'], $recipient, $member_id, $password);
                         }
 
                         $pdo->commit();
@@ -466,12 +466,12 @@
             $apply_coach = '';
            
             // Personal Details
-            $fName  = '';
-            $lName  = '';
-            $dob = '';
-            $playerNickname = '';
-            $playerHeight = '';
-            $playerWeight = '';
+            $fName  = $fName ?? '';
+            $lName  = $lName ?? '';
+            $dob = $dob ??'';
+            $playerNickname = $playerNickname ?? '';
+            $playerHeight = $playerHeight ?? '';
+            $playerWeight = $playerWeight ?? '';
                         
             $fNameErr  = '';
             $lNameErr  = '';
@@ -479,34 +479,54 @@
             $playerHeightErr = '';
             $playerWeightErr = '';
 
-            $nokFName = '';
-            $nokLName = '';
+            $nokFName = $nokFName ?? '';
+            $nokLName = $nokLName ?? '';
             $nokFNameErr = '';
             $nokLNameErr = '';
 
-            $nokFNameSecondary = '';
-            $nokLNameSecondary = '';
+            $nokFNameSecondary = $nokFNameSecondary ?? '';
+            $nokLNameSecondary = $nokLNameSecondary ?? '';
             $nokFNameSecondaryErr = '';
             $nokLNameSecondaryErr = '';
 
-            $nokRelationship = '';
+            $nokRelationship = $nokRelationship ?? '';
             $nokRelationshipErr = '';
-            $nokRelationshipSecondary = '';
+
+            $nokRelationshipSecondary = $nokRelationshipSecondary ?? '';
             $nokRelationshipSecondaryErr = '';
 
-            $email = '';
+            $email = $email ?? '';
             $emailErr = '';
 
-            $mobileNum = '';
+            $mobileNum = $mobileNum ?? '';
             $mobileNumErr = '';
-            $mobileNumSecondary = '';
-            $mobileNumSecondaryErr = '';
-            
-            $line1 = $line2 = $city = $postcode = $country = "";
-            $line1Err = $line2Err = $cityErr =  $postcodeErr = $countryErr = "";
 
-            $line1Secondary = $line2Secondary = $citySecondary = $postcodeSecondary = $countrySecondary = "";
-            $line1SecondaryErr = $line2SecondaryErr = $citySecondaryErr =  $postcodeSecondaryErr  = $countrySecondaryErr = "";
+            $mobileNumSecondary = $mobileNumSecondary ?? '';
+            $mobileNumSecondaryErr = '';
+
+            $line1 = $line1 ?? '';
+            $line2 = $line2 ?? '';
+            $city = $city ?? '';
+            $postcode = $postcode ?? '';
+            $country = $country ?? '';
+
+            $line1Err = '';
+            $line2Err = '';
+            $cityErr = '';
+            $postcodeErr = '';
+            $countryErr = '';
+
+            $line1Secondary = $line1Secondary ?? '';
+            $line2Secondary = $line2Secondary ?? '';
+            $citySecondary = $citySecondary ?? '';
+            $postcodeSecondary = $postcodeSecondary ?? '';
+            $countrySecondary = $countrySecondary ?? '';
+
+            $line1SecondaryErr = '';
+            $line2SecondaryErr = '';
+            $citySecondaryErr = '';
+            $postcodeSecondaryErr = '';
+            $countrySecondaryErr = '';
 
             // Medical Information Array
             $medicalInformationData = [];
@@ -516,20 +536,26 @@
             $pastCondition = [];
 
             // Doctor Information
-            $doctor  = '';
-            $doctorErr  = '';
-            $doctorNum  = '';
+            $doctor = $doctor ?? '';
+            $doctorErr = '';
+
+            $doctorNum = $doctorNum ?? '';
             $doctorNumErr = '';
-            $line1Doctor  = '';
-            $line1DoctorErr  = '';
-            $line2Doctor  = '';
-            $line2DoctorErr  = '';
-            $cityDoctor  = '';
-            $cityDoctorErr  = '';
-            $postcodeDoctor  = '';
-            $postcodeDoctorErr  = '';
-            $countryDoctor = '';
-            $countryDoctorErr  = '';
+
+            $line1Doctor = $line1Doctor ?? '';
+            $line1DoctorErr = '';
+
+            $line2Doctor = $line2Doctor ?? '';
+            $line2DoctorErr = '';
+
+            $cityDoctor = $cityDoctor ?? '';
+            $cityDoctorErr = '';
+
+            $postcodeDoctor = $postcodeDoctor ?? '';
+            $postcodeDoctorErr = '';
+
+            $countryDoctor = $countryDoctor ?? '';
+            $countryDoctorErr = '';
 
             $isJunior = false;
 
@@ -583,77 +609,73 @@
                 $postcodeDoctor = strtoupper(trimPost('postcodeDoctor')); 
                 $countryDoctor = trimPost('countryDoctor'); 
 
-                
+  // Fake populated values for testing
 // Fake populated values for testing
-// Personal Details
-// Player Information
-// Player Information
-$fName = 'Allister';
-$lName = 'Byrne';
-$dob = '2020-04-17';
-$playerNickname = 'Danny';
-$playerHeight = '140';
-$playerWeight = '40';
 
+// Player Information
+$fName = 'Reuben';
+$lName = 'Forrest';
+$dob = '2014-09-28';
+$playerNickname = 'Ruby';
+$playerHeight = '147';
+$playerWeight = '44';
 
 // NOK Primary
-$nokFName = 'Emma';
-$nokLName = 'Byrne';
-$nokRelationship = 'Mother';
+$nokFName = 'Daniel';
+$nokLName = 'Forrest';
+$nokRelationship = 'Father';
 
 // NOK Secondary
-$nokFNameSecondary = 'Ryan';
-$nokLNameSecondary = 'Byrne';
-$nokRelationshipSecondary = 'Uncle';
+$nokFNameSecondary = 'Amy';
+$nokLNameSecondary = 'Forrest';
+$nokRelationshipSecondary = 'Mother';
 
 // Contact Details
-$email = 'Emma.byrne95@gmail.com';
-$mobileNum = '07591826473';
-$mobileNumSecondary = '07462819357';
-
+$email = 'daniel.forrest@email.com';
+$mobileNum = '07855111002';
+$mobileNumSecondary = '07855111502';
 
 // Primary Address
-$line1 = '42 Cedar Avenue';
+$line1 = '45 Dumbarton Road';
 $line2 = '';
 $city = 'Glasgow';
-$postcode = 'GA12 2TR';
+$postcode = 'G11 6PW';
 $country = 'United Kingdom';
 
-
 // Secondary Address
-$line1Secondary = '42 Cedar Avenue';
+$line1Secondary = '45 Dumbarton Road';
 $line2Secondary = '';
 $citySecondary = 'Glasgow';
-$postcodeSecondary = 'GA12 2TR';
+$postcodeSecondary = 'G11 6PW';
 $countrySecondary = 'United Kingdom';
-
 
 // Medical Information Array
 $medicalInformationData = [];
 
 $allergyData = [];
 
-$currentCondition = [];
-$pastCondition = []; 
+$currentCondition = [
+    1 // Asthma
+];
 
+$pastCondition = [];
 
 // Doctor Information
-$doctor = 'Dr Fiona MacKenzie';
-$doctorNum = '01412847635';
+$doctor = 'Dr Alan Stewart';
+$doctorNum = '01413392000';
 
 // Doctor Address
-$line1Doctor = '12 Woodside Health Centre';
-$line2Doctor = 'Maryhill Road';
+$line1Doctor = 'Sandyford GP Practice';
+$line2Doctor = '2 Sandyford Place';
 $cityDoctor = 'Glasgow';
-$postcodeDoctor = 'G20 7LR';
+$postcodeDoctor = 'G3 7NB';
 $countryDoctor = 'United Kingdom';
 
+// Application Details
 $isJunior = true;
-$apply_coach = 1;
+$apply_coach = true;
+$sameAddress = true;
 
-// // Senior Player
-// $apply_coach = 0;
-// $sameAddress = true;
 
                 // Default data to be passed
                 $data = [
@@ -828,7 +850,7 @@ $apply_coach = 1;
                             $result = User::checkEmailExists($email,'Email already registered. Please log in to continue.');
                             if(isset($result['emailError'])){
                                 $emailErr = $result['emailError'];
-                                throw new \ErrorException('This email is already registered.');
+                                throw new \ErrorException('This email is already registered. Please log in if you wish to register another junior player.');
                             }
 
                             // Check if parent email already exists in members and player_contact table
@@ -845,8 +867,7 @@ $apply_coach = 1;
                                 }
                             }
                             // Convert date to Y-m-d format
-                            $data['dob'] = \DateTime::createFromFormat('Y-m-d', $dob);
-                            $data['dob'] = date_format($data['dob'],"Y/m/d H:i:s");
+                            formatDate($data['dob']);
 
                             $age  = calcAge($data['dob']);
                             
@@ -872,7 +893,11 @@ $apply_coach = 1;
 
                             // Insert doctor to db and store id
                             $doctor = new Doctor($doctorData);
-                            $doctor->insert($pdo);
+                            $insertDoctor = $doctor->insert($pdo);
+                            if(!$insertDoctor){
+                                throw new \Exception("Doctor wasn't added");
+                            }
+
                             $data['doctor_id'] = $doctor->getDoctorId();
 
                             $primaryGuardianData = [

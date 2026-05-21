@@ -4,48 +4,75 @@
     use Test\Database;
     use PDO;
     
-    class Training
+    class Matches
     {
-        public $training_session_id;
+        public $match_id;
         public $squad_id;
-        public $coach_member_id;
-        public $skills_activities;
-        public $start_time;
-        public $end_time;
-        public $date;
-
+        public $match_venue;
+        public $match_date;
+        public $opposition_team_name;
+        public $kick_off_time;
+        public $result;
 
         public function __construct($data = [])
         {
-            $this->training_session_id = $data['training_session_id'] ?? null;
+            $this->match_id = $data['match_id'] ?? null;
             $this->squad_id = $data['squad_id'] ?? null;
-            $this->coach_member_id = $data['coach_member_id'] ?? null;
-            $this->skills_activities = $data['skills_activities'] ?? '';
-            $this->start_time = $data['start_time'] ?? '';
-            $this->end_time = $data['end_time'] ?? '';
-            $this->date = $data['date'] ?? '';
+            $this->match_venue = $data['match_venue'] ?? '';
+            $this->match_date = $data['match_date'] ?? '';
+            $this->opposition_team_name = $data['opposition_team_name'] ?? '';
+            $this->kick_off_time = $data['kick_off_time'] ?? '';
+            $this->result = $data['result'] ?? '';
         }
 
-        // Create training session 
+        // Create match
         public function insert($pdo)
         {
             $statement = $pdo->prepare
             (
-                "INSERT INTO training_session 
-                    (squad_id, coach_member_id, date, start_time, end_time, skills_activities) 
-                VALUES (:squad_id, :coach_member_id, :date, :start_time, :end_time, :skills_activities)"
+                "INSERT INTO matches
+                    (squad_id, match_venue, match_date, opposition_team_name, 
+                    kick_off_time, result)
+                VALUES
+                    (:squad_id, :match_venue, :match_date, :opposition_team_name, 
+                    :kick_off_time, :result)"
             );
 
             $statement->execute([
                 ':squad_id' => $this->squad_id,
-                ':coach_member_id' => $this->coach_member_id,
-                ':date' => $this->date,
-                ':start_time' => $this->start_time,
-                ':end_time' => $this->end_time,
-                ':skills_activities' => $this->skills_activities
+                ':match_venue' => $this->match_venue,
+                ':match_date' => $this->match_date,
+                ':opposition_team_name' => $this->opposition_team_name,
+                ':kick_off_time' => $this->kick_off_time,
+                ':result' => $this->result
             ]);
+
+            // Get Id
+            $id = $pdo->lastInsertId();
+
+            if (!$id) {
+                throw new \Exception('Failed to create match');
+            }
             
-            return $pdo->lastInsertId();
+            return $id;
+        }
+
+        // Insert Lineup
+        public static function insertLineup($pdo, $match_id, $player_id, $position)
+        {
+            $statement = $pdo->prepare
+            (
+                "INSERT INTO match_lineup
+                    (match_id, player_id, position)
+                VALUES
+                    (:match_id, :player_id, :position)"
+            );
+
+            return $statement->execute([
+                ':match_id' => $match_id,
+                ':player_id' => $player_id,
+                ':position' => $position ?? ''
+            ]);
         }
 
         // Update training session
@@ -74,41 +101,32 @@
             
         }
 
+        // Select Matches allow all or by squad_id
+        public static function getMatches($pdo, $squad_id = null){
+           $sql = "
+                SELECT *
+                FROM matches
+            ";
 
-        // Select Trainings allow all or by squad_id
-        public static function getTraining($pdo, $squad_id = null){
-            $sql =
-                "SELECT 
-                    ts.*,
-                    s.squad_name,
-                    sec.section_name,
-                    CONCAT(coach.first_name, ' ', coach.last_name) AS coach_name,
-                    SUM(ta.attendance_status = 'Pending') AS pending_count
-
-                FROM training_session ts
-
-                -- Squad Name
-                LEFT JOIN squad s ON ts.squad_id = s.squad_id
-                -- Section (Junior/Senior)
-                LEFT JOIN section sec ON s.section_id = sec.section_id
-                -- Attendance in Pending
-                LEFT JOIN training_attendance ta ON ts.training_session_id = ta.training_session_id
-                -- Coach
-                LEFT JOIN member coach ON ts.coach_member_id = coach.member_id";
-              
-            $params = [];
-            
-            // If selecting by squad_id
-            if($squad_id !== null){
-                $sql .= " WHERE ts.squad_id = :squad_id";
-                $params[':squad_id'] = $squad_id;
+            // If squad_id is not null
+            if ($squad_id !== null) {
+                $sql .= " WHERE squad_id = :squad_id";
             }
 
-            // Order result group by id and desc date
-            $sql .= " GROUP BY ts.training_session_id ORDER BY date DESC";
+            // Order by match date
+            $sql .= " ORDER BY match_date ASC, kick_off_time ASC";
 
             $statement = $pdo->prepare($sql);
-            $statement->execute($params);
+
+            // Execute with or without squad_id
+            if ($squad_id !== null) {
+                $statement->execute([
+                    ':squad_id' => $squad_id
+                ]);
+            } else {
+                $statement->execute();
+            }
+
             return $statement->fetchAll(PDO::FETCH_ASSOC);
         }
 

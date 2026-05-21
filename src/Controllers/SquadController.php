@@ -6,6 +6,7 @@
     use Test\Models\Member;
     use Test\Models\Role;
     use Test\Models\Squad;
+    use Test\Models\AccessControl;
     use Test\Database;
     
     class SquadController extends Controller
@@ -24,15 +25,13 @@
             
             $pdo = Database::getInstance()->getConnection();
 
-            $squads = Squad::getSquadAccess($pdo, $this->member_id, $this->rbac);
+            $squads = AccessControl::getAuthorizedSquads($pdo, $this->member_id);
             
             $players = [];
 
             // Forbidden Access
             if(!$squads ){
-                $error = new Error();
-                $error->forbidden();
-                exit;
+                abort(403);
             }
             
             try{
@@ -44,18 +43,8 @@
                     // Get squad details
                     $squad = Squad::getSquadByName($pdo, $squad_name);
 
-                    if(!$squad){
-                        $error = new Error();
-                        $error->notFound('Squad Not Found!');
-                        exit;
-                    }
-
-                    // Authorization 
-                    if (!Squad::canViewSquad($squad)) {
-                        $error = new Error();
-                        $error->forbidden();
-                        exit;
-                    }
+                    // Validate Squad Access
+                    $squad = AccessControl::validateSquadAccess($pdo, $squad['squad_id']);
                     
                     // Get squad players
                     $players = Squad::listSquadPlayer($pdo, $squad['squad_id']);
@@ -85,9 +74,9 @@
 
             $squad_player = Squad::listSquadPlayer($pdo, $squads['squad_id']);
 
-            $this->render('squad/index', [
+            $this->render('squad/index',[
                 'squads' => $squads,
-                'squadPlayers' => $squad_player,
+                'squadPlayers' => $squad_player
             ]);
         }
         

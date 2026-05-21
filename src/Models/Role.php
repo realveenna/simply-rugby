@@ -135,24 +135,18 @@
         }
 
         // Get member role id
-        private static function getRoleIdByMemberId($pdo, $member_id)
+        public static function getRoleIdByMemberId($pdo, $member_id)
         {
-            try{
-                $statement = $pdo->prepare(
-                    "SELECT role_id FROM member_role WHERE member_id = :member_id"
-                );
-                $statement->execute([':member_id' => $member_id]);
-                $result = $statement->fetchColumn();
-                
-                if(!$result){
-                    return null;
-                }
-                return $result;
+            $statement = $pdo->prepare(
+                "SELECT role_id FROM member_role WHERE member_id = :member_id"
+            );
+            $statement->execute([':member_id' => $member_id]);
+            $result = $statement->fetchColumn();
+            
+            if(!$result){
+                return null;
             }
-            catch (\Exception $e)
-            {
-                echo $e->getMessage();
-            }
+            return $result;
         }
 
         public static function getRoleIdByName($pdo, $role_name)

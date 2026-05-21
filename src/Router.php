@@ -5,19 +5,23 @@
     {
         protected $routes = [];
 
-        private function addRoute($route, $controller, $action, $method)
+        private function addRoute($route, $controller, $action, $method, $permissions = [])
         {
-            $this->routes[$method][$route] = ['controller' => $controller, 'action' => $action];
+            $this->routes[$method][$route] = [
+                'controller' => $controller, 
+                'action' => $action,
+                'permissions' => $permissions
+            ];
         }
 
-        public function get($route, $controller, $action)
+        public function get($route, $controller, $action, $permissions = [])
         {
-            $this->addRoute($route, $controller, $action, "GET");
+            $this->addRoute($route, $controller, $action, "GET", $permissions);
         }
 
-        public function post($route, $controller, $action)
+        public function post($route, $controller, $action, $permissions = [])
         {
-            $this->addRoute($route, $controller, $action, "POST");
+            $this->addRoute($route, $controller, $action, "POST", $permissions);
         }
 
         public function dispatch()
@@ -34,8 +38,36 @@
                 $uri = '/';
             }
             
-
             if (array_key_exists($uri, $this->routes[$method])) {
+
+               $route = $this->routes[$method][$uri];
+
+                // Protected route?
+                if (!empty($route['permissions'])) {
+
+                    // Not logged in
+                    if (!isLoggedIn()) {
+                        header('Location: /login');
+                        exit;
+                    }
+
+                    // Default
+                    $isAuthorized = false;
+
+                    // Permission check
+                    foreach ($route['permissions'] as $permission) {
+                        if (hasPermission($permission)) {
+                            $isAuthorized = true;
+                            break;
+                        }
+                    }
+
+                    // No permission abort
+                    if (!$isAuthorized) {
+                        abort(403);
+                    }
+                }
+
                 $controller = $this->routes[$method][$uri]['controller'];
                 $action = $this->routes[$method][$uri]['action'];
 
@@ -44,12 +76,8 @@
                 
             } else {
                 http_response_code(404);
-                $controller = new \Test\Controllers\Error();
-                $controller->notFound();
-                exit;
+                abort(404);
             } 
-
-            
         }
     }
 

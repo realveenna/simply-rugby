@@ -4,6 +4,7 @@
     use Test\Controller;
     use Test\Models\User;
     use Test\Models\Role;
+    use Test\Models\AccessControl;
     use Test\Models\PrivilegedUser;
     use Test\Models\Guardian;
     use Test\Models\Squad;
@@ -64,9 +65,9 @@
                                 $_SESSION['player_access'] = 
                                     Guardian::getAccessPlayers($pdo, $_SESSION['user']['member_id']);
                                 $_SESSION['squad_access'] = 
-                                    Squad::getAccessSquads($pdo, $_SESSION['user']['member_id']);
+                                    AccessControl::getAccessSquads($pdo, $_SESSION['user']['member_id']);
                                 $_SESSION['section_access'] = 
-                                    Squad::getAccessSections($pdo, $_SESSION['user']['member_id']);
+                                    AccessControl::getAccessSections($pdo, $_SESSION['user']['member_id']);
 
                                 alert('success','Login Successfully!', '/');
                             }

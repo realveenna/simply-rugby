@@ -159,6 +159,9 @@
          // Create a login for a member
         public function createLogin()
         {
+             // PDO connection
+            $pdo = Database::getInstance()->getConnection();
+
             // Get member id from query
             $member_id = $_GET['member_id'] ?? null;
 
@@ -170,6 +173,9 @@
 
             // Get all roles for dropdown
             $roles = Role::getRole();
+
+             // Get all sqauds for dropdown
+            $squads = Squad::getAllSquads($pdo);
 
             // Create login object to be inserted to db
             $member_login = new User();
@@ -184,13 +190,15 @@
                 'email' => $email ?? null,
                 'password' => '',
                 'selectedRole' => '',
+                'selectedSquad' => '',
                 'section' => null
             ];
 
 
             $errors = [
                 'email' => '',
-                'selectedRole' => ''
+                'selectedRole' => '',
+                'selectedSquad' => ''
             ];
 
             if ($_POST) {
@@ -201,12 +209,14 @@
                 $data['password'] = trim($hashedPassword);
                 $data['email'] = trimPost('email');
                 $data['selectedRole'] = (int)($_POST['selectedRole'] ?? '');
+                $data['selectedSquad'] = (int)($_POST['selectedSquad'] ?? '');
 
-                // Validate Empty Email and Password Input
+
+                // Validate Empty Email and Other Inputs
                 if ($data['selectedRole'] <= 0) {
                     $errors['selectedRole'] = "Please select a role";
                 }
-                
+
                 // Check if email already exists
                 $result = User::checkEmailExists($data['email'],'Email is not yet registered.');
 
@@ -217,21 +227,30 @@
                 // If selected role is a fixture or section secretary get assigned section
                 if($data['selectedRole'] === 3 || $data['selectedRole'] === 4){
                     $data['section'] = (int)$_POST['selectSection'] ?: 1;
+
+                    if ($data['selectedRole'] <= 0) {
+                        $errors['selectedRole'] = "Please select a section";
+                    }
+                }
+
+                // If selected role is a coach get assigned squad_id
+                if($data['selectedRole'] === 5){
+                    $data['squad'] = (int)$_POST['selectedSquad'] ?: 1;
+
+                    if ($data['selectedSquad'] <= 0) {
+                        $errors['selectedSquad'] = "Please select a squad";
+                    }
                 }
 
                 // No errors, add to database
                 if(!array_filter($errors)){
-                    
-                    $pdo = Database::getInstance()->getConnection();
                     try{
                         $pdo->beginTransaction();
 
                         $user = new User();
-
                         $user->email = $data['email'];
                         $user->password = $data['password'];
                         $user->member_id = $data['member_id'];
-                        $user->role = $data['selectedRole'];
 
                         $exists = User::findMemberLogin($pdo, $user->member_id);
                         
@@ -240,22 +259,42 @@
                         }
 
                         //Insert login details to db
-                        User::insertNewMemberLogin($pdo, $user->member_id , $user->password);
+                        $insert_login = User::insertNewMemberLogin($pdo, $user->member_id , $user->password);
+                        if(!$insert_login){
+                            throw new \Exception("Failed to insert member login.");
+                        }
 
                         //Insert role for member
-                        Role::insertMemberRoles($pdo, $user->member_id, $user->role);
+                        $insert_role = Role::insertMemberRoles($pdo, $user->member_id, $data['selectedRole']);
+                        if($insert_role === 0){
+                            throw new \Exception("Failed to insert member role.");
+                        }
+
+                        // Get Role ID
+                        $role_id = Role::getRoleIdByMemberId($pdo, $user->member_id);
 
                         // If selected role is a fixture or section secretary set to assigned section
                         if($data['selectedRole'] === 3 || $data['selectedRole'] === 4){
-                            Squad::insertSectionAdmin($pdo, $user->member_id, $data['section']);
+                            $insert_secretary = Squad::insertSectionAdmin($pdo, $user->member_id, $data['section']);
+                            if(!$insert_secretary){
+                                throw new \Exception("Failed to insert secretary to section");
+                            }  
                         }
 
+                        // If selected role is a coach add to assigned squad
+                        if($data['selectedRole'] === 5){
+                            $insert_coach = Squad::insertSquadMember($pdo, $user->member_id, $data['squad'], $role_id);
+                            if(!$insert_coach){
+                                throw new \Exception("Failed to insert coach to squad");
+                            }    
+                        }
+    
                         //Commit transaction
                         $pdo->commit();
 
                         // Send email to reset password
                         // MailController::newResetPassword($data['first_name'], $user->email, $user->member_id, $user->password);
-                        alert('success', 'Login Account has been Successfully Created', '/members?id='.$user->member_id);
+                        alert('success', 'Login Account has been Successfully Created!', '/members?id='.$user->member_id);
                     }
                     catch (\Exception $e) {
                         if ($pdo->inTransaction()) {
@@ -269,7 +308,8 @@
             $this->render('/members/create-login', [
                 'data' => $data,    
                 'errors' => $errors,
-                'roles' => $roles
+                'roles' => $roles,
+                'squads' => $squads
             ]);
         }
     }

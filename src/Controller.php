@@ -1,6 +1,5 @@
 <?php
 namespace Test;
-use Test\Database;
 use Test\Base;
 
     class Controller extends Base
@@ -11,6 +10,8 @@ use Test\Base;
 
         public function __construct()
         {
+            parent::__construct();
+            
             $this->user = $_SESSION['user'] ?? null;
             $this->member_id = $this->user['member_id'] ?? null;
             $this->rbac = $_SESSION['rbac'] ?? null;
@@ -40,23 +41,43 @@ use Test\Base;
         <div id="main-content" class="relative w-full min-h-screen flex flex-col bg-gray-50 lg:ml-64 dark:bg-gray-900">
             <?php if($alertOn) :?>
                 <div id="alertMessage" class="absolute w-11/12 md:w-1/2 z-30 top-5 left-1/2 -translate-x-1/2">
-                    <?php if(!empty($sessionError)) :?>
-                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                            <strong class="font-bold">An error has occurred:</strong>
-                            <span class="block sm:inline"><?=$sessionError?></span>
-                            <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
-                                <svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
-                            </span>
+                    <!-- Success Message -->
+                    <?php if(!empty($success)) :?>
+                        <div id="alert-1" class="flex sm:items-center p-4 mb-4 text-sm text-fg-brand-strong rounded-base bg-brand-softer" role="alert">
+                            <svg class="w-4 h-4 shrink-0 mt-0.5 md:mt-0" aria-hidden="true" 
+                                xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" 
+                                viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" 
+                                stroke-linejoin="round" stroke-width="2" d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                            </svg>
+                            <span class="sr-only">Success Alert!</span>
+                            <div class="ms-2 font-medium me-1">
+                                <?= $success ?>
+                            </div>
+                                <button type="button" class="ms-auto -mx-1.5 -my-1.5 rounded focus:ring-2 focus:ring-brand-medium hover:bg-brand-soft inline-flex items-center justify-center h-8 w-8 shrink-0 shrink-0" data-dismiss-target="#alert-1" aria-label="Close">
+                                <span class="sr-only">Close</span>
+                                <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6"/></svg>
+                            </button>
                         </div>
                     <?php endif ;?>
-                    <?php if(!empty($success)) :?>
-                        <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative" role="alert">
-                                <strong class="font-bold">Success!</strong>
-                                <span class="block sm:inline"><?=$success?></span>
-                                <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
-                                    <svg class="fill-current h-6 w-6 text-blue-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
-                                </span>
+                    
+                    <!-- Error Message -->
+                    <?php if(!empty($sessionError)) :?>
+                        <div id="alert-2" class="flex sm:items-center p-4 mb-4 text-sm text-fg-danger-strong rounded-base bg-danger-soft" role="alert">
+                            <svg class="w-4 h-4 shrink-0 mt-0.5 md:mt-0" aria-hidden="true" 
+                                xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
+                                fill="none" viewBox="0 0 24 24"><path stroke="currentColor"
+                                stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                            </svg>
+                            <span class="sr-only">Something went wrong!</span>
+                            <div class="ms-2 font-medium me-1">
+                                <?= $sessionError ?>
                             </div>
+                            <button type="button" class="ms-auto -mx-1.5 -my-1.5 bg-danger-soft text-fg-danger-strong rounded focus:ring-2 focus:ring-danger-medium p-1.5 hover:bg-danger-medium inline-flex items-center justify-center h-8 w-8 shrink-0 shrink-0" data-dismiss-target="#alert-2" aria-label="Close">
+                                <span class="sr-only">Close</span>
+                                <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6"/></svg>
+                            </button>
+                        </div>
                     <?php endif ;?>
                 </div>
             <?php endif ;?>

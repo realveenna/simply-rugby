@@ -10,8 +10,9 @@
     use Test\Database;
     use Test\Models\Training;
     use Test\Models\Attendance;
-    
-    class TrainingController extends Controller
+    use Test\Models\Matches;
+
+    class MatchController extends Controller
     {
         public function __construct()
         {
@@ -24,82 +25,110 @@
         {
             $pdo = Database::getInstance()->getConnection();
 
-
-            // Get Training Details
-            $trainings = AccessControl::getAuthorizedTraining($pdo, $this->member_id);
+            // Get All Match Details
+            $matches = AccessControl::getAuthorizedMatches($pdo, $this->member_id);
 
             // Not Found 
-            if(!$trainings){
-               abort(404, 'No Training Session Found');
+            if(!$matches){
+               abort(404, 'No Matches Available');
             }
+            alert('error','Match created Successfully.','/');
 
-            $this->render('/training/index',[
-                'trainings' => $trainings
+            
+            var_dump($matches);exit;
+
+            // var_dump($matches);exit; ##########
+
+            $this->render('/match/index',[
+                'matches' => $matches
             ]);
         }
 
-        // Render create training with permission check
+        // Render create match with permission check
         public function create()
         {
+            // Set PDO Connection
             $pdo = Database::getInstance()->getConnection();
 
-            // Permission Check
-            authorize('create_training_session');
-
-            // Get Squad Access
-            $squads = AccessControl::getAuthorizedSquads($pdo, $this->member_id);
-
-            // Set error array
-            $error = [];
-
-            // Default training object value
-            $training = new Training(['squad_id' => $_GET['squad_id'] ?? '']);
-
             try{
-                // Only check if squad_id exists from GET request
-                if (!empty($training->squad_id)) {
-                    $squad = AccessControl::validateSquadAccess($pdo, $training->squad_id);
+                // Set error array
+                $error = [];
 
+                // Store only valid squads
+                $availableSquads = [];
+                
+                // Get Squad Access
+                $squads = AccessControl::getAuthorizedSquads($pdo, $this->member_id);
+
+                if($squads){
+                    // If multiple squads available
+                    foreach($squads as $squad){
+                        // Get squad players
+                        $players = Squad::getSquadPlayers($pdo, $squad['squad_id']);
+
+                        // Only allow squads with at least 15 players
+                        if (count($players) >= 15) {
+                            $availableSquads[] = $squad;
+                        }
+                    }
+                }
+
+                //Override squads with 15+ players 
+                $squads = $availableSquads;
+
+                if(!$squads){
+                    // Check minimum players
+                    alert('error', 'There are no available squad to participate in a match.', '/');
+                }
+
+                // Default match object value
+                $M = new Matches(['squad_id' => $_GET['squad_id'] ?? '']);
+
+                // Only check if squad_id exists from GET request
+                if (!empty($M->squad_id)) {
+                    AccessControl::validateSquadAccess($pdo, $M->squad_id);
                 }
 
                 // POST REQUEST
                 if($_SERVER['REQUEST_METHOD'] === 'POST') {
-                    // Create training object
-                    $training = new Training([
+                    // Create Matches object, override the original
+                    $M = new Matches([
                         'squad_id' => trimPost('squad_id'),
-                        'skills_activities' => trimPost('skills_activities'),
-                        'start_time' => trimPost('start_time'),
-                        'end_time' => trimPost('end_time'),
-                        'date' => trimPost('date'),
-                        'coach_member_id' => $this->member_id ?? null
+                        'match_venue' => trimPost('match_venue'),
+                        'match_date' => trimPost('match_date'),
+                        'opposition_team_name' => trimPost('opposition_team_name'),
+                        'kick_off_time' => trimPost('kick_off_time'),
+                        'result' => trimPost('result')
                     ]);
 
+                 
                     // Validate inputs
-                    if(empty($training->squad_id)){
+                    if (empty($M->squad_id)) {
                         $error['squad_id'] = "Please select a squad.";
                     }
-                    if(empty($training->skills_activities)){
-                        $error['skills_activities'] = "Please enter skills and activities.";
-                    }
-                    if(empty($training->date)){
-                        $error['date'] = "Please enter date of training session.";
-                    }
-                    if(empty($training->start_time)){
-                        $error['start_time'] = "Please enter start time of training session.";
-                    }
-                    if(empty($training->end_time)){
-                        $error['end_time'] = "Please enter end time of training session.";
+
+                    if (empty($M->match_venue)) {
+                        $error['match_venue'] = "Please select match venue.";
                     }
 
-                    // Check valid time
-                    if ($training->end_time <= $training->start_time) {
-                        $error['end_time'] = 'End time must be after start time.';
+                    if (empty($M->match_date)) {
+                        $error['match_date'] = "Please enter match date.";
                     }
-                    
-                    //  Date must be in future
-                    $training->date = formatDate($training->date);
-                    if (!isFutureDate($training->date)) {
-                        $error['date'] = 'Training session date must be in future date.';
+                    else{
+                        // Match date must be future date
+                        $M->match_date = formatDate($M->match_date);
+
+                        if (!isFutureDate($M->match_date)) {
+                            $error['match_date'] = 'Match date must be a future date.';
+                        }
+                    }
+
+                    if (empty($M->opposition_team_name)) {
+                        $error['opposition_team_name'] = "Please enter opposition team name.";
+                    }
+
+                    if (empty($M->kick_off_time)) {
+                        $error['kick_off_time'] = "Please enter kick off time.";
                     }
 
                     // No validation errors add to database
@@ -107,61 +136,29 @@
                         // Begin Transaction
                         $pdo->beginTransaction();
 
-                        // Validate Squad Access
-                        $squad = AccessControl::validateSquadAccess($pdo, $training->squad_id);
-
+                        AccessControl::validateSquadAccess($pdo, $M->squad_id);
+                        
                         // Get all squad players
-                        $players = Squad::getSquadPlayers($pdo, $training->squad_id);
+                        $players = Squad::getSquadPlayers($pdo, $M->squad_id);
+
                         if(!$players){
                             throw new \ErrorException('There is no players in this squad.');
                         }
-
-                        // Check section
-                        $isJunior = $squad['section_name'] !== 'Senior';
-
-                        // Insert training session details to db
-                        $training->training_session_id = $training->insert($pdo);
-                        if(!$training->training_session_id){
-                            throw new \ErrorException('Failed to add training session');
-                        }
                         
-                        // Insert each player to training_attendance table
-                        foreach($players as $player){
-                            $added = Attendance::insert($pdo, $training->training_session_id, $player['member_id']);
-                            if(!$added){
-                                throw new \ErrorException
-                                    ('Failed to add player: ' .$player['first_name'] . ' ' 
-                                    .$player['last_name'] . 'to attendance sheet');
-                            }
-                            // If is Junior set email as the parent email
-                            if($isJunior){
-                                $recipient = $player['guardian_email'];
-                                $name = $player['guardian_first_name'];
-                            }
-                            // Else use player's own email
-                            else{
-                                $recipient = $player['player_email'];
-                                $name = $player['first_name'];
-                            }
-                            // Continue if recipient is null
-                            if(empty($recipient)){
-                                continue;
-                            }
-                            // Send Mail 
-                            MailController::newTraining([
-                                    'name' => ucfirst($name),
-                                    'start_time' => formatTime($training->start_time),
-                                    'end_time' => formatTime($training->end_time),
-                                    'date' => formatDate($training->date),
-                                    'activities' => $training->skills_activities,
-                                    'recipient' => trim($recipient)
-                                ],
-                            );
+                        // Check if Squad has enough playing member
+                        if (count($players) < 15) {
+                            throw new \ErrorException('Squad must have at least 15 players to participate in a match.');
+                        }
+
+                        // Insert match details to db
+                        $M->match_id = $M->insert($pdo);
+                        if(!$M->match_id){
+                            throw new \ErrorException('Failed to create a match');
                         }
 
                         // Commmit and success message
                         $pdo->commit();
-                        alert('success','Training session created successfully.','/');
+                        alert('success','Match created Successfully.','/match');
                     }
                 }
             }
@@ -170,17 +167,21 @@
                 if ($pdo->inTransaction()) {
                     $pdo->rollBack();
                 }
-                alert('error', $e->getMessage(), '/training/create');
+                alert('error', $e->getMessage(), '/match/create');
                 die($e->getMessage());
             }
 
             // Render
-            $this->render('training/create', [
+            $this->render('match/create', [
                 'squads' => $squads ?? '',
-                'training' => $training ?? '',
+                'match' => $M ?? '',
                 'error' => $error
             ]);
         }
+
+
+
+        ############
         // Render update training with permission check
         public function update()
         {
@@ -204,7 +205,12 @@
                     // Permission Check Again
                     authorize('update_training_session');
                     
-                    $training = self::checkTrainingSessionId($pdo);
+                     $training = self::checkTrainingSessionId($pdo);
+
+                    // Forbidden
+                    if (!hasSquadAccess($training['squad_id']) || !hasRole('Club Chairperson')){
+                        abort(403);
+                    }
 
                     // Create training object
                     $training = new Training([
@@ -266,14 +272,14 @@
             }
 
             // Render
-            $this->render('training/update', [
+            $this->render('match/update', [
                 'squads' => $squads ?? '',
                 'training' => $training ?? '',
                 'error' => $error
             ]);
         }
 
-
+#########
         // Render record training attendance with permission check
         public function record()
         {
@@ -294,6 +300,16 @@
 
                     // Get Training Session
                     $training = Training::getTrainingById($pdo, $training_session_id);
+
+                    // Training session does not exist
+                    if(!$training){
+                        abort(404, 'Training Session Not Found.');
+                    }
+
+                    // Authorization 
+                    if (!AccessControl::canViewSquad($training)) {
+                        abort(403);
+                    }
                 }
                 else{
                     alert("error","Please select a squad", '/training');
@@ -364,7 +380,7 @@
             }
 
             // Render
-            $this->render('training/record_attendance', [
+            $this->render('match/record_attendance', [
                 'players' => $players,
                 'training' => $training,
                 'error' => $error
@@ -446,7 +462,7 @@
             }
 
             // Render
-            $this->render('training/view', [
+            $this->render('match/view', [
                 'players' => $players,
                 'training' => $T,
                 'error' => $error
@@ -457,7 +473,7 @@
         // view and update
         private function checkTrainingSessionId($pdo){
             if(isset($_GET['training_session_id']) || isset($_POST['training_session_id'])){
-                // Default training_session_id value
+                // Default training object value
                 $training_session_id = $_GET['training_session_id']
                      ?? ($_POST['training_session_id']);
 
@@ -469,8 +485,10 @@
                     abort(404, 'Training Session Not Found.');
                 }
 
-                // Validation of Squad 
-                AccessControl::validateSquadAccess($pdo, $training['squad_id']);
+                // Authorization 
+                if (!AccessControl::canViewSquad($training)) {
+                    abort(403);
+                }
 
                 // Return as Training Object
                 return $training;

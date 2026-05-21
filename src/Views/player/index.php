@@ -604,7 +604,7 @@
                         <!-- Reject -->
                         <button type="submit" name="action" value="remove"
                             class="<?=dangerBtn()?>">
-                            Remove Player
+                            Delete Player Details
                         </button>
                         
                         <!-- Approve Button -->

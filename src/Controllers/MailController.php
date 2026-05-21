@@ -58,7 +58,8 @@
                 }
                 $result = ResponseHelper::toArray($response);
             } catch (\Exception $e) {
-                alert('error', $mailtrap->$result, '/');
+                // As comment for testing purposes
+                // alert('error', $mailtrap->$result, '/');
             }
         }
         public static function newMember($fname, $email)
@@ -90,7 +91,51 @@
                 $result = ResponseHelper::toArray($response);
 
             } catch (\Exception $e) {
-                alert('error', $mailtrap->$result, '/player-applications');
+                // As comment for testing purposes
+                // alert('error', $mailtrap->$result, '/player-applications');
+            }
+        }
+
+        public static function newTraining($data)
+        {
+            $club = new Club();
+
+            try {
+                $apiKey = '4d609627dab818729ea0d0cb1f7c5480';
+                $mailtrap = MailtrapClient::initSendingEmails(
+                    apiKey: $apiKey,
+                    inboxId: 4629275,
+                    isSandbox: true,
+                );
+
+
+               $email = (new MailtrapEmail())
+                    ->from(new Address('hello@demomailtrap.co', 'Mailtrap Test'))
+                    ->to(new Address($data['recipient']))
+                    ->templateUuid('e07d67b7-4a77-4782-96ec-9af83a79642c')
+                    ->templateVariables([
+                        'company_info_name' => $club->name,
+                        'name' => $data['name'],
+                        'date' => $data['date'],
+                        'start_time' => $data['start_time'],
+                        'end_time' => $data['end_time'],
+                        'activities' => $data['skills_activities'],
+                        'coach_name' => 
+                            ucwords($_SESSION['user']['first_name'] . ' ' . 
+                            $_SESSION['user']['last_name']) ,
+                        'coach_email' => strtolower($_SESSION['user']['email']),
+                        'company_info_address' => $club->line1,
+                        'company_info_city' => $club->city,
+                        'company_info_zip_code' => $club->zipcode,
+                        'company_info_country' => $club->country
+                    ])
+                ;
+                $response = $mailtrap->send($email);
+                $result = ResponseHelper::toArray($response);
+
+            } catch (\Exception $e) {
+                // As comment for testing purposes
+                // alert('error', $mailtrap->$result, '/training/create');
             }
         }
     }

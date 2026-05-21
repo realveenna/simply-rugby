@@ -7,7 +7,6 @@ use Test\Models\Squad;
     {
         protected $squads;
         protected $pdo;
-        
 
         public function __construct()
         {

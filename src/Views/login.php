@@ -3,8 +3,8 @@
         <div class="<?= cardClass() ?>">
           <div class="<?= formPadding() ?>">
             <a href="/" class="flex flex-col items-center justify-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
-                <img class="w-8 h-8 mr-2" src="/images/logo/main-logo.png" alt="logo">
-                Sign in to your account
+              <img class="w-8 h-8 mr-2" src="/images/logo/main-logo.png" alt="logo">
+              Sign in to your account
             </a>  
             <form class="<?= formClass() ?>" method="post" action="/login">
               <div>
@@ -24,8 +24,20 @@
                   <p class="<?= smallError() ?>"><?php echo h($rawPasswordErr);?></p>
                 </div>
               </div>
-              <button type="submit" class="<?=primaryBtn()?>">Sign in</button>
-              </p>
+                <!-- Buttons -->
+                <div class="grid gap-2 mb-6 md:grid-cols-2">
+                  <!-- Clear Button -->
+                  <button type="reset"
+                      class="<?=secondaryBtn()?>">
+                      Clear
+                  </button>
+                  
+                  <!-- Submit Button -->
+                  <button type="submit" 
+                      class="<?=primaryBtn()?>">
+                      Submit
+                  </button>
+              </div>
               <?= small("
                   Don't have an account yet? <a href='/register' class='font-medium text-blue-600 hover:underline dark:text-blue-500'>Register</a>
               ")?>

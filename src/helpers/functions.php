@@ -1,51 +1,82 @@
 <?php
-    use Test\Controllers\Auth;
+    use Test\Auth;
+    use Test\Controllers\Error;
 
-#############
-    // Helper Authentication function if user has permission
-    function hasPermission($permission)
-    {
-        return Auth::hasPermission($permission);
-    }
-
-    // Helper Authentication function to get role name
-    function hasRole($roleName)
-    {
-        return Auth::hasRole($roleName);
-    }
-
-    // Helper Authentication function to check if user is authorized 
+    // Helper Authentication function to check if user is authorized else redirect
     function authorize($permission)
     {
         return Auth::authorize($permission);
     }
 
+    // Helper Authentication function to check if user has permission
+    function hasPermission($permission)
+    {
+        return Auth::hasPermission($permission);
+    }
+
+    // Helper Authentication function to check is user has role name
+    function hasRole($roleName)
+    {
+        return Auth::hasRole($roleName);
+    }
+    // User is a Club Chairperson or Membership Secretary
     function isAdmin()
     {
         return Auth::isAdmin();
     }
 
+    // User has section access
     function hasSectionAccess($section_id)
     {
         return Auth::hasSectionAccess($section_id);
     }
-
+    // User has squad access
     function hasSquadAccess($squad_id)
     {
         return Auth::hasSquadAccess($squad_id);
     }
 
+    // User is the owner
     function isOwner($currentUser, $member_id)
     {
         return Auth::isOwner($currentUser, $member_id);
     }
 
+    // User has access to individual player (Parent) 
     function hasPlayerAccess($member_id)
     {
         return Auth::hasPlayerAccess($member_id);
     }
 
-############
+    // Function for error redirect
+    function abort($response_code, $message = null)
+    {
+        http_response_code($response_code);
+
+        // Default messages
+        switch ($response_code) {
+            case 403:
+                $title = 'Access Denied';
+                $message = $message ?? 'You do not have permission to access this page or resource.';
+                break;
+            case 404:
+                $title = 'Page Not Found';
+                $message = $message ?? 'This page does not exist.';
+                break;
+            case 500:
+                $title = 'Internal Server Error';
+                $message = $message ?? 'Ooops! Something went wrong.';
+                break;
+            default:
+                $title = 'Unknown Error';
+                $message = $message ?? 'Somethingg went terribly wrong.';
+        }
+
+        // Redirect
+        $error = new Error();
+        $error->index($response_code, $title, $message);
+        exit;
+    }
 
     function h($data){
         $data = htmlspecialchars($data);
@@ -72,23 +103,29 @@
     // Format date for db
     function formatDate($date)
     {
-        if (empty($date)) {
-            return null;
-        }
         return date('Y-m-d', strtotime($date));
     }
 
     // Date must be in future
     function isFutureDate($date)
     {
-        if (empty($date)) {
-            return false;
-        }
-
         $selectedDate = strtotime($date);
         $today = strtotime(date('Y-m-d'));
-
         return $selectedDate >= $today;
+    }
+
+    // Date is today
+    function isToday($date)
+    {
+        $selectedDate = strtotime($date);
+        $today = strtotime(date('Y-m-d'));
+        return $selectedDate === $today;
+    }
+
+    // Format time
+
+    function formatTime($time){
+        return date('g:i A', strtotime($time));
     }
 
     function ifEmpty($value, $message){
@@ -110,7 +147,7 @@
     function title($text,$underline){
         return"
         <div class='flex flex-col items-center'>
-            <h1 class='mb-4 text-4xl font-semibold tracking-tight text-heading md:text-4l lg:text-5xl'>
+            <h1 class='mb-4 text-4xl font-semibold tracking-tight text-heading md:text-5l xxl:text-6xl'>
                     $text 
                 <span class='underline underline-offset-3 decoration-4 decoration-brand'>
                     $underline
@@ -162,6 +199,9 @@
     function h2($text) {
         return "<h2 class='text-lg md:text-xl mb-4 font-medium text-gray-900 dark:text-white'>$text</h2>";
     }
+    function h2Center($text) {
+        return "<h2 class='text-lg  text-center md:text-xl mb-4 font-medium text-gray-900 dark:text-white'>$text</h2>";
+    }
 
     function h3($text) {
         return "<h3 class='text-base md:text-lg mb-2 font-medium text-gray-800 dark:text-white'>$text</h3>";
@@ -195,20 +235,35 @@
             focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 
             focus:outline-none
     ";}
+    function dangerBtn(){
+        return "
+          text-red-600 flex mx-auto items-center justify-center
+            hover:text-white border border-red-600 hover:bg-red-600
+            focus:ring-4 focus:outline-none focus:ring-red-300
+            font-medium rounded-lg text-sm px-5 py-2.5
+            dark:border-red-500 dark:text-red-500
+            dark:hover:text-white dark:hover:bg-red-600
+            dark:focus:ring-red-900 w-full"
+    ;}
 
     function secondaryBtn() {
         return "
-            text-body bg-neutral-secondary-medium box-border border border-default-medium 
-            hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 
-            focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm 
-            px-4 py-2.5 focus:outline-none
+        flex items-center justify-center py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700
+           
     ";}
-    function dangerBtn() {
-        return "
-            text-white bg-danger box-border border border-transparent hover:bg-danger-strong 
-            focus:ring-4 focus:ring-danger-medium shadow-xs font-medium leading-5 rounded-base text-sm 
-            px-4 py-2.5 focus:outline-none
-    ";}
+
+     // text-body bg-neutral-secondary-medium box-border border border-default-medium 
+            // hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 
+            // focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm 
+            // px-4 py-2.5 focus:outline-none
+
+            
+    // function dangerBtn() {
+    //     return "
+    //         text-white bg-danger box-border border border-transparent hover:bg-danger-strong 
+    //         focus:ring-4 focus:ring-danger-medium shadow-xs font-medium leading-5 rounded-base text-sm 
+    //         px-4 py-2.5 focus:outline-none
+    // ";}
 
     function inputClass(){
         return "bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs placeholder:text-body
@@ -224,19 +279,18 @@
     }
 
     function cardClass(){
-        return "w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-xl xl:p-0 
-            dark:bg-gray-800 dark:border-gray-700";
+        return "w-full max-w-2xl p-4 mb-4 bg-white border border-gray-200 rounded-lg 
+            shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800";
     }
     function cardClassXL(){
-        return "w-full max-w-4xl bg-white rounded-lg shadow dark:border xl:p-0
-            dark:bg-gray-800 dark:border-gray-700";
+        return "w-full max-w-5xl p-4 mb-4 bg-white border border-gray-200 rounded-lg 
+            shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800";
     }
 
     function cardClassXLNoBg(){
-        return "w-full max-w-4xl rounded-lg xl:p-0
+        return "w-full max-w-5xl rounded-lg xl:p-0
             dark:bg-gray-800 ";
     }
-
 
     function centerContainer() {
         return "flex flex-col items-center justify-center px-6 py-8 mx-auto lg:py-0";
@@ -284,11 +338,4 @@
         $salt ="4g£yc7!L(";
         return md5($rawPassword.$salt);
     }
-
-    // function alertSelf($session,$message){
-    //      // There is an error in the form redirect to self
-    //     $_SESSION[$session] = $message;
-    //     header("Location: " . $_SERVER['PHP_SELF']);
-    //     exit;
-    // }
 ?>

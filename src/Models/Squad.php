@@ -28,137 +28,7 @@
             $this->min_age = null;
             $this->max_age = null;
         }
-
-        ########
-        // Get Authorization for viewing squad
-        public static function canViewSquad($squad)
-        {
-            // General permission check
-            if (!$_SESSION['rbac']->hasPermission('view_squad')) {
-                return false;
-            }
-
-            // If is higher admin
-            if (isAdmin()) {
-                return true;
-            }
-
-            // User is a coach, access own squad
-            if (hasSquadAccess($squad['squad_id'])) {
-                return true;
-            }
-
-            // User has section access to own section junior/senior
-            if (hasSectionAccess($squad['section_id'])) {
-                return true;
-            }
-
-            return false;
-        }
-        #################
-
-
-        public static function getAccessSquads($pdo, $member_id)
-        {
-            $statement = $pdo->prepare
-            ("
-                 SELECT squad_id
-                FROM squad_member
-                WHERE member_id = :member_id
-                AND role_id IN (5)
-            ");
-
-            $statement->execute([
-                ':member_id' => $member_id
-            ]);
-
-            return $statement->fetchAll(PDO::FETCH_COLUMN);
-        }
-        ######
-
-        #####
-        public static function getAccessSections($pdo, $member_id)
-        {
-            $statement = $pdo->prepare
-            ("
-                SELECT section_id
-                FROM section_admin
-                WHERE member_id = :member_id
-            ");
-
-            $statement->execute([
-                ':member_id' => $member_id
-            ]);
-
-            return $statement->fetchAll(PDO::FETCH_COLUMN);
-        }
-        #####
-
-        // Get squad by squad type
-        public static function getSquadByName($pdo, $squad_name){
-            $statement = $pdo->prepare
-            (
-                "SELECT * FROM squad 
-                WHERE squad_name = :squad_name LIMIT 1"
-            );
-
-            $statement->execute([
-                ":squad_name" => $squad_name
-            ]);
-
-            $result = $statement->fetch(PDO::FETCH_ASSOC);
-            return $result;
-        }
-
-        // Get squad by squad by member id
-        public static function getSquadOfMember($pdo, $member_id){
-            $statement = $pdo->prepare
-            (
-                "SELECT * FROM squad 
-                WHERE member_id = :member_id LIMIT 1"
-            );
-
-            $statement->execute([
-                ":member_id" => $member_id
-            ]);
-
-            $result = $statement->fetch(PDO::FETCH_ASSOC);
-            return $result;
-        }
-
-        // Get Each Database Statement Role Access For Squad
-        public static function getSquadAccess($pdo, $member_id, $rbac)
-        {
-            // Club Chairperson/Admin can access all squads
-            if (hasRole('Club Chairperson') || hasRole('Membership Secretary')) {
-                return Squad::getAllSquads($pdo);
-            }
-
-            if (hasRole('Fixture Secretary') || hasRole('Section Secretary')) {
-                return Squad::getSectionSquads($pdo, $member_id);
-            }
-
-            if (hasRole('Coach') || hasRole('Senior Player')) {
-                return Squad::getMemberSquad($pdo, $member_id);
-            }
-
-            return [];
-        }
-
-        // Get squad details by id
-        public static function getSquadById($pdo, $squad_id){
-            $statement = $pdo->prepare
-            (
-                "SELECT * FROM squad WHERE squad_id = :squad_id"
-
-            );
-            $statement->execute([
-                ':squad_id' => $squad_id
-            ]);
-            return $statement->fetch(PDO::FETCH_ASSOC);
-        }
-
-        // Player and Coach
+         // Player and Coach
         public static function getMemberSquad($pdo, $member_id){
             $statement = $pdo->prepare
             (
@@ -235,6 +105,56 @@
             $statement->execute();
             return $statement->fetchAll(PDO::FETCH_ASSOC);
         }
+
+
+        // Get squad by squad type
+        public static function getSquadByName($pdo, $squad_name){
+            $statement = $pdo->prepare
+            (
+                "SELECT * FROM squad 
+                WHERE squad_name = :squad_name LIMIT 1"
+            );
+
+            $statement->execute([
+                ":squad_name" => $squad_name
+            ]);
+
+            $result = $statement->fetch(PDO::FETCH_ASSOC);
+            return $result;
+        }
+
+  
+
+        // Get squad details by id
+        public static function getSquadById($pdo, $squad_id){
+            $statement = $pdo->prepare
+            (
+                "SELECT * FROM squad WHERE squad_id = :squad_id"
+
+            );
+            $statement->execute([
+                ':squad_id' => $squad_id
+            ]);
+            return $statement->fetch(PDO::FETCH_ASSOC);
+        }
+        
+              // Get squad by squad by member id
+        public static function getSquadOfMember($pdo, $member_id){
+            $statement = $pdo->prepare
+            (
+                "SELECT * FROM squad 
+                WHERE member_id = :member_id LIMIT 1"
+            );
+
+            $statement->execute([
+                ":member_id" => $member_id
+            ]);
+
+            $result = $statement->fetch(PDO::FETCH_ASSOC);
+            return $result;
+        }
+
+
 
 
         // public static function getSectionName($pdo, $squad_id){
@@ -340,6 +260,44 @@
             return $squadPlayer;
         }
 
+        // Get Squad Players
+         public static function getSquadPlayers($pdo, $squad_id){
+
+            $statement = $pdo->prepare
+            (
+                "SELECT
+                    sm.*,
+                    m.first_name,
+                    m.last_name,
+
+                    -- For senior player email
+                    m.email AS player_email,
+
+                    -- Primary guardian details
+                    p.first_name AS guardian_first_name,
+                    p.last_name AS guardian_last_name,
+                    p.email AS guardian_email,
+
+                    -- Player Profile
+                    pp.position
+
+                FROM squad_member sm
+                JOIN member m ON sm.member_id = m.member_id
+                LEFT JOIN player_contact pc ON m.member_id = pc.member_id
+                    AND pc.is_primary = 1
+                LEFT JOIN member p ON p.member_id = pc.contact_member_id
+                JOIN player_profile pp ON pp.member_id = m.member_id
+
+                WHERE 
+                    sm.squad_id = :squad_id 
+                    AND sm.status = 'Active' 
+                    AND role_id != 5"
+            );
+
+            $statement->execute(['squad_id' => $squad_id]);
+            return $statement->fetchAll(PDO::FETCH_ASSOC);
+        }
+
         // Insert member to squad_member table
         public static function insertSquadHistory($pdo, $squad_id, $member_id){
 
@@ -356,13 +314,13 @@
             return $result;
         }
 
-        // Identify squad based on age and season
+        // Identify squad_id based on age and season
         public static function identifySquad($pdo, $age){
             $pdo = Database::getInstance()->getConnection();
 
             $statement = $pdo->prepare
             (
-                "SELECT squad_id FROM squad 
+                "SELECT * FROM squad 
                 WHERE :age BETWEEN min_age AND max_age 
                 LIMIT 1"
             );
@@ -371,7 +329,8 @@
                 ':age' => $age
             ]);
 
-            $result = $statement->fetch(PDO::FETCH_ASSOC);
+            $result = $statement->fetchColumn();
+
             if(!$result){
                 return null;
             }
