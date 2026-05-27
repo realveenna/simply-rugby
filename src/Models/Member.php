@@ -209,6 +209,8 @@
             ]);
         }
 
+    
+
 
         public static function selectEmail($member_id)
         {
@@ -221,6 +223,7 @@
             $statement->execute([':member_id' => $member_id]);
             return $statement->fetchColumn();
         }
+
         public static function selectIdByEmail($email)
         {
             $pdo = Database::getInstance()->getConnection();
@@ -259,6 +262,49 @@
 
             return $result;
         }
+
+        // Get all members by role
+        public static function getMembersByRole($pdo, $role_name)
+        {
+            $statement = $pdo->prepare(
+                "SELECT 
+                    m.member_id,
+                    m.first_name,
+                    m.last_name,
+                    m.email
+                FROM member m
+
+                JOIN member_role mr ON m.member_id = mr.member_id
+                JOIN role r ON mr.role_id = r.role_id
+
+                WHERE r.role_name = :role_name
+                AND m.email IS NOT NULL
+                ORDER BY m.first_name ASC"
+            );
+
+            $statement->execute([
+                ':role_name' => $role_name
+            ]);
+
+            return $statement->fetchAll(PDO::FETCH_ASSOC);  
+        }
+
+        // Update membership status
+        public static function updateMembershipStatus($pdo, $member_id, $status)
+        {
+            $statement = $pdo->prepare(
+                "UPDATE member
+                SET membership_status = :membership_status
+                WHERE member_id = :member_id"
+            );
+
+            return $statement->execute([
+                ':membership_status' => $status ?? 'Active',
+                ':member_id' => $member_id
+            ]);
+        }
+
+        // Get child of a member
         public static function getMemberChildren($pdo, $member_id)
         {
             $statement = $pdo->prepare(

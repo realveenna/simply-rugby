@@ -10,7 +10,6 @@
     use Test\Models\Doctor;
     use Test\Models\Guardian;
     use Test\Models\Member;
-    use Test\Models\PlayerParent;
     use Test\Models\Player;
     use Test\Models\Squad;
     use Test\Database;
@@ -22,7 +21,6 @@
         {
             
         }
-
 
         // Display all player applications
         // /player-applications/index 

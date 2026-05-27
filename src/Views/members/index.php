@@ -24,7 +24,7 @@
                 <li>
                     <a href="/members?role=Junior Player"
                         class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
-                        Players
+                        Junior Players
                     </a>
                 </li>
 
@@ -32,7 +32,7 @@
                 <li>
                     <a href="/members?role=Senior Player"
                         class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
-                        Players
+                        Senior Players
                     </a>
                 </li>
 

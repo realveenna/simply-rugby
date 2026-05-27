@@ -596,6 +596,73 @@
             ]);
         }
 
+
+        // Renewal
+        public function renewal()
+        {
+            // PDO connection
+            $pdo = $this->pdo;
+            $error = [];
+
+            // Get member_id with permission check
+            $member = $this->getMemberId($pdo);
+
+            $player = Player::playerProfile($pdo,$member['member_id']);
+
+            try{
+                if($_POST){
+                    $member_id = trimPost('member_id');
+                    $renewal = trimPost('renewal');
+
+                    if(!$member_id){
+                        abort(500, 'Unable to update membership');
+                    }
+
+
+                    // If is a junior player
+                    if($player['section_id'] !== 3){
+                        $consent = (int)$_POST['consent'];
+                        if($consent !== 1){
+                            $error['renewal'] = "Please tick the box to give consent.";
+                        }
+                    }
+
+                    // No error
+                    if(!array_filter($error)){
+                        $pdo->beginTransaction();
+                        // Update player membership status to inactive
+                        if($renewal === 'decline'){
+                            $update = Member::updateMembershipStatus($pdo, $member_id, 'inactive');
+                            if(!$update){
+                                throw new \Exception("Unable to update membership status.");
+                            }
+                            // Update player squad status to inactive
+                            $update = Squad::updateSquadStatus($pdo, $member_id, 'Inactive');
+                            if(!$update){
+                                throw new \Exception("Unable to update squad status.");
+                            }
+                            // Commmit and success message
+                            $pdo->commit();
+                            alert('success', 'Membership has been updated successfully!', '/');
+                            exit;
+                        }
+                    }
+                }
+            }
+            catch (\Exception $e) {
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                alert('error',$e->getMessage(), '/');
+                exit;
+            }
+
+       
+            $this->render('members/renewal', [
+                'player' => $player,
+            ]);
+        }
+
         // delete a member 
         public static function delete($pdo, $member_id)
         {

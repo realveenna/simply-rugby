@@ -3,19 +3,15 @@
 
     use Test\Controller;
     use Test\Models\User;
-    use Test\Models\Role;
     use Test\Models\AccessControl;
     use Test\Models\PrivilegedUser;
-    use Test\Models\Guardian;
-    use Test\Models\Squad;
     use Test\Database;
 
     class LoginController extends Controller
     {
-        // Login function
+        // Login render 
         public function login()
         {
-
             $pdo = Database::getInstance()->getConnection();
 
             $email = '';

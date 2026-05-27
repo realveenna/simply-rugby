@@ -20,9 +20,6 @@
         // List of all squads
         public function index()
         {
-            // Permission Check
-            authorize('view_squad');
-            
             $pdo = $this->pdo;
 
             $squads = AccessControl::getAuthorizedSquads($pdo, $this->member_id);
@@ -91,21 +88,5 @@
                 alert('errors', $e->getMessage(), '/');
             }
         }
-
-        // List of all members
-        public function squadMember()
-        {
-            $pdo = $this->pdo;
-
-            $squads = Squad::getAllSquads($pdo);
-
-            $squad_player = Squad::listSquadPlayer($pdo, $squads['squad_id']);
-
-            $this->render('squad/index',[
-                'squads' => $squads,
-                'squadPlayers' => $squad_player
-            ]);
-        }
-        
     }
 ?>

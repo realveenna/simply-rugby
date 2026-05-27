@@ -301,26 +301,21 @@
             <?php endif;?>
   
             <form method="post" class="mt-6">
-                <input type="hidden" name="application_id" value="<?= h($member['member_id']) ?>">
+                <input type="hidden" name="member_id" value="<?= h($member['member_id']) ?>">
                 <div class="flex flex-col gap-2">
                     <div class="grid gap-2 md:grid-cols-2 ">
-                        <!-- Reject -->
+                        <!-- Delete -->
                         <button type="submit" name="action" value="delete"
                             class="<?=dangerBtn()?>">
                             Delete Member Details
-                        </button>
+                        </button>   
                         
-                        <!-- Approve Button -->
-                        <button type="submit" name="action" value="edit" 
-                            class="<?=primaryBtn()?>">
+                        <!-- Edit Button -->
+                        <a href="/members/update?member_id=<?= $member['member_id'] ?>"
+                            class="<?=primaryBtn()?> text-center">
                             Edit
-                        </button>
+                        </a>
                     </div>
-                    <!-- Back Button -->
-                    <button type="submit" name="action" value="back"
-                        class="<?=secondaryBtn()?>">
-                        Back
-                    </button>
                 </div>
             </form>
         </div>

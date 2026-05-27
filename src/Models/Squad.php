@@ -55,6 +55,30 @@
             ]);
             return $statement->fetchAll(PDO::FETCH_ASSOC);
         }
+
+        // Get renewwal reminder
+        public static function getRenewalReminder($pdo, $squad_id)
+        {
+            $statement = $pdo->prepare(
+                "SELECT 
+                    squad_name,
+                    season,
+                    end_date,
+                    DATEDIFF(end_date, CURDATE()) AS days_left
+                FROM squad
+                WHERE squad_id = :squad_id
+                AND DATEDIFF(end_date, CURDATE()) <= 30
+                AND end_date >= CURDATE()"
+            );
+
+            $statement->execute([
+                ':squad_id' => $squad_id
+            ]);
+
+            return $statement->fetch();
+        }
+
+        
         
         // Selct Squad Coaches
         public static function getSquadCoaches($pdo, $squad_id){
@@ -100,6 +124,21 @@
                 ':member_id' => $member_id
             ]);
             return $statement->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+         // Update squad status
+        public static function updateSquadStatus($pdo, $member_id, $status)
+        {
+            $statement = $pdo->prepare(
+                "UPDATE squad_member
+                SET status = :status
+                WHERE member_id = :member_id"
+            );
+
+            return $statement->execute([
+                ':status' => $status ?? 'Active',
+                ':member_id' => $member_id
+            ]);
         }
 
         // Display all squads for Club Chairperson and Membership Secretary
@@ -175,21 +214,21 @@
             return $statement->fetch(PDO::FETCH_ASSOC);
         }
         
-        // Get squad by squad by member id
-        public static function getSquadOfMember($pdo, $member_id){
-            $statement = $pdo->prepare
-            (
-                "SELECT * FROM squad 
-                WHERE member_id = :member_id LIMIT 1"
-            );
+        // // Get squad by squad by member id
+        // public static function getSquadOfMember($pdo, $member_id){
+        //     $statement = $pdo->prepare
+        //     (
+        //         "SELECT * FROM squad 
+        //         WHERE member_id = :member_id LIMIT 1"
+        //     );
 
-            $statement->execute([
-                ":member_id" => $member_id
-            ]);
+        //     $statement->execute([
+        //         ":member_id" => $member_id
+        //     ]);
 
-            $result = $statement->fetch(PDO::FETCH_ASSOC);
-            return $result;
-        }
+        //     $result = $statement->fetch(PDO::FETCH_ASSOC);
+        //     return $result;
+        // }
 
 
 
@@ -274,7 +313,8 @@
         // }
 
         // 
-        public static function listSquadPlayer($pdo, $squad_id){
+        public static function listSquadPlayer($pdo, $squad_id)
+        {
 
             $statement = $pdo->prepare
             (
@@ -283,12 +323,16 @@
                     m.first_name,
                     m.last_name,
                     s.squad_name,
-                    pp.*
+                    pp.*,
+                    sm.status
                 FROM squad_player_history h
                 JOIN member m ON h.member_id = m.member_id
                 JOIN squad s ON h.squad_id = s.squad_id
                 JOIN player_profile pp  ON m.member_id = pp.member_id
-                WHERE h.squad_id = :squad_id AND h.end_date IS NULL"
+                JOIN squad_member sm  ON m.member_id = sm.member_id
+                WHERE h.squad_id = :squad_id 
+                    AND sm.status = 'Active'
+                    AND h.end_date IS NULL"
             );
 
             $statement->execute(['squad_id' => $squad_id]);

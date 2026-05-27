@@ -187,8 +187,13 @@
             }
             try{
                 if($_SERVER['REQUEST_METHOD'] === 'POST') {
-                    // If delete button is pressed
-                    $this->delete($pdo, $member->member_id);
+                    if($_POST['action']){
+                        $action = $_POST['action'];
+                        // If delete button is pressed
+                        if($action === 'delete'){
+                            Member::delete($pdo, $member->member_id);
+                        }
+                    }
                 }
             }
             // Catch error

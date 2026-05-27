@@ -13,7 +13,7 @@
                 <input type="hidden" name="member_id" value="<?= $member->member_id ?? '' ?>">
                 <div class="flex flex-col items-center gap-4 bg-neutral-primary-soft p-6 border border-default rounded-base shadow-xs md:flex-row">
                     <!-- Image -->
-                    <?php if (!isset($player) || $player['section_id'] === 3): ?>
+                    <?php if (empty($player) || $player['section_id'] === 3): ?>
                         <img class="object-cover min-w-[300px] w-full rounded-base h-64 md:h-auto md:w-48 mb-4 md:mb-0" 
                             src="https://images.unsplash.com/photo-1581403341630-a6e0b9d2d257?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
                             alt="player-image">

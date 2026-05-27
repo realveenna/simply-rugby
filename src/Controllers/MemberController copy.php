@@ -27,11 +27,25 @@
 
             // Select all members
             $members = Member::selectAll($role);
+         
+            $this->render('members/index', [
+                'members' => $members,
+            ]);
+        }
+
+        // Renewal
+        public function renewal()
+        {
+            // Role filter
+            $role = $_GET['role'] ?? null;
+
+            // Select all members
+            $members = Member::selectAll($role);
             
             if($member_id = $_GET['member_id'] ?? null){
 
             }
-            $this->render('members/index', [
+            $this->render('members/renewal', [
                 'members' => $members,
             ]);
         }
@@ -548,7 +562,7 @@
                     abort(500,'Failed to delete member details');
                 }
             }
-
+            
             // Commmit and success message
             $pdo->commit();
             alert('success', 'Member has been removed successfully!', '/');

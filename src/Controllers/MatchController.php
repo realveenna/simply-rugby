@@ -2,16 +2,10 @@
     namespace Test\Controllers;
 
     use Test\Controller;
-    use Test\Models\User;
-    use Test\Models\Member;
-    use Test\Models\Role;
     use Test\Models\Squad;
     use Test\Models\AccessControl;
-    use Test\Database;
-    use Test\Models\Training;
-    use Test\Models\Attendance;
     use Test\Models\Matches;
-use Test\Models\Player;
+    use Test\Models\Player;
 
     class MatchController extends Controller
     {
@@ -23,7 +17,7 @@ use Test\Models\Player;
         // Render Match index with permission check
         public function index()
         {
-            $pdo = Database::getInstance()->getConnection();
+            $pdo = $this->pdo;
 
             // Get All Match Details
             $matches = AccessControl::getAuthorizedMatches($pdo, $this->member_id);           
@@ -99,7 +93,7 @@ use Test\Models\Player;
          // Render all match details with permission check
         public function all()
         {
-            $pdo = Database::getInstance()->getConnection();
+            $pdo = $this->pdo;
 
             // Get All Match Details
             $matches = AccessControl::getAuthorizedMatches($pdo, $this->member_id);    
@@ -200,12 +194,11 @@ use Test\Models\Player;
         public function view()
         {
             $pdo = $this->pdo;
-
             $lineup = [];
             $coaches = [];
 
             try{
-
+                // Pemission check to get match details
                 $match = $this->getMatchId($pdo);
 
                 // Get lineup

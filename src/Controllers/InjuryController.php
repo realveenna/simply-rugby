@@ -3,11 +3,10 @@
 
     use Test\Controller;
     use Test\Models\AccessControl;
-    use Test\Database;
     use Test\Models\Matches;
     use Test\Models\Training;
     use Test\Models\Attendance;
-use Test\Models\Injury;
+    use Test\Models\Injury;
 
     class InjuryController extends Controller
     {

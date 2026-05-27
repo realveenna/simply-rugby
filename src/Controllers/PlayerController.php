@@ -12,37 +12,21 @@
     use Test\Models\PlayerSkill;
     use Test\Models\Injury;
     use Test\Models\Attendance;
+use Test\Models\Squad;
 
     class PlayerController extends Controller
     {
         public function __construct()
         {
-            
-        }
-
-        // List of all members
-         public function index()
-        {
-            // $squad = Member::selectAll();
-
-            // foreach ($squad as &$member ){
-            //     $member['roles'] = Role::getMemberRoleName($member['member_id']);
-            // }
-
-            // $this->render('squad/index', [
-            //     'squad' => $squad
-            // ]);
+            parent::__construct();
         }
 
         
-        // Display player Details with Perm Check
+        // Render display player Details
         public function displayPlayer()
         {
-            // Permission Check
-            authorize('view_player_details');
+            $pdo = $this->pdo;
 
-            $pdo = Database::getInstance()->getConnection();
-            
             $player = [];
 
             try{
@@ -56,7 +40,7 @@
 
                 // Get player profile
                 $player = Player::playerProfile($pdo, $member_id);
-
+                
                 // Not a player no access
                 if(!$player){
                     abort(404, 'Player Not Found.');
@@ -66,6 +50,9 @@
                 if (!AccessControl::canViewPlayer($player, $_SESSION['user']['member_id'], $member_id)) {
                     abort(403);
                 }
+
+                // Renewal Date
+                $renewalReminder = Squad::getRenewalReminder($pdo, $player['squad_id']);
 
                 // Get Player Training Stats
                 $s = new PlayerSkill($player);
@@ -147,6 +134,7 @@
                 'trainingAttendance' => $trainingAttendance ?? [],
                 'injuries' => $injuries ?? [],
                 'allStats' => $allStats ?? [],
+                'renewalReminder' => $renewalReminder ?? '', 
             ]);
         }
 

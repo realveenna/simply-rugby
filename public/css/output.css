@@ -1635,9 +1635,6 @@
   .w-auto {
     width: auto;
   }
-  .w-fit {
-    width: fit-content;
-  }
   .w-full {
     width: 100%;
   }
@@ -2071,17 +2068,8 @@
   .border-blue-300 {
     border-color: var(--color-blue-300);
   }
-  .border-blue-500 {
-    border-color: var(--color-blue-500);
-  }
   .border-brand {
     border-color: var(--color-brand);
-  }
-  .border-brand-medium {
-    border-color: var(--color-brand-medium);
-  }
-  .border-brand-subtle {
-    border-color: var(--color-brand-subtle);
   }
   .border-danger-subtle {
     border-color: var(--color-danger-subtle);
@@ -2158,9 +2146,6 @@
   }
   .bg-brand-soft {
     background-color: var(--color-brand-soft);
-  }
-  .bg-brand-softer {
-    background-color: var(--color-brand-softer);
   }
   .bg-danger {
     background-color: var(--color-danger);
@@ -2324,6 +2309,9 @@
   }
   .p-2\.5 {
     padding: calc(var(--spacing) * 2.5);
+  }
+  .p-3 {
+    padding: calc(var(--spacing) * 3);
   }
   .p-4 {
     padding: calc(var(--spacing) * 4);

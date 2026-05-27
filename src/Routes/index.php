@@ -9,6 +9,7 @@ use Test\Controllers\TrainingController;
 use Test\Controllers\SquadController;
 use Test\Controllers\MatchController;
 use Test\Controllers\InjuryController;
+use Test\Controllers\MailController;
 
 use Test\Controllers\Error;
 use Test\Controllers\Auth;
@@ -61,6 +62,9 @@ $router->post('/members/view', MemberController::class, 'view',['view_member']);
 $router->get('/members/update', MemberController::class, 'update');
 $router->post('/members/update', MemberController::class, 'update');
 
+$router->get('/members/renewal', MemberController::class, 'renewal');
+$router->post('/members/renewal', MemberController::class, 'renewal');
+
 // APPLICATION CONTROLLER
 $router->get('/register', ApplicationController::class, 'index');
 $router->post('/register', ApplicationController::class, 'index');
@@ -97,8 +101,8 @@ $router->post('/training/view', TrainingController::class, 'view', ['view_traini
 $router->get('/training/update', TrainingController::class, 'update', ['update_training_session']);
 $router->post('/training/update', TrainingController::class, 'update', ['update_training_session']);
 
-
-$router->get('/player', PlayerController::class, 'displayPlayer');
+// PLAYER INFORMATION
+$router->get('/player', PlayerController::class, 'displayPlayer', ['view_player_details']);
 
 // MATCH CONTROLLER
 $router->get('/match', MatchController::class, 'index');
@@ -126,9 +130,15 @@ $router->post('/match/all', MatchController::class, 'all', ['view_match']);
 $router->get('/match/match-player-stats', MatchController::class, 'matchPlayerStats', ['update_match','create_team']);
 $router->post('/match/match-player-stats', MatchController::class, 'matchPlayerStats', ['update_match','create_team']);
 
-// Injury
+// INJURY
 $router->get('/injury', InjuryController::class,'index',['record_injury']);
 $router->post('/injury', InjuryController::class,'index',['record_injury']);
+
+
+// MAIL
+$router->get('/mail', MailController::class,'sendMail',['send_messages']);
+$router->post('/mail', MailController::class,'sendMail',['send_messages']);
+
 
 
 $router->dispatch();

@@ -17,11 +17,23 @@
                         alt="player-image">
                 <?php endif; ?>
 
+                <!-- Personal information -->
                 <div class="flex flex-col justify-between md:p-4 leading-normal w-full">
-                    <h5 class="<?= heading5()?>">Personal Information</h5>
-                    
-                     <!-- Include badge status -->
-                    <?php require '../src/includes/player_availability_status.php'; ?>
+                    <div class="flex justify-between">
+                        <h5 class="<?= heading5()?>">Personal Information</h5>
+                         <!-- Include badge status -->
+                        <?php require '../src/includes/player_availability_status.php'; ?>
+                    </div>
+
+                    <!-- Membership Renewal -->
+                    <?php if (!empty($renewalReminder)): ?>
+                        <p class="text-danger font-semibold">
+                            Your membership is ending soon! Click 
+                            <a href="/members/renewal?member_id=<?= $player['member_id'] ?>" 
+                            class="underline"> here </a>
+                             to renew your membership.
+                        </p>
+                    <?php endif; ?>
 
                      <div class="flow-root">
                         <ul role="list" class="divide-y divide-default">
@@ -183,7 +195,6 @@
 
             <!-- Permission to view player skills -->
             <?php if (hasPermission('view_player_skills')):?>
-
                 <!-- Player Skills -->
                 <?= titleLeftSmall('Player Match Stats')?>
                 
