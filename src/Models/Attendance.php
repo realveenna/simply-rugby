@@ -82,5 +82,52 @@
             ]);
             return $statement->fetchAll(PDO::FETCH_ASSOC);
         }
+
+        // Get player match attendance
+        public static function getPlayerMatchAttendance($pdo,$member_id){
+            $statement = $pdo->prepare(
+                "SELECT
+                    m.*,
+                    s.squad_name
+                FROM match_lineup ml
+
+                INNER JOIN matches m ON ml.match_id = m.match_id
+                INNER JOIN squad s ON m.squad_id = s.squad_id
+                WHERE ml.member_id = :member_id
+                ORDER BY m.match_date DESC
+                LIMIT 8"
+            );
+
+            $statement->execute([
+                ':member_id' => $member_id
+            ]);
+
+            return $statement->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        // Get player training attendance
+        public static function getPlayerTrainingAttendance($pdo,$member_id){
+            $statement = $pdo->prepare(
+                "SELECT
+                    ts.training_session_id,
+                    ts.skills_activities,
+                    ts.date,
+                    ta.attendance_status,
+                    s.squad_name
+
+                FROM training_attendance ta
+                INNER JOIN training_session ts ON ta.training_session_id = ts.training_session_id
+                INNER JOIN squad s ON ts.squad_id = s.squad_id
+                WHERE ta.member_id = :member_id
+                ORDER BY ts.date DESC
+                LIMIT 8"
+            );
+
+            $statement->execute([
+                ':member_id' => $member_id
+            ]);
+
+            return $statement->fetchAll(PDO::FETCH_ASSOC);
+        }
     }
 ?>

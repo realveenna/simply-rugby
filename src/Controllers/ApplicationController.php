@@ -170,7 +170,7 @@
                     // If approved applications
                     if ($action === 'approve') {
                         if (!$memberExists) {
-                            // Insert primary guardian to member table
+                            // Insert player to member table
                             $memberId = $member->insert($pdo);
                             if (!$memberId) {
                                 throw new \Exception('Failed to add member details.');
@@ -203,7 +203,6 @@
                             throw new \Exception('Failed to add player to squad history.');
                         }
 
-
                         // Create primary guardian object
                         $pContactMember = new Member();
                         $pContactMember->first_name = $pGuardian['first_name'];
@@ -228,7 +227,6 @@
                             $pContactMember->member_id = $memberExists;
                             $hasParentLogin = true;
                         }
-                     
 
                         // Set primary guardian member id and access level
                         $pGuardian['contact_member_id'] = $pContactMember->member_id;
@@ -609,73 +607,6 @@
                 $postcodeDoctor = strtoupper(trimPost('postcodeDoctor')); 
                 $countryDoctor = trimPost('countryDoctor'); 
 
-  // Fake populated values for testing
-// Fake populated values for testing
-
-// Player Information
-$fName = 'Reuben';
-$lName = 'Forrest';
-$dob = '2014-09-28';
-$playerNickname = 'Ruby';
-$playerHeight = '147';
-$playerWeight = '44';
-
-// NOK Primary
-$nokFName = 'Daniel';
-$nokLName = 'Forrest';
-$nokRelationship = 'Father';
-
-// NOK Secondary
-$nokFNameSecondary = 'Amy';
-$nokLNameSecondary = 'Forrest';
-$nokRelationshipSecondary = 'Mother';
-
-// Contact Details
-$email = 'daniel.forrest@email.com';
-$mobileNum = '07855111002';
-$mobileNumSecondary = '07855111502';
-
-// Primary Address
-$line1 = '45 Dumbarton Road';
-$line2 = '';
-$city = 'Glasgow';
-$postcode = 'G11 6PW';
-$country = 'United Kingdom';
-
-// Secondary Address
-$line1Secondary = '45 Dumbarton Road';
-$line2Secondary = '';
-$citySecondary = 'Glasgow';
-$postcodeSecondary = 'G11 6PW';
-$countrySecondary = 'United Kingdom';
-
-// Medical Information Array
-$medicalInformationData = [];
-
-$allergyData = [];
-
-$currentCondition = [
-    1 // Asthma
-];
-
-$pastCondition = [];
-
-// Doctor Information
-$doctor = 'Dr Alan Stewart';
-$doctorNum = '01413392000';
-
-// Doctor Address
-$line1Doctor = 'Sandyford GP Practice';
-$line2Doctor = '2 Sandyford Place';
-$cityDoctor = 'Glasgow';
-$postcodeDoctor = 'G3 7NB';
-$countryDoctor = 'United Kingdom';
-
-// Application Details
-$isJunior = true;
-$apply_coach = true;
-$sameAddress = true;
-
 
                 // Default data to be passed
                 $data = [
@@ -846,26 +777,15 @@ $sameAddress = true;
                         try{
                             $pdo->beginTransaction();
 
-                            // Check if email already exists in members table
-                            $result = User::checkEmailExists($email,'Email already registered. Please log in to continue.');
-                            if(isset($result['emailError'])){
-                                $emailErr = $result['emailError'];
-                                throw new \ErrorException('This email is already registered. Please log in if you wish to register another junior player.');
-                            }
-
-                            // Check if parent email already exists in members and player_contact table
-                            $existingParentEmail = $_GET['parentEmail'] ?? '';
-                            if($existingParentEmail !== ''){
-                                $existingParent  = PlayerParent::getParent($pdo, $existingParentEmail);
-                                if($existingParent ){
-                                    $primaryGuardianData['first_name'] = $existingParent ->getFirstName();
-                                    $primaryGuardianData['last_name'] = $existingParent ->getLastName();
-                                    $primaryGuardianData['relationship'] = $existingParent ->getRelationship();
-                                    $primaryGuardianData['mobile_number'] = $existingParent ->getMobileNum();
-                                    $primaryGuardianData['email'] = $existingParent ->getEmail();
-                                    $primaryGuardianData['is_primary'] = $existingParent ->getIsPrimary();
+                            // Check if senior and email already exists in members table
+                            if(!$isJunior){
+                                $result = User::checkEmailExists($email,'Email already registered. Please log in to continue.');
+                                if(isset($result['emailError'])){
+                                    $emailErr = $result['emailError'];
+                                    throw new \ErrorException('This email is already registered');
                                 }
                             }
+
                             // Convert date to Y-m-d format
                             formatDate($data['dob']);
 
@@ -918,6 +838,7 @@ $sameAddress = true;
                             // Check if primary guardian application already exists in db 
                             $data['primary_guardian_id'] = $primaryGuardian->checkGuardianApplicationExists($pdo);
                             
+                            // Insert primary guardian application
                             if(!$data['primary_guardian_id']){
                                 $data['primary_guardian_id'] = $primaryGuardian->insertGuardianApplication($pdo);
                             }

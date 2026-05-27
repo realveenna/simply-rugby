@@ -55,6 +55,28 @@
             ]);
             return $statement->fetchAll(PDO::FETCH_ASSOC);
         }
+        
+        // Selct Squad Coaches
+        public static function getSquadCoaches($pdo, $squad_id){
+            $statement = $pdo->prepare
+            (
+                "SELECT 
+                    m.member_id,
+                    CONCAT(m.first_name, ' ', m.last_name) AS coach_name
+
+                FROM squad_member sc
+                INNER JOIN member m  ON m.member_id = sc.member_id
+                WHERE sc.squad_id = :squad_id
+                    AND role_id = 5
+
+                ORDER BY m.first_name ASC"
+            );
+            
+                $statement->execute([
+                ':squad_id' => $squad_id
+            ]);
+            return $statement->fetchAll(PDO::FETCH_ASSOC);
+        }
 
         // Fixture and Section Secretary
         public static function getSectionSquads($pdo, $member_id)
@@ -106,6 +128,21 @@
             return $statement->fetchAll(PDO::FETCH_ASSOC);
         }
 
+        public static function getAllSquadGlobal($pdo)
+        {
+            $statement = $pdo->prepare(
+                "SELECT
+                    squad_id,
+                    squad_name,
+                    section_id
+                FROM squad"
+            );
+
+            $statement->execute();
+
+            return $statement->fetchAll(PDO::FETCH_ASSOC);
+        }
+
 
         // Get squad by squad type
         public static function getSquadByName($pdo, $squad_name){
@@ -138,7 +175,7 @@
             return $statement->fetch(PDO::FETCH_ASSOC);
         }
         
-              // Get squad by squad by member id
+        // Get squad by squad by member id
         public static function getSquadOfMember($pdo, $member_id){
             $statement = $pdo->prepare
             (
@@ -237,7 +274,7 @@
         // }
 
         // 
-        public static function listSquadPlayer($pdo, $squad_id,){
+        public static function listSquadPlayer($pdo, $squad_id){
 
             $statement = $pdo->prepare
             (

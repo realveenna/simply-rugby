@@ -7,7 +7,8 @@
         public function index()
         {
             if (true === isLoggedIn()){
-                $this->render('dashboard');
+                header('Location: /account?member_id=' . $this->member_id);
+                exit;
             }
             else{
                 $this->render('index');

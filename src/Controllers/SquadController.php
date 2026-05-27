@@ -23,7 +23,7 @@
             // Permission Check
             authorize('view_squad');
             
-            $pdo = Database::getInstance()->getConnection();
+            $pdo = $this->pdo;
 
             $squads = AccessControl::getAuthorizedSquads($pdo, $this->member_id);
             
@@ -65,10 +65,37 @@
             }
         }
 
+        // Display Senior squad for public
+        public function senior()
+        {
+            $pdo = $this->pdo;
+
+            try{
+                // Get senior squad 
+                $squad = Squad::getSquadByName($pdo, 'Senior');
+                
+                if(!$squad){
+                    abort(404, 'No Squad Found');
+                }
+
+                $players = Squad::listSquadPlayer($pdo, $squad['squad_id']);
+                $coaches = Squad::getSquadCoaches($pdo, $squad['squad_id']);
+
+                $this->render('squad/senior', [
+                    'squad' => $squad,
+                    'players' => $players,
+                    'coaches' => $coaches,
+                ]);
+            }
+            catch (\Exception $e){
+                alert('errors', $e->getMessage(), '/');
+            }
+        }
+
         // List of all members
         public function squadMember()
         {
-            $pdo = Database::getInstance()->getConnection();
+            $pdo = $this->pdo;
 
             $squads = Squad::getAllSquads($pdo);
 

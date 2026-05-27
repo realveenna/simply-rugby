@@ -1,14 +1,59 @@
 <section class="bg-gray-50 dark:bg-gray-900">
-    <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto lg:py-0">
+    <div class="flex flex-col items-center justify-center px-1 sm:px-4 lg:px-6 py-3 sm:py-6 mx-auto">
         <div class="<?= cardClassXLNoBg() ?>">
-            <div class="<?= formPadding() ?>">
-                <?= title('All', 'Matches') ?>
-                <?php foreach ($matches as $matches):?>
-                    <div>
-                        <button class="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">See more</button>
+
+            <?php if(!empty($seniorUpcoming) || !empty($seniorPast)): ?>
+                <?= title('Senior', 'Matches') ?>
+            <?php endif; ?>
+            
+
+            <!-- SENIOR UPCOMING MATCH -->
+            <?php if(!empty($seniorUpcoming)): ?>
+                <div class="<?= formPadding() ?>">
+                    <?= titleLeftSmall('Upcoming Match'); ?>
+                    <?php foreach($seniorUpcoming as $match): ?>
+                        <?php require '../src/includes/match-card.php'; ?>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+            
+            <!-- SENIOR PAST MATCH -->
+            <?php if(!empty($seniorPast)): ?>
+                <div class="<?= formPadding() ?>">
+                    <?= titleLeftSmall('Past Match'); ?>
+                    <?php foreach($seniorPast as $match): ?>
+                        <?php require '../src/includes/match-card.php'; ?>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+
+     
+
+            <!-- JUNIOR UPCOMING MATCH WITH PERMISSION -->
+            <?php if(!empty($juniorUpcoming) || !empty($juniorPast)): ?>
+                <?php if(hasPermission('view_junior_match')): ?>
+                    <?= title('Junior', 'Matches') ?>
+                    <?php if(!empty($juniorUpcoming)): ?>
+                        <div class="<?= formPadding() ?>">
+                            <?= titleLeftSmall('Upcoming Match'); ?>
+                            
+                            <?php foreach($juniorUpcoming as $match): ?>
+                                <?php require '../src/includes/match-card.php'; ?>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+
+                <!-- JUNIOR PAST MATCH -->
+                <?php if(!empty($juniorPast)): ?>
+                    <div class="<?= formPadding() ?>">
+                        <?= titleLeftSmall('Past Match'); ?>
+                        <?php foreach($juniorPast as $match): ?>
+                            <?php require '../src/includes/match-card.php'; ?>
+                        <?php endforeach; ?>
                     </div>
-                <?php endforeach ;?>
-            </div>
+                <?php endif; ?>
+            <?php endif; ?>
+        <?php endif; ?>
         </div>
     </div>
 </section>

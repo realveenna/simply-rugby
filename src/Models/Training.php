@@ -14,7 +14,6 @@
         public $end_time;
         public $date;
 
-
         public function __construct($data = [])
         {
             $this->training_session_id = $data['training_session_id'] ?? null;
@@ -145,6 +144,25 @@
             return $statement->fetch(PDO::FETCH_ASSOC);
         }
 
+        public static function hasSkillRatings($pdo, $training_session_id)
+        {
+            $statement = $pdo->prepare
+            (
+                "SELECT COUNT(*)
+                FROM player_skill
+                WHERE training_session_id = :training_session_id
+
+            ");
+
+            $statement->execute([
+                ':training_session_id' => $training_session_id
+            ]);
+
+            // Returns true of false if training_session_id exists in player_skills table
+            return ((int)$statement->fetchColumn() > 0);
+        }
+                
+        // Get training attendance all or by id
         public static function getTrainingAttendance($pdo, $training_session_id = null){
             // SQL query
             $sql = 

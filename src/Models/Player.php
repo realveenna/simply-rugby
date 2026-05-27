@@ -105,5 +105,63 @@
             $result =  $statement->fetch(PDO::FETCH_ASSOC);
             return $result;
         }
+
+        public static function insertPlayerMatchStats($pdo, $match_id, $member_id, $stats){
+            $statement = $pdo->prepare(
+                "INSERT INTO player_match_stats (
+                    match_id, member_id, minutes_played, tries, conversions, 
+                    penalties, drop_goals, yellow_cards, red_cards
+                )
+                VALUES (
+                    :match_id, :member_id, :minutes_played, :tries, :conversions, 
+                    :penalties, :drop_goals, :yellow_cards, :red_cards
+                )
+
+                ON DUPLICATE KEY UPDATE
+                    minutes_played = VALUES(minutes_played),
+                    tries = VALUES(tries),
+                    conversions = VALUES(conversions),
+                    penalties = VALUES(penalties),
+                    drop_goals = VALUES(drop_goals),
+                    yellow_cards = VALUES(yellow_cards),
+                    red_cards = VALUES(red_cards)
+                ");
+
+            $result = $statement->execute([
+                ':match_id' => $match_id,
+                ':member_id' => $member_id,
+                ':minutes_played' => (int)$stats['minutes_played'],
+                ':tries' => (int)$stats['tries'],
+                ':conversions' => (int)$stats['conversions'],
+                ':penalties' => (int)$stats['penalties'],
+                ':drop_goals' => (int)$stats['drop_goals'],
+                ':yellow_cards' => (int)$stats['yellow_cards'],
+                ':red_cards' => (int)$stats['red_cards'],
+            ]);
+        
+            return $result;
+        }
+
+        // Update player profile
+        public static function updatePlayerProfile($pdo, $data)
+        {
+            $statement = $pdo->prepare(
+                "UPDATE player_profile
+                SET
+                    height = :height,
+                    weight = :weight,
+                    position = :position,
+                    player_availability_status = :player_availability_status
+                WHERE member_id = :member_id"
+            );
+
+            return $statement->execute([
+                ':height' => $data['height'] ?? null,
+                ':weight' => $data['weight'] ?? null,
+                ':position' => $data['position'] ?? null,
+                ':player_availability_status' => $data['player_availability_status'] ?? 'Available',
+                ':member_id' => $data['member_id']
+            ]);
+        }
     }
 ?>

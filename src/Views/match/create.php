@@ -65,7 +65,7 @@
                     </div>
                     <div class="flex items-center ps-4 border p-2 border-default bg-neutral-primary-soft rounded-base">
                         <input id="away" type="radio" value="away" name="match_venue" 
-                            <?= ($match->match_venue ?? '') === 'aways' ? 'checked' : '' ?>
+                            <?= ($match->match_venue ?? '') === 'away' ? 'checked' : '' ?>
                             class="w-4 h-4 text-neutral-primary border-default-medium bg-neutral-secondary-medium rounded-full checked:border-brand focus:ring-2 focus:outline-none focus:ring-brand-subtle border border-default appearance-none">
                         <label for="away" class="w-full py-4 select-none ms-2 text-sm font-medium text-heading">
                             Away
@@ -76,6 +76,7 @@
                   <p class="<?= smallError() ?>"><?php echo h($error['match_venue'] ?? '');?></p>
                 </div>
             </div>
+
             <!-- DATE -->
              <div>
                 <label for="date" class="<?= labelClass() ?>">Date</label>

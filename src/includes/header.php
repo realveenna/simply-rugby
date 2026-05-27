@@ -8,6 +8,7 @@
     <link rel="canonical" href="https://flowbite-admin-dashboard.vercel.app/">
   </head>
   
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
     
     if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {

@@ -73,23 +73,6 @@
                         </div>
                     </div>
                   
-                    <!-- Prompt guardian if they have an exisint login details -->
-                    <div id="if-existing-login">
-                        <label for="if-existing-login" class="<?= labelClass() ?>">
-                            Do you have an existing parent account?
-                        </label>
-                        <div>
-                            <div class="flex items-center mb-4">
-                                <input id="existing-login" type="radio" value="1" name="existing-login" class="w-4 h-4 text-neutral-primary border-default-medium bg-neutral-secondary-medium rounded-full checked:border-brand focus:ring-2 focus:outline-none focus:ring-brand-subtle border border-default appearance-none">
-                                <label for="existing-login" class="select-none ms-2 text-sm font-medium text-heading">Yes</label>
-                            </div>
-                            <div class="flex items-center">
-                                <input checked id="no-existing-login" type="radio" value="0" name="existing-login" class="w-4 h-4 text-neutral-primary border-default-medium bg-neutral-secondary-medium rounded-full checked:border-brand focus:ring-2 focus:outline-none focus:ring-brand-subtle border border-default appearance-none">
-                                <label for="no-existing-login" class="select-none ms-2 text-sm font-medium text-heading">No</label>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Next Button -->
                     <button type="submit" name="action" value="next" class="<?= primaryBtn() ?>">
                         Next

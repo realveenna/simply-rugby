@@ -55,11 +55,13 @@
                         </svg>
                     </span>
                 </th>
+                <?php if(hasPermission('view_player_details')): ?>
                 <th class="text-center">
                     <span class="flex items-center">
                         Action
                     </span>
                 </th>
+                <?php endif; ?>
             </tr>
         </thead>
 
@@ -74,32 +76,26 @@
                 <td class="text-center"><?= h($player['weight']) ?></td>
                 <td class="text-center"><?= h($player['height']) ?></td>
                 <td class="text-center">
-                    <!-- Badge Color for Availability Status -->
-                    <?php if ($player['player_availability_status']  === 'Available') :?>
-                        <span class="<?= badgeSuccess()?>">
-                            <?= ucfirst($player['player_availability_status']) ?>
-                        </span>
-                    <?php else: ?>
-                        <span class="<?= badgeDanger()?>">
-                            <?= ucfirst($player['player_availability_status']) ?>
-                        </span>
-                    <?php endif; ?>
+                    <!-- Include badge status -->
+                    <?php require '../src/includes/player_availability_status.php'; ?>
                 </td>
 
                 <td class="text-center">
-                    <button id="squadPlayerAction<?=h($player['member_id'])?>" data-dropdown-toggle="squadPlayerDots<?=h($player['member_id'])?>" class="text-heading bg-neutral-primary box-border border border-transparent hover:bg-neutral-secondary-medium focus:ring-4 focus:ring-neutral-tertiary font-medium leading-5 rounded-base text-sm p-2 focus:outline-none" type="button"> 
-                        <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-width="3" d="M6 12h.01m6 0h.01m5.99 0h.01"/></svg>
-                    </button>
-                    <!-- Dropdown menu -->
-                    <div id="squadPlayerDots<?=h($player['member_id'])?>" class="z-10 hidden bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg w-44 dark:divide-gray-600">
-                        <ul class="p-2 text-sm text-body font-medium" aria-labelledby="squadPlayerAction<?=h($player['member_id'])?>">
-                              <li>
-                                <a href="/player?id=<?=h(($player['member_id']))?>" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
-                                    View All Players
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
+                    <?php if(hasPermission('view_player_details')): ?>
+                        <button id="squadPlayerAction<?=h($player['member_id'])?>" data-dropdown-toggle="squadPlayerDots<?=h($player['member_id'])?>" class="text-heading bg-neutral-primary box-border border border-transparent hover:bg-neutral-secondary-medium focus:ring-4 focus:ring-neutral-tertiary font-medium leading-5 rounded-base text-sm p-2 focus:outline-none" type="button"> 
+                            <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-width="3" d="M6 12h.01m6 0h.01m5.99 0h.01"/></svg>
+                        </button>
+                        <!-- Dropdown menu -->
+                        <div id="squadPlayerDots<?=h($player['member_id'])?>" class="min-w-max z-10 hidden bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg w-44 dark:divide-gray-600">
+                            <ul class="p-2 text-sm text-body font-medium" aria-labelledby="squadPlayerAction<?=h($player['member_id'])?>">
+                                <li>
+                                    <a href="/player?id=<?=h(($player['member_id']))?>" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
+                                        View Player Details
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
                 </td>
             </tr>
             <?php endforeach; ?>

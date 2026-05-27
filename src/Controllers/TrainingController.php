@@ -10,7 +10,9 @@
     use Test\Database;
     use Test\Models\Training;
     use Test\Models\Attendance;
-    
+    use Test\Models\PlayerSkill;
+    use Test\Models\Skill;
+        
     class TrainingController extends Controller
     {
         public function __construct()
@@ -18,12 +20,10 @@
             parent::__construct();
         }
 
-        // Render training index with permission check
-
+       
         public function index()
         {
-            $pdo = Database::getInstance()->getConnection();
-
+            $pdo = $this->pdo;
 
             // Get Training Details
             $trainings = AccessControl::getAuthorizedTraining($pdo, $this->member_id);
@@ -33,33 +33,68 @@
                abort(404, 'No Training Session Found');
             }
 
+            // Check for training status
+            foreach ($trainings as &$training) {
+                $training['status'] = $this->checkTrainingStatus($pdo, $training);
+            }
+            unset($training);
+
             $this->render('/training/index',[
                 'trainings' => $trainings
             ]);
         }
 
+        private function checkTrainingStatus($pdo, $training){
+            // Future training
+            if (isFutureDate($training['date'])) 
+            {
+                return 'Upcoming';
+            }
+
+            // Attendance still pending
+            if ((int)$training['pending_count'] > 0) 
+            {
+                return 'Attendance';
+            }
+
+            // Skills not completed
+            if (!Training::hasSkillRatings($pdo,  $training['training_session_id'])) 
+            {
+                return 'Skills';
+            }
+
+            // Fully completed
+            return 'Completed';
+        }
+
+           
+
         // Render create training with permission check
         public function create()
         {
-            $pdo = Database::getInstance()->getConnection();
+            $pdo = $this->pdo;
 
             // Permission Check
             authorize('create_training_session');
 
-            // Get Squad Access
-            $squads = AccessControl::getAuthorizedSquads($pdo, $this->member_id);
-
             // Set error array
             $error = [];
 
+             // Get Squad Access
+            $squads = AccessControl::getAuthorizedSquads($pdo, $this->member_id);
+            
             // Default training object value
             $training = new Training(['squad_id' => $_GET['squad_id'] ?? '']);
 
             try{
+                // Auto select if only one squad [for coaches]
+                if (empty($training->squad_id) && count($squads) === 1) {
+                    $training->squad_id = $squads[0]['squad_id'];
+                }
+                
                 // Only check if squad_id exists from GET request
                 if (!empty($training->squad_id)) {
-                    $squad = AccessControl::validateSquadAccess($pdo, $training->squad_id);
-
+                    AccessControl::validateSquadAccess($pdo, $training->squad_id);
                 }
 
                 // POST REQUEST
@@ -176,7 +211,7 @@
 
             // Render
             $this->render('training/create', [
-                'squads' => $squads ?? '',
+                'squads' => $squads,
                 'training' => $training ?? '',
                 'error' => $error
             ]);
@@ -184,14 +219,8 @@
         // Render update training with permission check
         public function update()
         {
-            $pdo = Database::getInstance()->getConnection();
+            $pdo = $this->pdo;
 
-            // Permission Check
-            authorize('update_training_session');
-
-            // Get Squad Access
-            $squads = AccessControl::getAuthorizedSquads($pdo, $this->member_id);
-            
             // Set error array
             $error = [];
             
@@ -201,9 +230,6 @@
 
                 // POST REQUEST
                 if($_SERVER['REQUEST_METHOD'] === 'POST') {
-                    // Permission Check Again
-                    authorize('update_training_session');
-                    
                     $training = self::checkTrainingSessionId($pdo);
 
                     // Create training object
@@ -267,7 +293,7 @@
 
             // Render
             $this->render('training/update', [
-                'squads' => $squads ?? '',
+                'squads' => $this->squads, 
                 'training' => $training ?? '',
                 'error' => $error
             ]);
@@ -277,7 +303,7 @@
         // Render record training attendance with permission check
         public function record()
         {
-            $pdo = Database::getInstance()->getConnection();
+            $pdo = $this->pdo;
 
             // Permission Check
             authorize('record_attendance');
@@ -349,7 +375,7 @@
                     }
                      // Commmit and success message
                     $pdo->commit();
-                    alert('success','Training Attendance Marked Successfuly!.','/');
+                    alert('success','Training Attendance Marked Successfuly!','/training');
                 }
             }
             // Catch error
@@ -371,14 +397,212 @@
             ]);
         }
 
+        // Render record training player skill with permission check
+        public function recordSkill()
+        {
+            $pdo = $this->pdo;
+
+            // Set error array
+            $error = [];
+            $selectedIds = [];
+            $ratings = [];
+
+            try{
+                // Mandatory training session id 
+                $training = self::checkTrainingSessionId($pdo);
+                
+                // Get Categories 
+                $categories = Skill::getSkillCategories($pdo);
+                if(!$categories){
+                    throw new \ErrorException('No skill categories found.');
+                }
+
+                // Get Players for Training Session
+                $players = Attendance::getPlayersById($pdo,$training['training_session_id']);
+
+                // POST REQUEST FOR ATTENDANCE SHEET
+                if($_SERVER['REQUEST_METHOD'] === 'POST') {
+                    // Check training_session_id  on POST
+                    $training = self::checkTrainingSessionId($pdo);
+
+                    $action = trimPost('action');
+                    $selectedIds = $_POST['categories'] ?? [];
+
+                    // Next Button Selecting Category
+                    if($action  === 'next'){
+                        // get POST categories id
+                        $selectedIds =  $_POST['categories'] ?? [];
+
+                        // Error message if none selected
+                        if (empty($selectedIds)) {
+                            $error['categories'] =  'Please select at least one category';
+                        }else{
+                            // Get array of categories and skills
+                            $categoriesWithSkills = Skill::getCategoriesAndSkills($pdo);
+                            
+                            // filter array using selected skill category ids
+                            $selectedCategories = array_filter($categoriesWithSkills,
+                                function ($category) use ($selectedIds) {
+                                    return in_array(
+                                        (int)$category['skill_category_id'], $selectedIds
+                                    );
+                                }
+                            );
+
+                            // Grouped each skills in their categories
+                            $groupedCategories = [];
+                            foreach ($selectedCategories as $sc) {
+                                $categoryId = $sc['skill_category_id'];
+                               
+                                // Grouped in nested array
+                                if (!isset($groupedCategories[$categoryId])) {
+                                    $groupedCategories[$categoryId] = [
+                                        'category_name' => $sc['skill_category_name'],
+                                        'skills' => []
+                                    ];
+                                }
+
+                                // Add associated skill
+                                $groupedCategories[$categoryId]['skills'][] = [
+                                    'skill_id' => $sc['skill_id'],
+                                    'skill_name' => $sc['skill_name']
+                                ];
+                            }
+                            $skillForm = true;
+                        }
+                    }
+                    // Submit all player training skills
+                    elseif($action === 'submit'){
+                        $skillForm = true;  
+                        $ratings = $_POST['ratings'] ?? [];
+                        $selectedIds = $_POST['categories'] ?? [];
+
+                        // Rebuild grouped categories
+                        $selectedIds = $_POST['categories'] ?? [];
+                        $categoriesWithSkills = Skill::getCategoriesAndSkills($pdo);
+
+                        $selectedCategories = array_filter($categoriesWithSkills,
+                            function ($category) use ($selectedIds) {
+                                return in_array(
+                                    (int)$category['skill_category_id'],
+                                    $selectedIds
+                                );
+                            }
+                        );
+
+                        // Group skills
+                        $groupedCategories = [];
+                        foreach ($selectedCategories as $sc) {
+                            $categoryId = $sc['skill_category_id'];
+                            if (!isset($groupedCategories[$categoryId])) {
+                                $groupedCategories[$categoryId] = [
+                                    'category_name' => $sc['skill_category_name'],
+                                    'skills' => []
+                                ];
+                            }
+
+                            $groupedCategories[$categoryId]['skills'][] = [
+                                'skill_id' => $sc['skill_id'],
+                                'skill_name' => $sc['skill_name']
+                            ];
+                        }
+
+                        // For each grouped categories
+                        foreach ($groupedCategories as $categoryId => $group) {
+                            // Track rating
+                            $allFilled = true;
+
+                            // For each skills in category 
+                            foreach ($group['skills'] as $skill) {
+                                $skillId = $skill['skill_id'];
+
+                                // For each players
+                                foreach ($players as $player) {
+                                    $player_id = $player['member_id'];
+
+                                    // Get submitted rating
+                                    $rating = $ratings[$player_id][$skillId] ?? '';
+
+                                    // Empty rating
+                                    if ($rating === '') {
+                                        $allFilled  = false;
+                                    }
+                                }
+                            }
+                            // Missing ratings in category
+                            if (!$allFilled) {
+                                $error['ratings'][$categoryId] ='Please enter skill ratings in all fields';
+                            }
+
+                        }
+                        
+                        // No errors in all categories
+                        if(empty($error)){
+                            // Begin Transaction
+                            $pdo->beginTransaction();
+
+                            // For each players
+                            foreach ($ratings as $player_id => $skills) {
+                                // Loop skills
+                                foreach ($skills as $skillId => $rating) {
+                                    
+                                    // Insert player skill rating
+                                    $insert = PlayerSkill::insertSkillRating
+                                    (
+                                        $pdo,
+                                        $training['training_session_id'],
+                                        $player_id,
+                                        $skillId,
+                                        $this->member_id,
+                                        $rating
+                                    );
+                                    if(!$insert){
+                                        throw new \ErrorException('Failed to insert training player skills');
+                                    }
+                                }
+                            }
+
+                            // Commmit and success message
+                            $pdo->commit();
+                            alert('success','All Player Training Skills Marked Successfuly!.','/training');
+                        }
+                    }
+                    
+                    // Back to select categories
+                    else{
+                        $selectedCategories = [];
+                        $skillForm = false;
+                    }
+                }
+
+            }
+            // Catch error
+            catch (\Exception $e){
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                alert(
+                    'error', $e->getMessage(), '/training');
+            }
+
+            // Render
+            $this->render('training/record_player_skills', [
+                'players' => $players,
+                'training' => $training,
+                'error' => $error,
+                'ratings' => $ratings,
+                'categories' => $categories,
+                'groupedCategories' => $groupedCategories ?? [],
+                'skillForm' => $skillForm ?? false,
+                'selectedIds' => $selectedIds,
+            ]);
+        }
+
 
         // Render record training session with permission check
         public function view()
         {
-            $pdo = Database::getInstance()->getConnection();
-
-            // Permission Check
-            authorize('view_training_session');
+            $pdo = $this->pdo;
 
             // Set error array
             $error = [];
@@ -457,9 +681,9 @@
         // view and update
         private function checkTrainingSessionId($pdo){
             if(isset($_GET['training_session_id']) || isset($_POST['training_session_id'])){
+
                 // Default training_session_id value
-                $training_session_id = $_GET['training_session_id']
-                     ?? ($_POST['training_session_id']);
+                $training_session_id = $_GET['training_session_id'] ?? ($_POST['training_session_id']);
 
                 // Get Training Session
                 $training = Training::getTrainingById($pdo, $training_session_id);

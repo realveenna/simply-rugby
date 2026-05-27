@@ -32,7 +32,7 @@
                         <p class="mt-2 text-sm font-xs text-red-500"><?php echo trim($rawConfirmPasswordErr);?></p>
                     </div> 
                 </div>
-                 <div>
+                <div>
                     <label for="selectRole" class="<?= labelClass() ?>">Country </label>
                     <select class="<?= inputClass()?>"
                         autocomplete="country" name="selectRole">

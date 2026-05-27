@@ -61,7 +61,7 @@
                     </button>
                     
                     <!-- Dropdown menu -->
-                    <div id="memberNoLoginDots<?=h($member['member_id'])?>" class="z-10 hidden bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg w-44 dark:divide-gray-600">
+                    <div id="memberNoLoginDots<?=h($member['member_id'])?>" class="min-w-max  z-10 hidden bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg w-44 dark:divide-gray-600">
                         <ul class="p-2 text-sm text-body font-medium" aria-labelledby="memberNoLoginAction<?=h($member['member_id'])?>">
                         <li>
                             <a href="/members/create-login?member_id=<?= $member['member_id'] ?>" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">

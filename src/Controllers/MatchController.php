@@ -11,6 +11,7 @@
     use Test\Models\Training;
     use Test\Models\Attendance;
     use Test\Models\Matches;
+use Test\Models\Player;
 
     class MatchController extends Controller
     {
@@ -19,28 +20,284 @@
             parent::__construct();
         }
 
-        // Render training index with permission check
-
+        // Render Match index with permission check
         public function index()
         {
             $pdo = Database::getInstance()->getConnection();
 
             // Get All Match Details
-            $matches = AccessControl::getAuthorizedMatches($pdo, $this->member_id);
+            $matches = AccessControl::getAuthorizedMatches($pdo, $this->member_id);           
+
+            // Senior Matches
+            $seniorUpcoming = [];
+            $seniorPast = [];
+
+            // Junior Matches
+            $juniorUpcoming = [];
+            $juniorPast = [];
+
+            // Today's date
+            $today = date('Y-m-d');
+
+            $matchesAndHalves = [];
+
+            foreach ($matches as $match) {
+                $isSenior = $match['section_name'] === 'Senior';
+                $isUpcoming = $match['match_date'] >= $today;
+               
+                // Get each match half
+                $halves = Matches::getMatchHalfById($pdo,$match['match_id']);
+                $match['halves'] = $halves;
+
+                // Calculate total points
+                $match['our_total_points'] = $halves[0]['our_total_points'] ?? 0;
+                $match['opponent_total_points'] = $halves[0]['opponent_total_points'] ?? 0;
+
+                $matchesAndHalves[] = $match;
+
+                 // Senior matches
+                if ($isSenior) {
+                    if ($isUpcoming) {
+                        $seniorUpcoming[] = $match;
+                    } else {
+                        $seniorPast[] = $match;
+                    }
+                }
+                // Junior matches and has permission
+                elseif (hasPermission('view_junior_match')) {
+                    if ($isUpcoming) {
+                        $juniorUpcoming[] = $match;
+                    } else {
+                        $juniorPast[] = $match;
+                    }
+                }
+            }
+
+            // Update matches data with halves
+            $matches = $matchesAndHalves;
+
+            // Limit to 4 each match details
+            $seniorUpcoming = array_slice($seniorUpcoming, 0, 4);
+            $seniorPast = array_slice($seniorPast, 0, 4);
+
+            $juniorUpcoming = array_slice($juniorUpcoming, 0, 4);
+            $juniorPast = array_slice($juniorPast, 0, 4);
 
             // Not Found 
             if(!$matches){
                abort(404, 'No Matches Available');
             }
-            alert('error','Match created Successfully.','/');
-
-            
-            var_dump($matches);exit;
-
-            // var_dump($matches);exit; ##########
 
             $this->render('/match/index',[
-                'matches' => $matches
+                'seniorUpcoming' => $seniorUpcoming,
+                'seniorPast' => $seniorPast,
+                'juniorUpcoming' => $juniorUpcoming,
+                'juniorPast' => $juniorPast
+            ]);
+        }
+
+         // Render all match details with permission check
+        public function all()
+        {
+            $pdo = Database::getInstance()->getConnection();
+
+            // Get All Match Details
+            $matches = AccessControl::getAuthorizedMatches($pdo, $this->member_id);    
+
+            // Senior Matches
+            $seniorUpcoming = [];
+            $seniorPast = [];
+
+            // Junior Matches
+            $juniorUpcoming = [];
+            $juniorPast = [];
+
+            // Today's date
+            $today = date('Y-m-d');
+
+            $matchesAndHalves = [];
+
+            foreach ($matches as $match) {
+                $isSenior = $match['section_name'] === 'Senior';
+                $isUpcoming = $match['match_date'] >= $today;
+               
+                // Get each match half
+                $halves = Matches::getMatchHalfById($pdo,$match['match_id']);
+                $match['halves'] = $halves;
+
+                // Calculate total points
+                $match['our_total_points'] = $halves[0]['our_total_points'] ?? 0;
+                $match['opponent_total_points'] = $halves[0]['opponent_total_points'] ?? 0;
+
+                $matchesAndHalves[] = $match;
+
+                 // Senior matches
+                if ($isSenior) {
+                    if ($isUpcoming) {
+                        $seniorUpcoming[] = $match;
+                    } else {
+                        $seniorPast[] = $match;
+                    }
+                }
+                // Junior matches and has permission
+                elseif (hasPermission('view_junior_match')) {
+                    if ($isUpcoming) {
+                        $juniorUpcoming[] = $match;
+                    } else {
+                        $juniorPast[] = $match;
+                    }
+                }
+            }
+
+            // Update matches data with halves
+            $matches = $matchesAndHalves;
+
+            // Filter by category
+            $category = $_GET['category'] ?? null;
+            $displayMatches = [];
+
+            switch($category){
+                case 'Junior Upcoming':
+                    $displayMatches = $juniorUpcoming;
+                    $category = 'Junior Upcoming';
+                    break;
+
+                case 'Junior Past':
+                    $displayMatches = $juniorPast;
+                    $category = 'Junior Past';
+                    break;
+
+                case 'Senior Upcoming':
+                    $displayMatches = $seniorUpcoming;
+                    $category = 'Senior Upcoming';
+                    break;
+
+                case 'Senior Past':
+                    $displayMatches = $seniorPast;
+                    $category = 'Senior Past';
+                    break;
+
+                default:
+                    $displayMatches = $matches;
+                    $category = 'All';
+                    break;
+            }
+
+            // Not Found 
+            if(!$displayMatches){
+               abort(404, 'No Matches Available');
+            }
+
+            $this->render('/match/all',[
+                'matches' => $displayMatches,
+                'category' => $category,
+            ]);
+        }
+
+ 
+
+        //  Render view for single match details
+        public function view()
+        {
+            $pdo = $this->pdo;
+
+            $lineup = [];
+            $coaches = [];
+
+            try{
+
+                $match = $this->getMatchId($pdo);
+
+                // Get lineup
+                $lineup = Matches::getLineup($pdo, $match['match_id']);
+
+                // If no existing lineup
+                if(!$lineup){
+                    // Create lineup from squad players
+                    $insert = Matches::createLineupFromSquad($pdo, $match['match_id'], $match['squad_id']);
+                    if(!$insert){
+                        throw new \ErrorException('Failed to insert to player lineup');
+                    }
+                }
+                
+                // Get lineup
+                $lineup = Matches::getLineup($pdo, $match['match_id']);
+
+                // Get Coaches
+                $coaches = Squad::getSquadCoaches($pdo, $match['squad_id']);
+
+                // Match status title
+                $title = $match['result'] === 'Pending' ? 'Upcoming Match' : 'Past Match';
+
+                // Restrict permission for junior matches
+                if ($match['section_name'] === 'Junior' && !hasPermission('view_junior_match')) {
+                    abort(403);
+                }
+                // Get each match half
+                $halves = Matches::getMatchHalfById($pdo,$match['match_id']);
+                $match['halves'] = $halves;
+
+                // Calculate total points
+                $match['our_total_points'] = $halves[0]['our_total_points'] ?? 0;
+                $match['opponent_total_points'] = $halves[0]['opponent_total_points'] ?? 0;
+
+
+                 // Check if any lineup position is null
+                foreach ($lineup as $player) {
+                    if (empty($player['position'])) {
+                        $message = "Attention! Please update player's position for upcoming match";
+                        break;
+                    }
+                }
+
+                if ((hasPermission('create_team'))
+                    && $match['result'] === 'Pending' && !isFutureDate($match['match_date'])){
+                    $message = "Attention! Please update player's match stats";
+                }
+
+                // POST REQUEST
+                if($_SERVER['REQUEST_METHOD'] === 'POST') {
+                    // Get POST action
+                    $action = trimPost('action') ?? '';
+
+                    // Override match objext
+                    $match = $this->getMatchId($pdo);
+
+                    if ($action === 'delete') {
+                        // Begin Transaction
+                        $pdo->beginTransaction();
+
+                        // delete Match
+                        $deleted = Matches::delete($pdo, $match['match_id']);
+
+                        // If not deleted
+                        if(!$deleted){
+                            throw new \ErrorException('Unable to delete match');
+                        }
+
+                        // Commmit and success message
+                        $pdo->commit();
+                        alert('success', 'Match Details Deleted Successfully!', '/');
+                    }
+                    else{
+                        abort(404, "Undefined Action");
+                    }
+                }
+            }
+            // Catch error
+            catch (\Exception $e){
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                alert('error', $e->getMessage(), '/match/view');
+            }
+            // Render
+            $this->render('match/view', [
+                'title' => $title,
+                'match' => $match,
+                'lineup' => $lineup,
+                'coaches' => $coaches,
+                'message' => $message ?? ''
             ]);
         }
 
@@ -48,7 +305,7 @@
         public function create()
         {
             // Set PDO Connection
-            $pdo = Database::getInstance()->getConnection();
+            $pdo = $this->pdo;
 
             try{
                 // Set error array
@@ -59,7 +316,7 @@
                 
                 // Get Squad Access
                 $squads = AccessControl::getAuthorizedSquads($pdo, $this->member_id);
-
+         
                 if($squads){
                     // If multiple squads available
                     foreach($squads as $squad){
@@ -75,6 +332,7 @@
 
                 //Override squads with 15+ players 
                 $squads = $availableSquads;
+
 
                 if(!$squads){
                     // Check minimum players
@@ -156,6 +414,12 @@
                             throw new \ErrorException('Failed to create a match');
                         }
 
+                        // Insert each squach players to match_lineup
+                        $insertLineup =  Matches::createLineupFromSquad($pdo, $M->match_id, $M->squad_id);
+                        if(!$insertLineup){
+                            throw new \ErrorException('Failed to insert to player lineup');
+                        }
+
                         // Commmit and success message
                         $pdo->commit();
                         alert('success','Match created Successfully.','/match');
@@ -179,87 +443,116 @@
             ]);
         }
 
-
-
-        ############
-        // Render update training with permission check
-        public function update()
+        // Render lineup view with permission check
+        public function lineup()
         {
-            $pdo = Database::getInstance()->getConnection();
+            $pdo = $this->pdo;
 
-            // Permission Check
-            authorize('update_training_session');
+            $lineup = [];
+            $errors = [];
+            $positions = self::listAllPositions();
 
-            // Get Squad Access
-            $squads = AccessControl::getAuthorizedSquads($pdo, $this->member_id);
-            
-            // Set error array
-            $error = [];
-            
             try{
-                // Mandatory training session id
-                $training = self::checkTrainingSessionId($pdo);
+                $match = new Matches($this->getMatchId($pdo));
+                $lineup = Matches::getLineup($pdo,$match->match_id);
+               
+                // If no existing lineup
+                if(!$lineup){
+                    // Create lineup from squad players
+                    $insert = Matches::createLineupFromSquad($pdo, $match->match_id, $match->squad_id);
+                    if(!$insert){
+                        throw new \ErrorException('Failed to insert to player lineup');
+                    }
+                }
 
+                // Get lineup
+                $lineup = Matches::getLineup($pdo, $match->match_id);
+
+                // Abort if match already has result 
+                if($match->result !== 'Pending'){
+                    abort(403);
+                }
+
+                // Check if any lineup position is null
+                foreach ($lineup as $player) {
+                    if (empty($player['position'])) {
+                        $message = "Attention! Please update player's position for upcoming match";
+                        break;
+
+                    }
+                }
                 // POST REQUEST
                 if($_SERVER['REQUEST_METHOD'] === 'POST') {
-                    // Permission Check Again
-                    authorize('update_training_session');
-                    
-                     $training = self::checkTrainingSessionId($pdo);
+                    // Validate Match Id
+                    $match = new Matches($this->getMatchId($pdo));
 
-                    // Forbidden
-                    if (!hasSquadAccess($training['squad_id']) || !hasRole('Club Chairperson')){
-                        abort(403);
+                    // Check for if match already has result
+                    if($match->result !== 'Pending'){
+                        abort(403, 'Unable to modify lineup. This match already has a result.');
                     }
 
-                    // Create training object
-                    $training = new Training([
-                        'training_session_id' => $training['training_session_id'],
-                        'skills_activities' => trimPost('skills_activities'),
-                        'start_time' => trimPost('start_time'),
-                        'end_time' => trimPost('end_time'),
-                        'date' => trimPost('date'),
-                        'coach_member_id' => $this->member_id ?? null
-                    ]);
-                    
-                    if(empty($training->skills_activities)){
-                        $error['skills_activities'] = "Please enter skills and activities.";
-                    }
-                    if(empty($training->date)){
-                        $error['date'] = "Please enter date of training session.";
-                    }
-                    if(empty($training->start_time)){
-                        $error['start_time'] = "Please enter start time of training session.";
-                    }
-                    if(empty($training->end_time)){
-                        $error['end_time'] = "Please enter end time of training session.";
+                    // filter  empty value from POST
+                    $selectedPlayers = array_filter($_POST);
+
+                    // Unset match id from filtering post players
+                    unset($selectedPlayers['match_id']);
+
+                    // Filtered array of selected players
+                    $selectedPlayers = array_filter($selectedPlayers);
+
+                    // Check if any position select is empty
+                    foreach ($_POST as $position => $player_id) {
+                        if (empty($player_id)) {
+                            $errors[$position] = 'Please select a player.';
+                        }
                     }
 
-                    // Check valid time
-                    if ($training->end_time <= $training->start_time) {
-                        $error['end_time'] = 'End time must be after start time.';
-                    }
-                    
-
-                    //  Date must be in future
-                    $training->date;
-                    if (!isFutureDate($training->date)) {
-                        $error['date'] = 'Training session date must be in future date.';
+                    // Check for duplicate postion for a player
+                    if (count($selectedPlayers) !== count(array_unique($selectedPlayers))) {
+                        $errors['duplicate'] =  'A player cannot be selected multiple times.';
                     }
 
-                    // Begin Transaction
-                    $pdo->beginTransaction();
+                    if (empty($errors)){
+                        // Begin Transaction
+                        $pdo->beginTransaction();
 
-                    // Insert training session details to db
-                    $updated = $training->update($pdo);
+                        // Insert each selected player with position
+                        foreach ($_POST as $key => $player_id) {
+                             // Skip match_id
+                            if ($key === 'match_id') {
+                                continue;
+                            }
 
-                    if(!$updated){
-                        throw new \ErrorException('Failed to update training session');
+                            // Convert form key to match db ENUM value
+                            $position = $positions[$key];
+
+                            $inserted = Matches::updatePlayerPosition
+                                ($pdo, $match->match_id, $player_id, $position);
+
+                            // Failed to insert
+                            if (!$inserted) {
+                                throw new \Exception('Unable to update player positions.');
+                            }
+                        }
+
+                        // Insert unselected player with position as substitute
+                        foreach ($lineup as $player) {
+
+                            // If player was not selected
+                            if (!in_array($player['player_id'], $selectedPlayers)) {
+                                $inserted = Matches::updatePlayerPosition
+                                    ($pdo,$match->match_id,$player['player_id'],'Substitute');
+                                
+                                // Failed to insert
+                                if (!$inserted) {
+                                    throw new \Exception('Unable to update player positions.');
+                                }
+                            }
+                        }
+                        // Commmit and success message
+                        $pdo->commit();
+                        alert('success','Player Position for Match Lineup Succesfully Updated!','/');
                     }
-
-                    // Commmit and success message
-                    $pdo->commit();
-                    alert('success','Training Session Succesfully Updated!','/');
                 }
             }
             // Catch error
@@ -267,236 +560,419 @@
                 if ($pdo->inTransaction()) {
                     $pdo->rollBack();
                 }
-                alert('error', $e->getMessage(), '/training/update?training_session_id=' .$training->training_session_id);
+                alert('error', $e->getMessage(), '/match/lineup?match_id='. $match->match_id);
+                die();
+            }
+            // Render
+            $this->render('match/lineup', [
+                'message' => $message ?? '',
+                'match' => $match,
+                'lineup' => $lineup,
+                'errors' => $errors,
+                'positions' => $positions
+            ]);
+        }
+
+        // Render matchPlayerStats view with permission check
+        public function matchPlayerStats()
+        {
+            $pdo = $this->pdo;
+
+            $lineup = [];
+            $errors = [];
+            $positions = self::listAllPositions();
+
+            try{
+                $match = $this->getMatchId($pdo);
+                $lineup = Matches::getLineup($pdo,$match['match_id']);
+               
+                // If no existing lineup
+                if(!$lineup){
+                    abort(500, 'Unable to update match player stats. There is no exisiting lineup in this match.');
+                }
+
+                // Abort if match result is pending
+                if($match['result'] === 'Pending'){
+                    abort(403);
+                        abort(403, 'Unable to modify lineup. This match has no exising result yet.');
+                }
+
+                // Check if any lineup position is null
+                foreach ($lineup as $player) {
+                    if (empty($player['position'])) {
+                        abort(500, 'Unable to update match player stats. There is a player without lineup in this match.');
+                        break;
+                    }
+                }
+
+                // Get each match half
+                $halves = Matches::getMatchHalfById($pdo,$match['match_id']);
+                $match['halves'] = $halves;
+
+                // Calculate total points
+                $match['our_total_points'] = $halves[0]['our_total_points'] ?? 0;
+                $match['opponent_total_points'] = $halves[0]['opponent_total_points'] ?? 0;
+                
+                // POST REQUEST
+                if($_SERVER['REQUEST_METHOD'] === 'POST') {
+                    // Validate Match Id
+                    $match = $this->getMatchId($pdo);
+
+                    // Check for if match already has result
+                    if($match['result'] === 'Pending'){
+                        abort(403, 'Unable to modify lineup. This match has no exisint result yet.');
+                    }
+
+                    // Chech POSTs Values
+                    $stats = $_POST['stats'];
+                    foreach ($stats as $player_id => $playerStats) {
+                        $minutesPlayed = (int)$playerStats['minutes_played'] ?? 0;
+                        $tries = (int)$playerStats['tries'] ?? 0;
+                        $conversions = (int)$playerStats['conversions'] ?? 0;
+                        $penalties = (int)$playerStats['penalties'] ?? 0;
+                        $dropGoals = (int)$playerStats['drop_goals'] ?? 0;
+                        $yellowCards = (int)$playerStats['yellow_cards'] ?? 0;
+                        $redCards = (int)$playerStats['red_cards'] ?? 0;
+                    }
+
+                    // Get each match half
+                    $halves = Matches::getMatchHalfById($pdo, $match['match_id']);
+                    $match['halves'] = $halves;
+
+                    // Get Sum of total points
+                    $match['our_total_points'] = $halves[0]['our_total_points'] ?? 0;
+                    $match['opponent_total_points'] = $halves[0]['opponent_total_points'] ?? 0;
+                    $officialTotal =(int) $match['our_total_points'];
+                    $total = 0;
+
+                    // Calculate Total points by each player stats
+                    foreach ($stats as $playerStats) {
+                        $total +=
+                            ((int)$playerStats['tries'] * 5) +
+                            ((int)$playerStats['conversions'] * 2) +
+                            ((int)$playerStats['penalties'] * 3) +
+                            ((int)$playerStats['drop_goals'] * 3);
+                    }
+
+                    // Check if both points are equal
+                    if ((int)$total !== (int)$officialTotal){
+                        $errors['message'] = "Player stats total does not match official match score. Please try again";
+                    }
+
+                    // No errors
+                    if (empty($errors)){
+                        // Begin Transaction
+                        $pdo->beginTransaction();
+
+                        // Insert each to player_match_stats
+                        foreach ($stats as $player_id => $playerStats) {
+                            $inserted = Player::insertPlayerMatchStats($pdo, 
+                                $match['match_id'], $player_id, $playerStats);
+                            if(!$inserted){
+                                throw new \ErrorException('Failed to insert player stats.');
+                            }
+                        }
+
+                        // Commit
+                        $pdo->commit();
+                        alert('success','Player Match Player Stats Succesfully Updated!','/');
+                    }
+                }
+            }
+            // Catch error
+            catch (\Exception $e){
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                alert('error', $e->getMessage(), '/match/match-player-stats?match_id='. $match['match_id']);
+                die();
+            }
+            // Render
+            $this->render('match/match-player-stats', [
+                'message' => $message ?? '',
+                'match' => $match,
+                'lineup' => $lineup,
+                'errors' => $errors,
+                'positions' => $positions
+            ]);
+        }
+
+        // Render updateMatch view with permission check
+        public function updateMatch()
+        {
+            // Set PDO Connection
+            $pdo = $this->pdo;
+
+            try{
+                // Set error array
+                $error = [];
+
+                // Get match details as object with permission check
+                $match = new Matches($this->getMatchId($pdo));
+
+                // POST REQUEST
+                if($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+                    // Abort if match already has result 
+                    if($match->result !== 'Pending'){
+                        abort(403,'Unable to modify result of a past match');
+                    }
+                    
+                    // Set POST match_id
+                    $match = new Matches($this->getMatchId($pdo));
+
+                    // Create Matches object, override the original
+                    $match = new Matches([
+                        'match_id' => $match->match_id,
+                        'squad_id' => trimPost('squad_id'),
+                        'match_venue' => trimPost('match_venue'),
+                        'match_date' => trimPost('match_date'),
+                        'opposition_team_name' => trimPost('opposition_team_name'),
+                        'kick_off_time' => trimPost('kick_off_time'),
+                        'result' => trimPost('result')
+                    ]);
+                 
+                    // Validate inputs
+                    if (empty($match->match_venue)) {
+                        $error['match_venue'] = "Please select match venue.";
+                    }
+
+                    if (empty($match->match_date)) {
+                        $error['match_date'] = "Please enter match date.";
+                    }
+                    else{
+                        $match->match_date = formatDate($match->match_date);
+                    }
+
+                    if (empty($match->opposition_team_name)) {
+                        $error['opposition_team_name'] = "Please enter opposition team name.";
+                    }
+
+                    if (empty($match->kick_off_time)) {
+                        $error['kick_off_time'] = "Please enter kick off time.";
+                    }
+
+                    // No validation errors add to database
+                    if (empty($error)) {
+                        // Begin Transaction
+                        $pdo->beginTransaction();
+
+                        AccessControl::validateSquadAccess($pdo, $match->squad_id);
+                        
+                        // Get all squad players
+                        $players = Squad::getSquadPlayers($pdo, $match->squad_id);
+
+                        if(!$players){
+                            throw new \ErrorException('There is no players in this squad.');
+                        }
+                        
+                        // Check if Squad has enough playing member
+                        if (count($players) < 15) {
+                            throw new \ErrorException('Squad must have at least 15 players to participate in a match.');
+                        }
+
+                        // Update match details
+                        $updated = $match->update($pdo);
+
+                        if(!$updated){
+                            throw new \ErrorException('Failed to update match details');
+                        }
+
+                        // Commmit and success message
+                        $pdo->commit();
+                        alert('success','Match Updated Successfully.','/match');
+                    }
+                }
+            }
+            // Catch error
+            catch (\Exception $e){
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                alert('error', $e->getMessage(), '/match/update');
                 die($e->getMessage());
             }
 
             // Render
             $this->render('match/update', [
                 'squads' => $squads ?? '',
-                'training' => $training ?? '',
+                'match' => $match,
                 'error' => $error
             ]);
         }
 
-#########
-        // Render record training attendance with permission check
-        public function record()
+        // Update match result
+        public function updateResult()
         {
-            $pdo = Database::getInstance()->getConnection();
-
-            // Permission Check
-            authorize('record_attendance');
-
-            // Set error array
+            $pdo = $this->pdo;
             $error = [];
 
-            // Default training_session_id value
-            $training_session_id = $_GET['training_session_id'] ?? '';
+            // Get match details
+            $match = $this->getMatchId($pdo);
 
-            try{
-                // Only check if squad_id exists from GET request
-                if (!empty($_GET['training_session_id'])) {
+            // Get each match half
+            $halves = Matches::getMatchHalfById($pdo,$match['match_id']);
+            $match['halves'] = $halves;
 
-                    // Get Training Session
-                    $training = Training::getTrainingById($pdo, $training_session_id);
+            // Calculate total points
+            $match['our_total_points'] = $halves[0]['our_total_points'] ?? 0;
+            $match['opponent_total_points'] = $halves[0]['opponent_total_points'] ?? 0;
 
-                    // Training session does not exist
-                    if(!$training){
-                        abort(404, 'Training Session Not Found.');
-                    }
 
-                    // Authorization 
-                    if (!AccessControl::canViewSquad($training)) {
-                        abort(403);
-                    }
-                }
-                else{
-                    alert("error","Please select a squad", '/training');
-                }
-
-                // Get Players for Training Session
-                $players = Attendance::getPlayersById($pdo,$training_session_id);
-
-                // POST REQUEST FOR ATTENDANCE SHEET
-                if($_SERVER['REQUEST_METHOD'] === 'POST') {
-                    // Permission Check Again
-                    authorize('record_attendance');
-
-                    // Forbidden
-                    if (!hasSquadAccess($training['squad_id']) || !hasRole('Club Chairperson')){
-                        abort(403);
-                    }
-
-                    // Training date is in future show error message
-                    if (isFutureDate($training['date']) || isToday($training['date'])){
-                        alert('error', 
-                            'Unable to update training attendance sheet. Training date must be today or past date',
-                            '/training'
-                        );
-                    }
-
-                    // Begin Transaction
+            try {
+                // POST request
+                if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                    // Begin transaction
                     $pdo->beginTransaction();
 
-                    $attended = $_POST['attended'] ?? [];
+                    // Form data
+                    $data = [
+                        // First Half
+                        'fh_our_points' => trimPost('fh_our_points'),
+                        'fh_opponent_points' => trimPost('fh_opponent_points'),
+                        'fh_our_comments' => trimPost('fh_our_comments'),
+                        'fh_opponent_comments' => trimPost('fh_opponent_comments'),
 
-                    // Loop each players 
-                    foreach ($players as $player) {
-                        // If member_id is in array then update status to Present else Absent
-                        if (in_array($player['member_id'], $attended)) {
-                            $status = 'Present';
-                        } else {
-                            $status = 'Absent';
+                        // Second Half
+                        'sh_our_points' => trimPost('sh_our_points'),
+                        'sh_opponent_points' => trimPost('sh_opponent_points'),
+                        'sh_our_comments' => trimPost('sh_our_comments'),
+                        'sh_opponent_comments' => trimPost('sh_opponent_comments')
+                    ];
+
+                    // Validate empty input
+                    $error['fh_our_points'] = ifEmpty
+                        ($data['fh_our_points'], 'Please enter our team points');
+                    $error['fh_opponent_points'] = ifEmpty
+                        ($data['fh_opponent_points'], 'Please enter opponent team points');
+                    $error['fh_our_comments'] = ifEmpty
+                        ($data['fh_our_comments'], 'Please enter our team comments');
+                    $error['fh_opponent_comments'] = ifEmpty
+                        ($data['fh_opponent_comments'], 'Please enter opponent comments');
+                    $error['sh_our_points'] = ifEmpty
+                        ($data['sh_our_points'], 'Please enter our team points');
+                    $error['sh_opponent_points'] = ifEmpty
+                        ($data['sh_opponent_points'], 'Please enter opponent team points');
+                    $error['sh_our_comments'] = ifEmpty
+                        ($data['sh_our_comments'], 'Please enter our team comments');
+                    $error['sh_opponent_comments'] = ifEmpty
+                        ($data['sh_opponent_comments'], 'Please enter opponent comments');
+
+                    // Remove empty validation errors
+                    $error = array_filter($error);
+
+                    // No validation errors
+                    if (empty($error)) {
+                        // First Half in array
+                        $firstHalf = [
+                            'half_type' => 'First Half',
+                            'our_points' => $data['fh_our_points'],
+                            'opponent_points' => $data['fh_opponent_points'],
+                            'our_comments' => $data['fh_our_comments'],
+                            'opponent_comments' => $data['fh_opponent_comments']
+                        ];
+
+                        // Second Half in array
+                        $secondHalf = [
+                            'half_type' => 'Second Half',
+                            'our_points' => $data['sh_our_points'],
+                            'opponent_points' => $data['sh_opponent_points'],
+                            'our_comments' => $data['sh_our_comments'],
+                            'opponent_comments' => $data['sh_opponent_comments']
+                        ];
+                        
+                        // Save both halves
+                        Matches::saveMatchHalf($pdo,$match['match_id'],$firstHalf);
+                        Matches::saveMatchHalf($pdo,$match['match_id'],$secondHalf);
+
+                        // Calculate totals
+                        $ourTotal = $data['fh_our_points'] + $data['sh_our_points'];
+                        $opponentTotal = $data['fh_opponent_points'] + $data['sh_opponent_points'];
+
+                        // Determine match result
+                        if ($ourTotal > $opponentTotal) {
+                            $result = 'Win';
+                        }
+                        elseif ($ourTotal < $opponentTotal) {
+                            $result = 'Lose';
+                        }
+                        else {
+                            $result = 'Draw';
                         }
 
-                        // Create attendance object for each present players
-                        $attendance = new Attendance(
-                            $player['training_session_id'],
-                            $player['member_id'],
-                            $status ?? 'Pending'
-                        );
-
-                        // Update Status in database using attendance object
-                        $updated =  $attendance->update($pdo);
-                        if(!$updated){
-                            throw new \ErrorException('Failed to mark '.$player['player_name'].' /training/record_attendance');
-                        }
-                    }
-                     // Commmit and success message
-                    $pdo->commit();
-                    alert('success','Training Attendance Marked Successfuly!.','/');
-                }
-            }
-            // Catch error
-            catch (\Exception $e){
-                if ($pdo->inTransaction()) {
-                    $pdo->rollBack();
-                }
-                alert(
-                    'error', $e->getMessage(), 
-                    '/training/record_attendance?training_session_id='.$training['training_session_id']);
-                die($e->getMessage());
-            }
-
-            // Render
-            $this->render('match/record_attendance', [
-                'players' => $players,
-                'training' => $training,
-                'error' => $error
-            ]);
-        }
-
-
-        // Render record training session with permission check
-        public function view()
-        {
-            $pdo = Database::getInstance()->getConnection();
-
-            // Permission Check
-            authorize('view_training_session');
-
-            // Set error array
-            $error = [];
-
-            try{
-                $T = self::checkTrainingSessionId($pdo);
-
-                // POST REQUEST FOR ATTENDANCE SHEET
-                if($_SERVER['REQUEST_METHOD'] === 'POST') {
-                    // Permission Check Again
-                    authorize('update_training_session');
-
-                    // Forbidden
-                    if (!hasSquadAccess($T['squad_id']) || !hasRole('Club Chairperson')){
-                        abort(403);
-                    }
-
-                    $action = trimPost('action') ?? '';
-
-                    if ($action === 'update') {
-                        // Go to update training session page
-                        header(
-                            'Location: /training/update?training_session_id='
-                            . $T['training_session_id']
-                        );
-                    }
-                    elseif ($action === 'delete') {
-                        // Begin Transaction
-                        $pdo->beginTransaction();
-
-                        // delete training session
-                        $deleted = Training::deleteTraining($pdo, $T['training_session_id']);
-
-                        // If not deleted
-                        if(!$deleted){
-                            throw new \ErrorException('Unable to delete training session');
+                        // Update match result
+                        $updated =  Matches::updateMatchResult($pdo,$result, $match['match_id']);
+                        if (!$updated) {
+                            throw new \ErrorException('Failed to update match result' );
                         }
 
-                        // Commmit and success message
+                        // Commit
                         $pdo->commit();
-                        alert('success', 'Training Session Deleted Successfully!', '/');
-                    }
-                    else{
-                        abort(404, "Undefined Action");
-                    }
-                }
-                // DEFAULT VIEW
-                else{
-                    // Only check if squad_id exists from GET request
-                    if (!empty($_GET['training_session_id'])) {
-                        // Get Players for Training Session
-                        $players = Attendance::getPlayersById($pdo,$T['training_session_id']);
+
+                        // Alert message
+                        alert(
+                            'success', 'Match result updated successfully!',
+                            '/match/view?match_id=' . $match['match_id']
+                        );
                     }
                 }
             }
-            // Catch error
-            catch (\Exception $e){
+            catch (\Exception $e) {
                 if ($pdo->inTransaction()) {
                     $pdo->rollBack();
                 }
                 alert(
-                    'error', $e->getMessage(), 
-                    '/training/view?training_session_id='.$T['training_session_id']);
-                die($e->getMessage());
+                    'error', $e->getMessage(), '/match/view?match_id='. $match['match_id']
+                );
             }
 
-            // Render
-            $this->render('match/view', [
-                'players' => $players,
-                'training' => $T,
-                'error' => $error
+            $this->render('match/update-result', [
+                'match' => $match,
+                'halves' => $halves,
+                'error' => $error,
+                'data' => $data ?? []
             ]);
         }
 
-        // Private function if training session id is mandatory
+        // Private function if match_id is mandatory
         // view and update
-        private function checkTrainingSessionId($pdo){
-            if(isset($_GET['training_session_id']) || isset($_POST['training_session_id'])){
-                // Default training object value
-                $training_session_id = $_GET['training_session_id']
-                     ?? ($_POST['training_session_id']);
+        private function getMatchId($pdo){
+            // IF match_id is requested by GET or POST
+            if(isset($_GET['match_id']) || isset($_POST['match_id'])){
 
-                // Get Training Session
-                $training = Training::getTrainingById($pdo, $training_session_id);
+                // Set match_id
+                $match_id = $_GET['match_id'] ?? ($_POST['match_id']);
 
-                // Training session does not exist
-                if(!$training){
-                    abort(404, 'Training Session Not Found.');
-                }
+                // Get Match Details 
+                $match = AccessControl::validateMatchAccess($pdo, $match_id);
 
-                // Authorization 
-                if (!AccessControl::canViewSquad($training)) {
-                    abort(403);
-                }
-
-                // Return as Training Object
-                return $training;
+                // Return as match Object
+                return $match;
             }
             else{
-                alert("error","Please select a squad", '/training');
+                alert("error","Please select a match", '/match/all');
             }
         }
-    }
 
+        // Returns an array of positions
+        public static function listAllPositions(){
+            return [
+                'Loosehead_Prop' => 'Loosehead Prop',
+                'Hooker' => 'Hooker',
+                'Tighthead_Prop' => 'Tighthead Prop',
+                'Lock_1' => 'Lock',
+                'Lock_2' => 'Lock',
+                'Blindside_Flanker' => 'Blindside Flanker',
+                'Openside_Flanker' => 'Openside Flanker',
+                'Number_8' => 'Number 8',
+                'Scrum_half' => 'Scrum-half',
+                'Fly_half' => 'Fly-half',
+                'Left_Wing' => 'Left Wing',
+                'Inside_Centre' => 'Inside Centre',
+                'Outside_Centre' => 'Outside Centre',
+                'Right_Wing' => 'Right Wing',
+                'Fullback' => 'Fullback',
+            ];
+        }
+    }
 ?>

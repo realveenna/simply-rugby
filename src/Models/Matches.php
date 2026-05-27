@@ -13,6 +13,9 @@
         public $opposition_team_name;
         public $kick_off_time;
         public $result;
+        public $squad_name;
+        public $section_name;
+        public $section_id;
 
         public function __construct($data = [])
         {
@@ -23,6 +26,10 @@
             $this->opposition_team_name = $data['opposition_team_name'] ?? '';
             $this->kick_off_time = $data['kick_off_time'] ?? '';
             $this->result = $data['result'] ?? '';
+
+            $this->squad_name = $data['squad_name'] ?? null;
+            $this->section_name = $data['section_name'] ?? null;
+            $this->section_id = $data['section_id'] ?? null;
         }
 
         // Create match
@@ -57,61 +64,179 @@
             return $id;
         }
 
-        // Insert Lineup
-        public static function insertLineup($pdo, $match_id, $player_id, $position)
-        {
-            $statement = $pdo->prepare
-            (
-                "INSERT INTO match_lineup
-                    (match_id, player_id, position)
-                VALUES
-                    (:match_id, :player_id, :position)"
-            );
-
-            return $statement->execute([
-                ':match_id' => $match_id,
-                ':player_id' => $player_id,
-                ':position' => $position ?? ''
-            ]);
-        }
-
-        // Update training session
+        // Update match details
         public function update($pdo)
         {
             $statement = $pdo->prepare
             (
-                "UPDATE training_session 
-                SET 
-                    coach_member_id = :coach_member_id, 
-                    date = :date, 
-                    start_time = :start_time, 
-                    end_time = :end_time, 
-                    skills_activities = :skills_activities
-                WHERE training_session_id = :training_session_id"
+                "UPDATE matches
+                SET
+                    opposition_team_name = :opposition_team_name,
+                    match_venue = :match_venue,
+                    match_date = :match_date,
+                    kick_off_time = :kick_off_time
+                WHERE match_id = :match_id
+            ");
+
+            return $statement->execute([
+                ':opposition_team_name' => $this->opposition_team_name,
+                ':match_venue' => $this->match_venue,
+                ':match_date' => $this->match_date,
+                ':kick_off_time' => $this->kick_off_time,
+                ':match_id' => $this->match_id
+            ]);
+        }
+
+        // Update match result (Win / Lose / Draw)
+        public static function updateMatchResult($pdo,$result, $match_id)
+        {
+            $statement = $pdo->prepare
+            (
+                "UPDATE matches
+                SET
+                    result = :result
+                WHERE match_id = :match_id
+            ");
+
+            return $statement->execute([
+                ':result' => $result ?? 'Pending',
+                ':match_id' => $match_id
+            ]);
+        }
+
+        // Insert Lineup
+        public static function updatePlayerPosition($pdo, $match_id, $member_id, $position = null)
+        {
+            $statement = $pdo->prepare
+            (
+                  "UPDATE match_lineup
+                    SET position = :position
+                    WHERE match_id = :match_id AND member_id = :member_id"
             );
 
             return $statement->execute([
-                ':coach_member_id' => $this->coach_member_id,
-                ':date' => $this->date,
-                ':start_time' => $this->start_time,
-                ':end_time' => $this->end_time,
-                ':skills_activities' => $this->skills_activities,
-                ':training_session_id' => $this->training_session_id
+                ':match_id' => $match_id,
+                ':member_id' => $member_id,
+                ':position' => $position
             ]);
+        }
+
+        // Create lineup using squad players
+        public static function createLineupFromSquad($pdo, $match_id, $squad_id)
+        {
+            // Get all squad players
+            $players = Squad::getSquadPlayers($pdo, $squad_id);
+
+            // Prepare insert statement
+            $statement = $pdo->prepare
+            (
+                "INSERT INTO match_lineup 
+                    (match_id, member_id, position) 
+                VALUES 
+                    (:match_id, :member_id, :position)"
+            );
+
+            // Insert each player into lineup
+            foreach ($players as $player) {
+
+                $statement->execute([
+                    ':match_id' => $match_id,
+                    ':member_id' => $player['member_id'],
+                    ':position' => ''
+                ]);
+            }
+            return true;
+        }
+
+        // Get Player Match Lineup
+        public static function getLineup($pdo, $match_id)
+        {
+            $statement = $pdo->prepare
+            (
+                "SELECT 
+                    CONCAT(player.first_name, ' ', player.last_name) AS player_name,
+                    player.member_id AS player_id,
+                    ml.position,
+
+                    pms.minutes_played,
+                    pms.tries,
+                    pms.conversions,
+                    pms.penalties,
+                    pms.drop_goals,
+                    pms.yellow_cards,
+                    pms.red_cards
+
+                FROM match_lineup ml
+                INNER JOIN member player ON player.member_id = ml.member_id
+                LEFT JOIN player_match_stats pms ON ml.member_id = pms.member_id 
+                    AND ml.match_id = pms.match_id
+
+                WHERE ml.match_id = :match_id"
+            );
+
+            $statement->execute([':match_id' => $match_id]);
+
+            return $statement->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        // // Get Coach of a Squad
+        // public static function getCoachLineup($pdo, $match_id)
+        // {
+        //     $statement = $pdo->prepare
+        //     (
+        //         "SELECT 
+        //             CONCAT(player.first_name, ' ', player.last_name) AS player_name,
+        //             ml.position
+
+        //         FROM match_lineup ml
+        //         INNER JOIN member player ON player.member_id = ml.member_id
+
+        //         WHERE ml.match_id = :match_id"
+        //     );
+
+        //     $statement->execute([':match_id' => $match_id]);
+
+        //     return $statement->fetchAll(PDO::FETCH_ASSOC);
+        // }
+
+        // Delete Match
+        public static function delete($pdo, $match_id){
+            $statement = $pdo->prepare
+            (
+                "DELETE FROM matches 
+                WHERE match_id = :match_id"
+            );
             
+            $result = $statement->execute([
+                ':match_id' => $match_id
+            ]);
+
+            return $result;
         }
 
         // Select Matches allow all or by squad_id
         public static function getMatches($pdo, $squad_id = null){
            $sql = "
-                SELECT *
-                FROM matches
+                SELECT
+                    m.*,
+                    s.squad_name,
+                    sec.section_id,
+                    sec.section_name
+                    
+                FROM matches m
+
+                LEFT JOIN squad s ON m.squad_id = s.squad_id
+                LEFT JOIN squad_member sm ON m.squad_id = sm.squad_id
+                LEFT JOIN section sec ON sec.section_id  = s.section_id 
             ";
 
             // If squad_id is not null
             if ($squad_id !== null) {
-                $sql .= " WHERE squad_id = :squad_id";
+                $sql .= " WHERE m.squad_id = :squad_id";
             }
+
+            // GROUP by
+            $sql .= "  GROUP BY m.match_id";
 
             // Order by match date
             $sql .= " ORDER BY match_date ASC, kick_off_time ASC";
@@ -130,80 +255,146 @@
             return $statement->fetchAll(PDO::FETCH_ASSOC);
         }
 
-        // Select Training by id
-        public static function getTrainingById($pdo, $training_session_id){
+        // Get match details by id
+        public static function getMatchById($pdo, $match_id){
             $statement = $pdo->prepare
             (
-                "SELECT 
-                    ts.*,
+                "SELECT
+                    m.*,
                     s.squad_name,
-                    s.squad_id,
-                    sec.section_name,
-                    CONCAT(coach.first_name, ' ', coach.last_name) AS coach_name,
-                    SUM(ta.attendance_status = 'Pending') AS pending_count
+                    sec.section_id,
+                    sec.section_name
 
-                FROM training_session ts
+                FROM matches m
 
-                -- Squad Name
-                LEFT JOIN squad s ON ts.squad_id = s.squad_id
-                -- Section (Junior/Senior)
-                LEFT JOIN section sec ON s.section_id = sec.section_id
-                -- Attendance in Pending
-                LEFT JOIN training_attendance ta ON ts.training_session_id = ta.training_session_id
-                -- Coach
-                LEFT JOIN member coach ON ts.coach_member_id = coach.member_id
-                WHERE ts.training_session_id = :training_session_id
-                ORDER BY date DESC"
-            );
+                LEFT JOIN squad s ON m.squad_id = s.squad_id
+                LEFT JOIN squad_member sm ON m.squad_id = sm.squad_id
+                LEFT JOIN section sec ON sec.section_id = s.section_id
                 
-            $statement->execute([
-                ':training_session_id' => $training_session_id
-            ]);
+                WHERE match_id = :match_id"
 
+            );
+            $statement->execute([
+                ':match_id' => $match_id
+            ]);
             return $statement->fetch(PDO::FETCH_ASSOC);
         }
 
-        public static function getTrainingAttendance($pdo, $training_session_id = null){
-            // SQL query
-            $sql = 
-                "SELECT 
-                    ta.attendance_status,
-                    CONCAT(player.first_name, ' ', player.last_name) AS player_name,
-                    pp.player_availability_status
+        // Get all match halves by match_id
+        public static function getMatchHalfById($pdo, $match_id)
+        {
+            $statement = $pdo->prepare(
+            "SELECT 
+                mh.*,
+                (SELECT SUM(our_points)
+                FROM match_half
+                WHERE match_id = :match_id_1) AS our_total_points,
 
-                FROM training_attendance ta
-                -- Player Name
-                LEFT JOIN member player ON ta.member_id = player.member_id
-                -- Player Availability Status
-                LEFT JOIN player_profile pp ON player.member_id = pp.member_id";
+                (SELECT SUM(opponent_points)
+                FROM match_half
+                WHERE match_id = :match_id_2) AS opponent_total_points
 
+                FROM match_half mh
+                WHERE mh.match_id = :match_id
+                ORDER BY mh.half_type ASC
+            ");
 
-            // If selecting by training_session_id
-            if($training_session_id !== null){
-                $sql .= " WHERE ta.training_session_id = :training_session_id";
-            }
-
-            // Order result
-            $sql .= " ORDER BY date DESC";
-
-            $statement = $pdo->prepare($sql);
-            $statement->execute();
+            $statement->execute([
+                ':match_id' => $match_id,
+                ':match_id_1' => $match_id,
+                ':match_id_2' => $match_id
+            ]);
 
             return $statement->fetchAll(PDO::FETCH_ASSOC);
         }
 
-        public static function deleteTraining($pdo, $training_session_id){
-            $statement = $pdo->prepare
-            (
-                "DELETE FROM training_session 
-                WHERE training_session_id = :training_session_id"
+        // Save match half
+        public static function saveMatchHalf($pdo, $match_id, $half)
+        {
+            $statement = $pdo->prepare(
+                "INSERT INTO match_half
+                 SET
+                    match_id = :match_id,
+                    half_type = :half_type,
+                    our_points = :our_points,
+                    opponent_points = :opponent_points,
+                    our_comments = :our_comments,
+                    opponent_comments = :opponent_comments
+
+                -- If duplicate match_id and half_type then update
+                ON DUPLICATE KEY UPDATE
+                    our_points = VALUES(our_points),
+                    opponent_points = VALUES(opponent_points),
+                    our_comments = VALUES(our_comments),
+                    opponent_comments = VALUES(opponent_comments)"
             );
-            
-            $result = $statement->execute([
-                ':training_session_id' => $training_session_id
+
+            return $statement->execute([
+                ':match_id' => $match_id,
+                ':half_type' => $half['half_type'],
+                ':our_points' => $half['our_points'],
+                ':opponent_points' => $half['opponent_points'],
+                ':our_comments' => $half['our_comments'],
+                ':opponent_comments' => $half['opponent_comments']
+            ]);
+        }
+
+        // Get player match stats
+        public static function getMatchStats($pdo,$member_id){
+            $statement = $pdo->prepare(
+                "SELECT
+                    pms.*,
+                    m.match_date,
+                    m.opposition_team_name,
+                    s.squad_name
+
+                FROM player_match_stats pms
+
+                INNER JOIN matches m
+                    ON pms.match_id = m.match_id
+
+                INNER JOIN squad s
+                    ON m.squad_id = s.squad_id
+
+                WHERE pms.member_id = :member_id
+
+                ORDER BY
+                    m.match_date DESC"
+            );
+
+            $statement->execute([
+                ':member_id' => $member_id
             ]);
 
-            return $result;
+            return $statement->fetchAll(
+                PDO::FETCH_ASSOC
+            );
+        }
+
+        // Get player stats
+        public static function getAllMatchStats($pdo,$member_id){
+            $statement = $pdo->prepare(
+                "SELECT
+                    SUM(tries) AS tries,
+                    SUM(conversions) AS conversions,
+                    SUM(penalties) AS penalties,
+                    SUM(drop_goals) AS drop_goals,
+                    SUM(minutes_played) AS minutes_played,
+                    SUM(yellow_cards) AS yellow_cards,
+                    SUM(red_cards) AS red_cards,
+
+                    ((SUM(tries) * 5) + (SUM(conversions) * 2) + 
+                    (SUM(penalties) * 3) + (SUM(drop_goals) * 3)) AS total_points
+
+                FROM player_match_stats
+                WHERE member_id = :member_id"
+            );
+
+            $statement->execute([
+                ':member_id' => $member_id
+            ]);
+
+            return $statement->fetch(PDO::FETCH_ASSOC);
         }
     }
 ?>

@@ -63,7 +63,7 @@
                                     ($_SESSION['user']['member_id']) ?? null;
 
                                 $_SESSION['player_access'] = 
-                                    Guardian::getAccessPlayers($pdo, $_SESSION['user']['member_id']);
+                                    AccessControl::getAccessPlayers($pdo, $_SESSION['user']['member_id']);
                                 $_SESSION['squad_access'] = 
                                     AccessControl::getAccessSquads($pdo, $_SESSION['user']['member_id']);
                                 $_SESSION['section_access'] = 

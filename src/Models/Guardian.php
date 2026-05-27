@@ -17,14 +17,10 @@
         private $mobile_number;
         private $is_primary;
         private $apply_coach;
-
         private $email; 
-
         private $access_level; 
 
-
-
-        public function __construct($data, $memberId)
+        public function __construct($data, $memberId = null)
         {
             $this->application_id = $data['application_id'] ?? '';
             $this->member_id = $data['member_id'] ?? $memberId ?? '';
@@ -161,12 +157,12 @@
         public function insertGuardianApplication($pdo)
         {
             try{
-                // Check if the email already exists in the logins table
-                $isMember = User::checkEmailExists($this->email, "This email has an existing registration with another player");
+                // // Check if the email already exists in the logins table
+                // $isMember = User::checkEmailExists($this->email, "This email has an existing registration with another player");
                         
-                if($isMember['exists']){
-                    throw new \Exception("This email is already a registered member. Please log in.");
-                }
+                // if($isMember['exists']){
+                //     throw new \Exception("This email is already a registered member. Please log in.");
+                // }
 
                 $statement = $pdo->prepare(
                     "INSERT INTO application_guardian 
@@ -345,6 +341,7 @@
                 alert('error', 'There is a database error in fetching secondary guardians.', '/player-applications');
             }
         }
+        
         public static function getPlayerGuardian($pdo, $member_id, $is_primary){
              $statement = $pdo->prepare(
                 "SELECT
@@ -379,24 +376,5 @@
             $result = $statement->fetch(PDO::FETCH_ASSOC);
             return $result;
         }
-
-
-         ################
-        public static function getAccessPlayers($pdo, $member_id)
-        {
-            $statement = $pdo->prepare("
-                SELECT member_id
-                FROM player_contact
-                WHERE contact_member_id = :member_id
-            ");
-
-            $statement->execute([
-                ':member_id' => $member_id
-            ]);
-
-            return $statement->fetchAll(PDO::FETCH_COLUMN);
-        }
-        ##########
-
     }
 ?>

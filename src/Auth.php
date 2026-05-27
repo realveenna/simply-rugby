@@ -1,16 +1,13 @@
 <?php
     namespace Test;
 
-    use Test\Controllers\Error;
-    
     class Auth
     {
         // Check if Club Chairperson or Membership Secretary
         public static function isAdmin()
         {
-            return
-                $_SESSION['rbac']->hasRole('Club Chairperson') ||
-                $_SESSION['rbac']->hasRole('Membership Secretary');
+            return isset($_SESSION['rbac']) && ($_SESSION['rbac']->hasRole('Club Chairperson') ||
+                $_SESSION['rbac']->hasRole('Membership Secretary'));
         }
         
         // Own profile
@@ -28,7 +25,7 @@
         // Section Access
         public static function hasSectionAccess($section_id)
         {
-            if (hasRole('Club Chairperson')) {
+            if (isset($_SESSION['rbac']) && hasRole('Club Chairperson')) {
                 return true;
             }
             return in_array($section_id, $_SESSION['section_access'], true);
@@ -37,7 +34,7 @@
         // Squad Access
         public static function hasSquadAccess($squad_id)
         {
-            if (hasRole('Club Chairperson')) {
+            if (isset($_SESSION['rbac']) && hasRole('Club Chairperson')) {
                 return true;
             }
             return in_array($squad_id, $_SESSION['squad_access'], true);

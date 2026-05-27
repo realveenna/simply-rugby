@@ -12,6 +12,7 @@
     <?php endif; ?>
 
 
+
     <table class="datatable">
         <thead>
             <tr>
@@ -72,96 +73,125 @@
         </thead>
 
         <tbody>
-            <?php foreach($trainings as $s): ?>
+            <?php foreach($trainings as $training): ?>
             <tr>
                 <td class="font-medium text-heading whitespace-nowrap text-center">
-                    <?= h($s['squad_name']) ?> 
+                    <?= h($training['squad_name']) ?> 
                 </td>
-                <td class="text-center"><?= h($s['coach_name']) ?></td>
-                <td class="text-center"><?= h($s['date']) ?></td>
+                <td class="text-center"><?= h($training['coach_name']) ?></td>
+                <td class="text-center"><?= h($training['date']) ?></td>
                 <td class="text-center">
-                    <?= formatTime(h($s['start_time'])) .' - '. formatTime(h($s['end_time'])) ?>
+                    <?= formatTime(h($training['start_time'])) .' - '. formatTime(h($training['end_time'])) ?>
                 </td>
                 <td class="text-center long-text">
-                    <?= h($s['skills_activities'])?>
+                    <?= h($training['skills_activities'])?>
                 </td>
-                <!-- Badge Statusf for Training -->
+                <!-- Badge Status for Training -->
                 <td class="text-center">
-                    <!-- Past but pending attendance-->
-                    <?php if((int)$s['pending_count'] > 0 && (!isFutureDate($s['date']))): ?>
+                    <!-- Update Attendance -->
+                    <?php if($training['status'] === 'Attendance'): ?>
                         <span class="<?= badgeWarning()?>">
-                            Needs Attendance
+                            Update Attendance
                         </span>
-                    <!-- All Marked and Past Date-->
-                    <?php elseif((int)$s['pending_count'] === 0 && !isFutureDate($s['date'])): ?>
+
+                    <!-- Record Skills -->
+                    <?php elseif ($training['status'] === 'Skills' ): ?>
+                        <span class="<?= badgeWarning() ?>">
+                            Record Skills
+                        </span>
+
+                    <!-- Everything completed -->
+                    <?php elseif($training['status'] === 'Completed'): ?>
                         <span class="<?= badgeSuccess()?>">
                             Completed
                         </span>
+
                     <!-- Future Date -->
-                    <?php elseif(isFutureDate($s['date'])): ?>
+                    <?php elseif($training['status'] === 'Upcoming'): ?>
                         <span class="<?= badgeBlue()?>">
                             Upcoming
                         </span>
                     <?php endif; ?>
+                    
                 </td>
                 <!-- Action Button -->
                 <td class="text-center">
-                    <button id="trainingListAction<?=h($s['training_session_id'])?>" 
-                        data-dropdown-toggle="trainingListDots<?=h($s['training_session_id'])?>" class="text-heading bg-neutral-primary box-border border border-transparent hover:bg-neutral-secondary-medium focus:ring-4 focus:ring-neutral-tertiary font-medium leading-5 rounded-base text-sm p-2 focus:outline-none" type="button"> 
+                    <button id="trainingListAction<?=h($training['training_session_id'])?>" 
+                        data-dropdown-toggle="trainingListDots<?=h($training['training_session_id'])?>" class="text-heading bg-neutral-primary box-border border border-transparent hover:bg-neutral-secondary-medium focus:ring-4 focus:ring-neutral-tertiary font-medium leading-5 rounded-base text-sm p-2 focus:outline-none" type="button"> 
                         <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-width="3" d="M6 12h.01m6 0h.01m5.99 0h.01"/></svg>
                     </button>
 
                     <!-- Dropdown menu -->
                     <!-- Permission Action Buttons -->
-                    <div id="trainingListDots<?=h($s['training_session_id'])?>" class="z-10 hidden bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg w-44 dark:divide-gray-600">
+                    <div id="trainingListDots<?=h($training['training_session_id'])?>" class="min-w-max  z-10 hidden bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg w-44 dark:divide-gray-600">
                         <form method="post" action="">
-
-                            <!-- view_training_session -->
-                            <?php if(hasPermission('view_training_session')): ?>
-                                <ul class="p-2 text-sm text-body font-medium" aria-labelledby="trainingListAction<?=h($s['training_session_id'])?>">
-                                    <li>
-                                        <a href="/training/view?training_session_id=<?=h(($s['training_session_id']))?>" 
-                                            class="inline-flex items-center justify-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
-                                            View More
-                                        </a>  
-                                    </li>   
-                                </ul>
-                            <?php endif; ?>
-                            
+                            <ul class="p-2 text-sm text-body font-medium" aria-labelledby="trainingListAction<?=h($training['training_session_id'])?>">
                             <!-- record_attendance -->
-                            <?php if(hasPermission('record_attendance')): ?>
-                                <ul class="p-2 text-sm text-body font-medium" aria-labelledby="trainingListAction<?=h($s['training_session_id'])?>">
-                                    <li>
-                                        <a href="/training/record_attendance?training_session_id=<?=h(($s['training_session_id']))?>" 
-                                            class="inline-flex items-center justify-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
-                                            Record Attendance
-                                        </a>  
-                                    </li>   
-                                </ul>
+                            <!-- Date is today or past - -->
+                            <?php if(hasPermission('record_attendance') && $training['status'] === 'Attendance'): ?>
+                                <li>
+                                    <a href="/training/record_attendance?training_session_id=<?=h(($training['training_session_id']))?>" 
+                                        class="inline-flex items-center text-brand hover:text-brand-medium justify-center w-full p-2 hover:bg-neutral-tertiary-medium rounded">
+                                        Record Attendance
+                                    </a>  
+                                </li>   
                             <?php endif; ?>
 
-                            <!-- view_training_session -->
-                            <?php if(hasPermission('view_training_session')): ?>
-                                <ul class="p-2 text-sm text-body font-medium" aria-labelledby="trainingListAction<?=h($s['training_session_id'])?>">
+                            <!-- record_player_skills -->
+                            <!-- Date is today or past and all attendance is marked - -->
+                            <?php if(hasPermission('record_player_skills') && $training['status'] === 'Skills'): ?>
+                                <?php if($training['status'] === 'Skills'): ?>
                                     <li>
-                                        <a href="/training/update?training_session_id=<?=h(($s['training_session_id']))?>" 
-                                            class="inline-flex items-center justify-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
-                                            Update
+                                        <a href="/training/record_player_skills?training_session_id=<?=h(($training['training_session_id']))?>" 
+                                            class="inline-flex items-center text-brand hover:text-brand-medium justify-center w-full p-2 hover:bg-neutral-tertiary-medium rounded">
+                                            Record Player Skills
+                                        </a>  
+                                    </li>   
+                                <?php endif; ?>
+                            <?php endif; ?>
+
+                            <?php if(hasPermission('record_player_skills')): ?>
+                                <!-- Button if user has permission to record injury -->
+                                <?php if ((hasPermission('record_injury')) && !isFutureDate($training['date'])):?>
+                                    <li>
+                                        <a href="/injury?training_session_id=<?= $training['training_session_id']?>" 
+                                            class="inline-flex items-center justify-center text-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded-md">
+                                            Record Injury
                                         </a>
                                     </li>
-                                </ul>
+                                <?php endif; ?>
+                            <?php endif; ?>
+
+                            <!-- view_training_session -->
+                            <?php if(hasPermission('view_training_session')): ?>
+                                <li>
+                                    <a href="/training/view?training_session_id=<?=h(($training['training_session_id']))?>" 
+                                        class="inline-flex items-center justify-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
+                                        View More
+                                    </a>  
+                                </li>   
+                            <?php endif; ?>
+
+                            <!-- update_training_session -->
+                            <?php if(hasPermission('update_training_session')): ?>
+                                <li>
+                                    <a href="/training/update?training_session_id=<?=h(($training['training_session_id']))?>" 
+                                        class="inline-flex items-center justify-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
+                                        Update
+                                    </a>
+                                </li>
                             <?php endif; ?>
 
                             <!-- delete_training_session -->
                             <?php if(hasPermission('delete_training_session')): ?>
-                                 <ul class="p-2 text-sm text-body font-medium" aria-labelledby="trainingListAction<?=h($s['training_session_id'])?>">
-                                    <li>
-                                        <button type="submit" name="action" value="delete">
-                                            Delete
-                                        </button>
-                                    </li>
-                                </ul>
+                                <li>
+                                    <button type="submit" name="action" value="delete"
+                                        class="flex justify-center items-center text-center w-full p-2 text-fg-danger hover:bg-neutral-tertiary-medium rounded-md">
+                                        Delete
+                                    </button>
+                                </li>
                             <?php endif; ?>
+                            </ul>
                         </form>
                     </div>
                 </td>

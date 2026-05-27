@@ -99,6 +99,7 @@
         
         return $yearGap;
     }
+    
 
     // Format date for db
     function formatDate($date)
@@ -106,12 +107,19 @@
         return date('Y-m-d', strtotime($date));
     }
 
+    // Format date for display 
+    // THU 30 MAY
+    function formatDateDisplay($date)
+    {
+        return strtoupper(date('D, d M Y', strtotime($date)));
+    }
+
     // Date must be in future
     function isFutureDate($date)
     {
         $selectedDate = strtotime($date);
         $today = strtotime(date('Y-m-d'));
-        return $selectedDate >= $today;
+        return $selectedDate > $today;
     }
 
     // Date is today
@@ -123,15 +131,16 @@
     }
 
     // Format time
-
     function formatTime($time){
         return date('g:i A', strtotime($time));
     }
 
+    // POST input validation if empty
     function ifEmpty($value, $message){
         return empty($value) ? $message : '';
     }
 
+    // Trim POST input value
     function trimPost($value){
         if (!isset($_POST[$value])) {
             return '';
@@ -140,10 +149,8 @@
     }
 
 
-    // 
-    //  <div class="flex flex-col items-center">
-    //     <h1 class="<?= heading1() ">All <span class="<?  underline()">Squads</span></h1>
-    // </div>
+
+    // Page Title
     function title($text,$underline){
         return"
         <div class='flex flex-col items-center'>
@@ -166,10 +173,18 @@
             </h2>
         </div>";
     }
-     function titleLeftSmall($text){
+    function titleLeftBrand($text){
         return"
         <div class='flex flex-col items-start text-left'>
-            <h3 class='mb-3 mt-6 text-2xl font-semibold tracking-tight text-heading md:text-2l lg:text-3xl'>
+            <h2 class='mb-3 text-2xl font-semibold tracking-tight text-brand md:text-2l lg:text-3xl'>
+                $text 
+            </h2>
+        </div>";
+    }
+     function titleLeftSmall($text){
+        return"
+        <div class='flex flex-col mt-6 items-start text-left'>
+            <h3 class='mb-3 text-2xl font-semibold tracking-tight text-heading md:text-2l lg:text-2xl'>
                     $text 
             </h3>
         </div>";
@@ -182,10 +197,7 @@
         return "mb-2 text-xl font-semibold tracking-tight text-heading";
     }
 
-    // function p(){
-    //     return "mb-6 text-body";
-    // }
-
+ 
     function underline(){
         return "underline underline-offset-3 decoration-4 decoration-brand";
     }
@@ -231,14 +243,22 @@
 
     function primaryBtn(){
         return "
-            text-white bg-brand box-border border border-transparent hover:bg-brand-strong focus:ring-4 
+            text-white bg-brand box-border border border-transparent  hover:bg-transparent 
+            hover:border-brand hover:text-brand focus:ring-1 hover:bg-brand/80
             focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 
             focus:outline-none
     ";}
+    function primaryBtnNoBG(){
+        return "
+            text-brand bg-transparent border border-brand hover:bg-brand-brand hover:text-white 
+            hover:border-transparent focus:ring-4 focus:ring-brand-medium hover:bg-brand/80
+            shadow-xs font-medium leading-5 rounded-base
+            text-sm px-4 py-2.5 focus:outline-none
+    ";}
     function dangerBtn(){
         return "
-          text-red-600 flex mx-auto items-center justify-center
-            hover:text-white border border-red-600 hover:bg-red-600
+            text-red-600 flex mx-auto items-center justify-center
+            hover:text-white border border-red-600 hover:bg-red-600/70
             focus:ring-4 focus:outline-none focus:ring-red-300
             font-medium rounded-lg text-sm px-5 py-2.5
             dark:border-red-500 dark:text-red-500
@@ -248,7 +268,11 @@
 
     function secondaryBtn() {
         return "
-        flex items-center justify-center py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700
+        flex items-center justify-center py-2.5 px-5 text-sm font-medium 
+        text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 
+        hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:ring-4 focus:ring-gray-100 
+        dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 
+        dark:hover:text-white dark:hover:bg-gray-700
            
     ";}
 
@@ -275,7 +299,7 @@
     }
 
     function formPadding(){
-        return "p-6 space-y-4 md:space-y-6 sm:p-8";
+        return "p-2 space-y-4 md:space-y-6 sm:p-8";
     }
 
     function cardClass(){
@@ -299,19 +323,19 @@
         return "space-y-4 md:space-y-6";
     }
     function badgeBlue(){
-        return "bg-brand-softer border border-brand-subtle text-fg-brand-strong text-xs font-medium px-1.5 py-0.5 rounded";
+        return "bg-brand-soft border inline-flex border-blue-300 text-fg-brand-strong text-xs font-medium px-1.5 py-0.5 rounded";
     }
     function badgeGray(){
-        return "bg-neutral-secondary-medium border border-default-medium text-heading text-xs font-medium px-1.5 py-0.5 rounded-full";
+        return "bg-neutral-secondary-medium  inline-flex  border border-default-medium text-heading text-xs font-medium px-1.5 py-0.5 rounded-full";
     }
     function badgeSuccess(){
-        return "bg-success-soft border border-success-subtle text-fg-success-strong text-xs font-medium px-1.5 py-0.5 rounded";
+        return "bg-success-soft border inline-flex  border-success-subtle text-fg-success-strong text-xs font-medium px-1.5 py-0.5 rounded";
     }
     function badgeWarning(){
-        return"bg-warning-soft border border-warning-subtle text-fg-warning text-xs font-medium px-1.5 py-0.5 rounded";
+        return"bg-warning-soft border inline-flex  border-warning-subtle text-fg-warning text-xs font-medium px-1.5 py-0.5 rounded";
     }
     function badgeDanger(){
-        return "bg-danger-soft border border-danger-subtle text-fg-danger-strong text-xs font-medium px-1.5 py-0.5 rounded";
+        return "bg-danger-soft border inline-flex  border-danger-subtle text-fg-danger-strong text-xs font-medium px-1.5 py-0.5 rounded";
     }
     
     function alert($session,$message, $view){

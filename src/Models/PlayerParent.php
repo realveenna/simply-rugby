@@ -6,7 +6,7 @@
     
     class PlayerParent extends Guardian
     {
-        private $member_id;
+        public $member_id;
 
         public function __construct($data)
         {
@@ -33,8 +33,7 @@
             $data = $statement->fetch(PDO::FETCH_ASSOC);
 
             if ($data) {
-                echo "Parent found: " . $data['first_name'] . " " . $data['last_name'] . " (Email: " . $data['email'] . ")";
-                return new self($data);
+                return $data;
             }
             return null;
         }

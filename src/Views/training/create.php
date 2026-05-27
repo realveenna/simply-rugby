@@ -50,6 +50,7 @@
                   <p class="<?= smallError() ?>"><?php echo h($error['skills_activities'] ?? '');?></p>
                 </div>
             </div>
+            
             <!-- DATE -->
              <div>
                 <label for="date" class="<?= labelClass() ?>">Date</label>

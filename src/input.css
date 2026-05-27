@@ -12,11 +12,11 @@
 
 @theme {
     /* main text color */
-    --color-body: var(--color-stone-600);
+    --color-body:    #475569;
     --color-body-subtle: var(--color-stone-500);
 
     /* text heading colors */
-    --color-heading: var(--color-stone-900);
+    --color-heading: #0F172A;
 
     /* used for custom brand colors */
     --color-fg-brand-subtle: var(--color-stone-200);
@@ -57,25 +57,28 @@
     --color-gray: var(--color-gray-300);
 
     /* used for brand colors */
-    --color-brand-softer: var(--color-blue-50);
-    --color-brand-soft: var(--color-blue-100);
-    --color-brand: var(--color-blue-700);
-    --color-brand-medium: var(--color-blue-200);
-    --color-brand-strong: var(--color-blue-800);
+    --color-brand-softer: #F8FAFC;  
+    --color-brand-soft:#DBEAFE;  
+    --color-brand: #2563EB;  
+    --color-brand-medium: #5B7AA3; 
+    --color-brand-strong: #0F172A;  
 
     /* used for status colors */
-    --color-success-soft: var(--color-emerald-50);
-    --color-success: var(--color-emerald-700);
-    --color-success-medium: var(--color-emerald-100);
-    --color-success-strong: var(--color-emerald-800);
-    --color-danger-soft: var(--color-rose-50);
-    --color-danger: var(--color-rose-700);
-    --color-danger-medium: var(--color-rose-100);
-    --color-danger-strong: var(--color-rose-800);
-    --color-warning-soft: var(--color-orange-50);
-    --color-warning: var(--color-orange-500);
-    --color-warning-medium: var(--color-orange-100);
-    --color-warning-strong: var(--color-orange-700);
+    --color-success-soft: #DCFCE7;
+    --color-success: #10B981;
+    --color-success-medium: #BBF7D0;
+    --color-success-strong: #059669;
+
+    --color-danger-soft: #FEE2E2;
+    --color-danger: #EF4444;
+    --color-danger-medium: #FECACA;
+    --color-danger-strong: #DC2626;
+
+    --color-warning-soft: #FFF7ED;
+    --color-warning: #F59E0B;
+    --color-warning-medium: #FED7AA;
+    --color-warning-strong:  #C2410C;
+
     --color-dark-soft: var(--color-gray-800);
     --color-dark: var(--color-gray-800);
     --color-dark-strong: var(--color-gray-900);
@@ -103,13 +106,13 @@
     --color-default-strong: var(--color-gray-200);
 
     /* used for status colors */
-    --color-success-subtle: var(--color-emerald-200);
-    --color-danger-subtle: var(--color-rose-200);
-    --color-warning-subtle: var(--color-orange-200);
-    --color-brand-subtle: var(--color-blue-200);
-    --color-brand-light: var(--color-blue-600);
-    --color-dark-subtle: var(--color-gray-800);
-    --color-dark-backdrop: var(--color-gray-950);
+    --color-success-subtle: #BBF7D0;
+    --color-danger-subtle: #FECACA;
+    --color-warning-subtle: #FED7AA;
+    --color-brand-subtle: #DBEAFE;
+    --color-brand-light: #3B82F6;
+    --color-dark-subtle: #374151;
+    --color-dark-backdrop: #111827;
 
     --font-sans: 'Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'system-ui', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'Noto Sans', 'sans-serif', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     --font-body: 'Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'system-ui', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'Noto Sans', 'sans-serif', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';

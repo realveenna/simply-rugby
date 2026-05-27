@@ -82,21 +82,49 @@
 
                 <!-- List Players -->
                 <?php else : ?>
-                <ul class="max-w-md space-y-1 text-body list-disc list-inside">
+                <ul class="max-w-md space-y-1 text-body">
                     <?php foreach ($players as $player) :?>
-                        <li>
-                            <?= $player['player_name'] ?>
+                        <li class="py-1">
+                            <!-- Attendance Badge -->
+                            <?php if (($player['attendance_status'] ?? '') === 'Present') : ?>
+                                <span class="<?= badgeSuccess() ?>">
+                                    Present
+                                </span>
+
+                            <?php elseif (($player['attendance_status'] ?? '') === 'Absent') : ?>
+                                <span class="<?= badgeDanger() ?>">
+                                    Absent
+                                </span>
+
+                            <?php elseif (($player['attendance_status'] ?? '') === 'Late') : ?>
+                                <span class="<?= badgeWarning() ?>">
+                                    Late
+                                </span>
+
+                            <?php else : ?>
+                                <span>
+                                </span>
+                            <?php endif; ?>
+                            
+                            <span class="px-4">
+                                <!-- Player Name -->
+                                <?= $player['player_name'] ?>
+                            </span>
                         </li>
                     <?php endforeach ;?>
                     </ul>
                 <?php endif ;?>
+
                 <!-- Buttons -->
                 <div class="grid gap-2 mb-6 md:grid-cols-2">
-                    <!-- Update Button -->
-                    <button type="submit" name="action" value="update"
-                        class="<?=secondaryBtn()?>">
-                        Update
-                    </button>
+                    <!-- update_training_session -->
+                    <?php if(hasPermission('update_training_session')): ?>
+                        <button type="button" class="<?= secondaryBtn() ?>">
+                            <a href="/training/update?training_session_id=<?=h(($training['training_session_id']))?>">
+                                Update
+                            </a>
+                        </button>
+                    <?php endif; ?>
                     
                     <!-- Delete Button -->
                     <button type="submit" name="action" value="delete"

@@ -106,4 +106,3 @@ if (document.getElementById("search-table") && typeof simpleDatatables.DataTable
         sortable: false
     });
 }
-

@@ -61,17 +61,71 @@
             return  $statement->fetchAll(PDO::FETCH_ASSOC);
         }
 
-        // Select all members with login accounts
-        public static function selectAll()
+        // Get all members that has email but do not have a login account 
+        public static function selectMember($pdo, $member_id)
+        {
+            $statement = $pdo->prepare(
+                "SELECT * FROM member 
+                WHERE member_id = :member_id"
+            );
+
+            $statement->execute([
+                ':member_id' => $member_id
+            ]);
+            
+            return $statement->fetch(PDO::FETCH_ASSOC);
+        }
+
+        // Select all members no senior nok
+        public static function selectAll($role = null)
         {
             $pdo = Database::getInstance()->getConnection();
 
-            $statement = $pdo->prepare(
-                "SELECT * FROM member"
-            );
+            $sql = "
+                 SELECT 
+                    m.*,
+                    GROUP_CONCAT(r.role_name SEPARATOR ', ') AS roles
+                FROM member m
 
-            $statement->execute();
-            return  $statement->fetchAll(PDO::FETCH_ASSOC);
+                LEFT JOIN member_role mr  ON m.member_id = mr.member_id
+
+                LEFT JOIN role r ON mr.role_id = r.role_id
+            ";
+
+            // Filter by role
+            if($role === 'Admin'){
+                $sql .= "
+                    WHERE r.role_name IN (
+                        'Section Secretary',
+                        'Membership Secretary',
+                        'Fixture Secretary',
+                        'Club Chairperson'
+                    )
+                ";
+            }
+            else if($role){
+                $sql .= "
+                    WHERE r.role_name = :role
+                ";
+            }
+
+            $sql .= "
+                GROUP BY m.member_id
+            ";
+
+            $statement = $pdo->prepare($sql);
+
+            // Execute with or without role filter
+            if($role && $role !== 'Admin'){
+                $statement->execute([
+                    ':role' => $role
+                ]);
+            }
+            else{
+                $statement->execute();
+            }
+
+            return $statement->fetchAll(PDO::FETCH_ASSOC);
         }
 
         public function validateInsert($pdo){
@@ -113,6 +167,49 @@
             return $this->member_id;
         }
 
+        // update member details
+        public function update($pdo)
+        {
+            $statement = $pdo->prepare(
+                "UPDATE member
+                SET
+                    first_name = :fname,
+                    last_name = :lname,
+                    dob = :dob,
+                    address_id = :address_id,
+                    mobile_num = :mobileNum,
+                    membership_status = :membershipStatus,
+                    email = :email
+
+                WHERE member_id = :member_id"
+            );
+
+            return $statement->execute([
+                ':fname' => $this->first_name,
+                ':lname' => $this->last_name,
+                ':dob' => $this->dob,
+                ':address_id' => $this->address_id ?? null,
+                ':mobileNum' => $this->mobile_num,
+                ':membershipStatus' => $this->membership_status ?? 'active',
+                ':email' => $this->email ?? null,
+                ':member_id' => $this->member_id
+            ]);
+        }
+
+        // Delete a member
+        public static function delete($pdo, $member_id)
+        {
+            $statement = $pdo->prepare(
+                "DELETE FROM member
+                WHERE member_id = :member_id"
+            );
+
+            return $statement->execute([
+                ':member_id' => $member_id
+            ]);
+        }
+
+
         public static function selectEmail($member_id)
         {
             $pdo = Database::getInstance()->getConnection();
@@ -136,18 +233,50 @@
             return $statement->fetchColumn();
         }
 
-        // Get all member details
-         public static function getMemberDetails($pdo, $member_id)
+        // Get member details
+        public static function getMemberDetails($pdo, $member_id)
         {
             $statement = $pdo->prepare(
-                "SELECT * FROM member
-                WHERE member_id = :member_id");
+                "SELECT
+                    m.*,
+                    GROUP_CONCAT(DISTINCT r.role_name SEPARATOR ', ') AS roles,
+                    GROUP_CONCAT(DISTINCT sq.squad_name SEPARATOR ', ') AS squads,
+                    GROUP_CONCAT(DISTINCT s.section_name SEPARATOR ', ') AS sections
+                FROM member m
+                
+                LEFT JOIN member_role mr ON m.member_id = mr.member_id
+                LEFT JOIN role r ON mr.role_id = r.role_id
+                LEFT JOIN squad_member sm ON m.member_id = sm.member_id
+                LEFT JOIN squad sq ON sm.squad_id = sq.squad_id
+                LEFT JOIN section s ON sq.section_id = s.section_id
+
+                WHERE m.member_id = :member_id
+                GROUP BY m.member_id"
+            );
 
             $statement->execute([':member_id' => $member_id]);
             $result = $statement->fetch(PDO::FETCH_ASSOC);
 
             return $result;
-           
+        }
+        public static function getMemberChildren($pdo, $member_id)
+        {
+            $statement = $pdo->prepare(
+                "SELECT 
+                    m.member_id,
+                    CONCAT(m.first_name, ' ', m.last_name) AS child_name,
+                    cp.relationship
+
+                FROM contact_player cp
+                INNER JOIN member m  ON cp.contact_member_id = m.member_id
+                WHERE cp.member_id = :member_id"
+            );
+
+            $statement->execute([
+                ':member_id' => $member_id
+            ]);
+
+            return $statement->fetchAll(PDO::FETCH_ASSOC);
         }
     }
 ?>

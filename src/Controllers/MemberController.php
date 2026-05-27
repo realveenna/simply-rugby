@@ -7,31 +7,32 @@
     use Test\Models\Role;
     use Test\Models\Squad;
     use Test\Models\Address;
+    use Test\Models\AccessControl;
+    use Test\Models\Player;
     use Test\Database;
     
     class MemberController extends Controller
     {
         
-        private $roles;
-        public $email;
-        public $password;
-        public $confirmPassword;
-
         public function __construct()
         {
-            
+            parent::__construct();
         }
+        
         // List of all members
         public function index()
         {
-            $members = Member::selectAll();
+            // Role filter
+            $role = $_GET['role'] ?? null;
 
-            foreach ($members as &$member ){
-                $member['roles'] = Role::getMemberRoleName($member['member_id']);
+            // Select all members
+            $members = Member::selectAll($role);
+            
+            if($member_id = $_GET['member_id'] ?? null){
+
             }
-
             $this->render('members/index', [
-                'members' => $members
+                'members' => $members,
             ]);
         }
 
@@ -311,6 +312,329 @@
                 'roles' => $roles,
                 'squads' => $squads
             ]);
+        }
+
+         // View each member 
+        public function view()
+        {
+            // PDO connection
+            $pdo = $this->pdo;
+
+            // If this member has children get children player details
+            $childrenDetails = [];
+
+            $member = $this->getMemberId($pdo);
+
+            $updateUrl = '/members/update?member_id=' . $member['member_id'];
+
+            if(!empty($member['address_id'] )){
+                $address = Address::getAddressDetails($pdo, $member['address_id']);
+            }
+
+            // If this member has children get children player details
+            if (str_contains($member['roles'], 'Parent')) {
+                $children = AccessControl::getAccessPlayers($pdo, $member['member_id']);
+
+                // Loop children IDs
+                foreach ($children as $player_id) {
+                    // Get full junior player details
+                    $childrenDetails[] = Player::playerProfile($pdo, $player_id);
+                }
+            }
+
+
+            try{
+                if($_SERVER['REQUEST_METHOD'] === 'POST') {
+                    // If delete button is pressed
+                    $this->delete($pdo, $member->member_id);
+                }
+            }
+            // Catch error
+            catch (\Exception $e){
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                alert(
+                    'error', $e->getMessage(), 
+                    '/members/update?member_id='.$member->member_id);
+            }
+           
+            $this->render('/members/view', [
+                'member' => $member ?? '',
+                'address' => $address ?? [],
+                'children' => $childrenDetails,
+                'updateUrl' => $updateUrl,
+            ]);
+        }
+         // Update member details
+        public function update()
+        {
+            // PDO connection
+            $pdo = $this->pdo;
+
+            // Permission access
+            $data = $this->getMemberId($pdo);
+            $countries = Address::getCountries();
+
+            // Set default array
+            $address = [];
+            $error = [];
+            $player = [];
+            $positions = MatchController::listAllPositions();
+
+            // new member object
+            $member = new Member();
+            $member->member_id = $data['member_id'];
+            $member->first_name = $data['first_name'];
+            $member->last_name = $data['last_name'];
+            $member->dob = $data['dob'] ?? '';
+            $member->email = $data['email'] ?? '';
+            $member->membership_status = $data['membership_status'] ?? 'active';
+            $member->mobile_num = $data['mobile_num'] ?? '';
+            $member->address_id = $data['address_id'] ?? null;
+            $originalEmail = $member->email;
+
+            // Get player profile if member is a player
+            $player = Player::playerProfile($pdo, $member->member_id);
+
+
+            // Get address
+            if(!empty($member->address_id )){
+                $address = Address::getAddressDetails($pdo, $member->address_id);
+            }
+
+            try{
+                if($_SERVER['REQUEST_METHOD'] === 'POST') {
+                    // Begin Transaction
+                    $pdo->beginTransaction();
+
+                    $edit = trimPost('edit');
+
+                    if($edit === 'personal_details'){
+                        $member->first_name = trimPost('first_name');
+                        $member->last_name = trimPost('last_name');
+                        $member->dob = trimPost('dob');
+
+                        // Validate no input
+                        $error['first_name'] = ifEmpty($member->first_name, 'First name is required');
+                        $error['last_name'] = ifEmpty($member->last_name, 'Last name is required');
+                        $error['dob'] = ifEmpty($member->dob, 'Date of birth is required');
+                        
+                        // Valid age
+                        $age = calcAge($member->dob);
+                        if ($age < 18) {
+                            $error['dob'] = 'Member must be at least 18 years old';
+                        }
+
+                        // Filter array for empty/null
+                        $error = array_filter($error);
+
+                        // No error then update
+                        if(empty($error)){
+                            $updated = $member->update($pdo);
+                            if(!$updated){
+                                throw new \ErrorException('Failed to update details');
+                            }
+                            // Commmit and success message
+                            $pdo->commit();
+                            
+                            alert('success', 'Details Updated Successfully!', '/');
+                            exit;
+                        }
+                    }
+
+                    // edit player_details
+                    if($edit === 'player_details'){
+                        $data = [];
+                        
+                        $member_id = trimPost('member_id');
+                        $height = trimPost('height');
+                        $weight = trimPost('weight');
+                        $position = trimPost('position');
+                        $player_availability_status = trimPost('player_availability_status');
+
+                        // Validate no input
+                        $error['height'] = 
+                            ifEmpty($height, 'Height is required');
+                        $error['weight'] = 
+                            ifEmpty($weight, 'Weight is required');
+                        $error['position'] = 
+                            ifEmpty($position, 'Position is required');
+                        $error['player_availability_status'] = 
+                            ifEmpty($player_availability_status, 'Availability status is required');
+
+                        // Filter array for empty/null
+                        $error = array_filter($error);
+
+                        // No error then update
+                        if(empty($error)){
+                            // Set data to pass
+                            $data = [
+                                'height' => $height,
+                                'weight' => $weight,
+                                'position' => $position ?? '',
+                                'player_availability_status' => $player_availability_status,
+                                'member_id' => $member_id
+                            ];
+
+
+                            $updated = Player::updatePlayerProfile($pdo, $data);
+                            if(!$updated){
+                                throw new \ErrorException('Failed to update player profile');
+                            }
+
+                            // Commmit and success message
+                            $pdo->commit();
+                            
+                            alert('success', 'Player Details Updated Successfully!', '/');
+                            exit;
+                        }
+
+                    }
+                    if($edit === 'contact'){
+                        $member->email = trimPost('email');
+                        $member->mobile_num = trimPost('mobile_num');
+
+
+                        // Validate no input
+                        $error['email'] = ifEmpty($member->email, 'Email is required');
+                        $error['mobile_num'] = ifEmpty($member->mobile_num, 'Mobile number is required');
+                        
+                        // If invalid email format
+                        if (!filter_var($member->email, FILTER_VALIDATE_EMAIL)) {
+                            $error['email'] = "Invalid email format";
+                        }
+                        else{
+                            // Only check if email changed
+                            if ($member->email !== $originalEmail) {
+                                // Check if email already exists
+                                $result = User::checkEmailExists($member->email ,'Email already registered. Please select different email.');
+
+                                // If email already exists, display error message
+                                $error['email'] = $result['emailError'] ?? '';
+                            }
+                        }
+
+                        // Filter array for empty/null
+                        $error = array_filter($error);
+
+                        // No error then update
+                        if(empty($error)){
+                            $updated = $member->update($pdo);
+                            if(!$updated){
+                                throw new \ErrorException('Failed to update contact details');
+                            }
+                            // Commmit and success message
+                            $pdo->commit();
+                            alert('success', 'Contct Details Updated Successfully!', '/');
+                        }
+                    }
+                    if($edit === 'address'){
+                        $address['line1'] = trimPost('line1');
+                        $address['line2'] = trimPost('line2');
+                        $address['city'] = trimPost('city');
+                        $address['postcode'] = trimPost('postcode');
+                        $address['country'] = trimPost('country');
+
+                        // Validate empty input
+                        $error['line1'] = ifEmpty($address['line_1'], 'Address line 1 is required');
+                        $error['city'] = ifEmpty($address['city'], 'City is required');
+                        $error['postcode'] = ifEmpty($address['postcode'], 'Postcode is required');
+                        $error['country'] = ifEmpty($address['country'], 'Country is required');
+
+                        // Filter array for empty/null
+                        $error = array_filter($error);
+
+                        // No error then update
+                        if(empty($error)){
+                            // Returns address_id
+                            $address_id = Address::insert($pdo,$address);
+                            if(!$address_id){
+                                throw new \ErrorException('Failed to update address details');
+                            }
+
+                            // Save new address_id to member
+                            $member->address_id = $address_id;
+
+                            // Update member record
+                            $updated = $member->update($pdo);
+
+                            if (!$updated) {
+                                throw new \ErrorException('Failed to update member address');
+                            }
+
+                            // Commmit and success message
+                            $pdo->commit();
+                            
+                            alert('success', 'Address Details Updated Successfully!', '/');
+                        }
+                        
+                        // If delete button is pressed
+                        $this->delete($pdo, $member->member_id);
+                    }
+                }
+            }
+            // Catch error
+            catch (\Exception $e){
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                alert(
+                    'error', $e->getMessage(), 
+                    '/members/update?member_id='.$member->member_id);
+            }
+           
+            
+            $this->render('/members/update', [
+                'member' => $member ?? '',
+                'player' => $player ?? '',
+                'error' => $error,
+                'data' => $data,
+                'address' => $address,
+                'countries' => $countries,
+                'positions' => $positions ?? [],
+            ]);
+        }
+
+        // delete a member 
+        public static function delete($pdo, $member_id)
+        {
+            // Begin Transaction
+            $pdo->beginTransaction();
+
+            $action = trimPost('action');
+            if($action === 'delete'){
+                $delete = Member::delete($pdo,$member_id);
+                if(!$delete){
+                    abort(500,'Failed to delete member details');
+                }
+            }
+
+            // Commmit and success message
+            $pdo->commit();
+            alert('success', 'Member has been removed successfully!', '/');
+            exit;
+        }
+
+
+         // Protected function if member_id is mandatory
+        // view and update
+        protected function getMemberId($pdo){
+            // IF member_id is requested by GET or POST
+            if(isset($_GET['member_id']) || isset($_POST['member_id'])){
+
+                // Set member_id
+                $member_id = $_GET['member_id']?? ($_POST['member_id']);
+
+                // Get member Details 
+                $member = AccessControl::validateMemberAccess($pdo, $member_id);
+
+                // Return as member Object
+                return $member;
+            }
+            else{
+                alert("error","Please select a member", '/members');
+            }
         }
     }
 ?>

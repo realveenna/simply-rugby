@@ -90,7 +90,7 @@
                                 </div>
                             </li>
                         <?php endforeach ;?>
-                    <?php endif ;?> ?>
+                    <?php endif ;?>
                 </ul>
                 <!-- Buttons -->
                 <div class="grid gap-2 mb-6 md:grid-cols-2">
