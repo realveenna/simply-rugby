@@ -4,6 +4,7 @@
     
     class HomeController extends Controller
     {
+        // Index render page for logged in and not logged in user
         public function index()
         {
             if (true === isLoggedIn()){

@@ -24,7 +24,7 @@
                             name="fh_our_points" 
                             value="<?= h($data['fh_our_points'] ?? $halves[0]['our_points'] ?? '') ?>"
                             id="fh_our_points" class="<?= inputClass() ?>" 
-                            placeholder="Our Points" required />
+                            placeholder="Our Points"  />
                         <div>
                            <p class="<?= smallError() ?>"><?php echo h($error['fh_our_points'] ?? '');?></p>
                         </div>
@@ -38,7 +38,7 @@
                             name="fh_opponent_points" 
                             value="<?= h($data['fh_opponent_points'] ?? $halves[0]['opponent_points'] ?? '') ?>"
                             id="fh_opponent_points" class="<?= inputClass() ?>" 
-                            placeholder="Opponent Points" required />
+                            placeholder="Opponent Points"  />
                         <div>
                            <p class="<?= smallError() ?>"><?php echo h($error['fh_opponent_points'] ?? '');?></p>
                         </div>
@@ -88,7 +88,7 @@
                             name="sh_our_points" 
                             value="<?= h($data['sh_our_points'] ?? $halves[1]['our_points'] ?? '') ?>"
                             id="sh_our_points" class="<?= inputClass() ?>" 
-                            placeholder="Our Points" required />
+                            placeholder="Our Points"  />
                         <div>
                            <p class="<?= smallError() ?>"><?php echo h($error['sh_our_points'] ?? '');?></p>
                         </div>
@@ -102,7 +102,7 @@
                             name="sh_opponent_points" 
                             value="<?= h($data['sh_opponent_points'] ?? $halves[1]['opponent_points'] ?? '') ?>"
                             id="sh_opponent_points" class="<?= inputClass() ?>" 
-                            placeholder="Opponent Points" required />
+                            placeholder="Opponent Points"  />
                         <div>
                            <p class="<?= smallError() ?>"><?php echo h($error['sh_opponent_points'] ?? '');?></p>
                         </div>

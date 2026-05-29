@@ -26,7 +26,7 @@
                         <?php endforeach; ?>
                     </select>
                     <p class="<?= smallError() ?>">
-                        <?= h($errors['member'] ?? '') ?>
+                        <?= h($error['member_id'] ?? '') ?>
                     </p>
                 </div>
 
@@ -47,7 +47,7 @@
                         <?php endforeach; ?>
                     </select>
                     <p class="<?= smallError() ?>">
-                        <?= h($errors['injury'] ?? '') ?>
+                        <?= h($error['injury_id'] ?? '') ?>
                     </p>
                 </div>
 
@@ -73,7 +73,7 @@
                         </option>
                     </select>
                     <p class="<?= smallError() ?>">
-                        <?= h($errors['injury_status'] ?? '') ?>
+                        <?= h($error['injury_status'] ?? '') ?>
                     </p>
                 </div>
        

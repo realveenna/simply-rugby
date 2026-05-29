@@ -10,9 +10,7 @@ use Test\Controllers\SquadController;
 use Test\Controllers\MatchController;
 use Test\Controllers\InjuryController;
 use Test\Controllers\MailController;
-
 use Test\Controllers\Error;
-use Test\Controllers\Auth;
 
 use Test\Router;
 
@@ -86,8 +84,8 @@ $router->post('/squad/senior', SquadController::class, 'senior');
 $router->get('/training', TrainingController::class, 'index', ['view_training_session']);
 $router->post('/training', TrainingController::class, 'index', ['view_training_session']);
 
-$router->get('/training/create', TrainingController::class, 'create');
-$router->post('/training/create', TrainingController::class, 'create');
+$router->get('/training/create', TrainingController::class, 'create', ['create_training_session']);
+$router->post('/training/create', TrainingController::class, 'create', ['create_training_session']);
 
 $router->get('/training/record_attendance', TrainingController::class, 'record',['record_attendance']);
 $router->post('/training/record_attendance', TrainingController::class, 'record',['record_attendance']);
@@ -131,8 +129,14 @@ $router->get('/match/match-player-stats', MatchController::class, 'matchPlayerSt
 $router->post('/match/match-player-stats', MatchController::class, 'matchPlayerStats', ['update_match','create_team']);
 
 // INJURY
-$router->get('/injury', InjuryController::class,'index',['record_injury']);
-$router->post('/injury', InjuryController::class,'index',['record_injury']);
+$router->get('/injury', InjuryController::class,'record',['record_injury']);
+$router->post('/injury', InjuryController::class,'record',['record_injury']);
+
+$router->get('/injury/update', InjuryController::class,'update',['record_injury']);
+$router->post('/injury/update', InjuryController::class,'update',['record_injury']);
+
+$router->get('/injury/all', InjuryController::class,'all',['record_injury']);
+$router->post('/injury/all', InjuryController::class,'all',['record_injury']);
 
 
 // MAIL

@@ -31,7 +31,8 @@
                     ':address_id' => $this->address_id,
                 ]);
                 
-                return $pdo->lastInsertId();
+                $this->doctor_id= $pdo->lastInsertId();
+                return $this->doctor_id;
            }
            catch(\PDOException $e){
                 $sql = "SELECT doctor_id FROM doctor 

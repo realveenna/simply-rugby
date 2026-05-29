@@ -148,23 +148,23 @@
                     <button id="memberAction<?=h($member['member_id'])?>" data-dropdown-toggle="memberDots<?=h($member['member_id'])?>" class="text-heading bg-neutral-primary box-border border border-transparent hover:bg-neutral-secondary-medium focus:ring-4 focus:ring-neutral-tertiary font-medium leading-5 rounded-base text-sm p-2 focus:outline-none" type="button"> 
                     <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-width="3" d="M6 12h.01m6 0h.01m5.99 0h.01"/></svg>
                     </button>
-                </td>
 
-                <!-- Dropdown menu -->
-                <div id="memberDots<?=h($member['member_id'])?>" class="min-w-max  z-10 hidden bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg w-44 dark:divide-gray-600">
-                    <ul class="p-2 text-sm text-body font-medium" aria-labelledby="memberAction<?=h($member['member_id'])?>">
-                        <li>
-                            <a href="/members/view?member_id=<?= $member['member_id'] ?>" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
-                                View Details
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/members/view?member_id=<?= $member['member_id'] ?>" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
-                                Remove
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+                    <!-- Dropdown menu -->
+                    <div id="memberDots<?=h($member['member_id'])?>" class="min-w-max  z-10 hidden bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg w-44 dark:divide-gray-600">
+                        <ul class="p-2 text-sm text-body font-medium" aria-labelledby="memberAction<?=h($member['member_id'])?>">
+                            <li>
+                                <a href="/members/view?member_id=<?= $member['member_id'] ?>" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
+                                    View Details
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/members/view?member_id=<?= $member['member_id'] ?>" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
+                                    Remove
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
             </tr>
             <?php endforeach; ?>
         </tbody>

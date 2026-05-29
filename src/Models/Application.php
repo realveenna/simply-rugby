@@ -6,22 +6,6 @@
     
     class Application
     {
-        private $application_id;
-        private $address_id;
-        private $doctor_id;
-
-        private $application_status;
-        private $submitted_on;
-        private $applicant_first_name;  
-        private $applicant_last_name;
-        private $applicant_dob;
-        private $nickname;
-        private $playerHeight;
-        private $playerWeight;
-        private $email;
-        private $mobile_num;
-
-     
         public function __construct()
         {
 
@@ -74,6 +58,8 @@
                 VALUES 
                     (:application_status, :fName, :lName, :dob, :address_id, :nickname, :playerHeight, :playerWeight, 
                     :email, :doctor_id, :mobile, :primary_guardian_id, :secondary_guardian_id, :recommended_squad)
+               
+                -- Prevent duplicate registration
                 ON DUPLICATE KEY UPDATE 
                     application_id = LAST_INSERT_ID(application_id),
                     address_id  = VALUES(address_id),
@@ -133,11 +119,11 @@
                 -- Joins
                 JOIN address 
                         ON player_application.address_id = address.address_id
-                    LEFT JOIN application_guardian AS primary_guardian
+                LEFT JOIN application_guardian AS primary_guardian
                         ON player_application.primary_guardian_id = primary_guardian.guardian_id
-                    LEFT JOIN application_guardian AS secondary_guardian
+                LEFT JOIN application_guardian AS secondary_guardian
                         ON player_application.secondary_guardian_id = secondary_guardian.guardian_id
-                "
+                ORDER BY submitted_on DESC"
             );
 
             $statement->execute();
@@ -169,55 +155,19 @@
         // View all player applications details
         public static function getPlayerApplicationDetails($pdo, $application_id)
         {
-            try{
-                $statement = $pdo->prepare(
-                    "SELECT * FROM player_application
-                    WHERE player_application.application_id = :application_id");
-                //     --     player_application.*, 
-                //     --     address.*
+            $statement = $pdo->prepare(
+                "SELECT * FROM player_application
+                WHERE player_application.application_id = :application_id
+                ORDER BY submitted_on DESC");
 
-                //     --     -- primary_guardian.first_name AS primary_fname,
-                //     --     -- primary_guardian.last_name AS primary_lname,
-                //     --     -- primary_guardian.mobile_number AS primary_mobile,
+            $statement->execute([':application_id' => $application_id]);
+            $result = $statement->fetch(PDO::FETCH_ASSOC);
 
-                //     --     -- secondary_guardian.first_name AS secondary_fname,
-                //     --     -- secondary_guardian.last_name AS secondary_lname,
-                //     --     -- secondary_guardian.mobile_number AS secondary_mobile,
-
-                //     -- FROM player_application
-
-                //     -- JOIN address 
-                //     --         ON player_application.address_id = address.address_id
-                //         -- LEFT JOIN application_guardian AS primary_guardian
-                //         --     ON player_application.primary_guardian_id = primary_guardian.guardian_id
-                //         -- LEFT JOIN application_guardian AS secondary_guardian
-                //         --     ON player_application.secondary_guardian_id = secondary_guardian.guardian_id
-
-                //     WHERE player_application.application_id = :application_id"
-                // );
-
-                $statement->execute([':application_id' => $application_id]);
-                $result = $statement->fetch(PDO::FETCH_ASSOC);
-
-                if(!$result){
-                    alert('error', 'Application details not found', '/player-applications');
-                    return null; 
-                }
-                return $result;
+            if(!$result){
+                alert('error', 'Application details not found', '/player-applications');
+                return null; 
             }
-            catch (\PDOException $e) {
-                // Handle any database errors
-                alert('error', 'There is a database error in fetching application details.', '/player-applications');
-                return null;
-            }
+            return $result;
         }
-
-
-        // public static function showAllDetails($pdo, $application_id)
-        // {
-        //     // Check if application exists
-        //     self::getApplicationById($pdo, $application_id); // Check if application exists
-
-        // }
     }
 ?>

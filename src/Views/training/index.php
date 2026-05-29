@@ -1,17 +1,7 @@
 <!-- Squad Table -->
 <section class="bg-gray-50 dark:bg-gray-900 dark:text-white">
-    <!-- All Trainings for Higher Admins -->
-    <?php if(isAdmin()):?>
-        <?= title('All','Trainings')?>
-    <!-- Junior or Senior Section -->
-    <?php elseif (count($trainings) > 1): ?>
-        <?= title($trainings[0]['section_name'] .' Squad', 'Training') ?>
-    <!-- Coach -->
-    <?php else: ?>
-        <?= title($trainings[0]['squad_name'] .' Squad', 'Training') ?>
-    <?php endif; ?>
 
-
+    <?= title($title ?? 'All', 'Trainings') ?>
 
     <table class="datatable">
         <thead>
@@ -123,8 +113,8 @@
 
                     <!-- Dropdown menu -->
                     <!-- Permission Action Buttons -->
-                    <div id="trainingListDots<?=h($training['training_session_id'])?>" class="min-w-max  z-10 hidden bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg w-44 dark:divide-gray-600">
-                        <form method="post" action="">
+                    <div id="trainingListDots<?=h($training['training_session_id'])?>" class="min-w-max z-10 hidden bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg w-44 dark:divide-gray-600">
+                        <form method="post" action="/training/view?training_session_id=<?= h($training['training_session_id']) ?>">
                             <ul class="p-2 text-sm text-body font-medium" aria-labelledby="trainingListAction<?=h($training['training_session_id'])?>">
                             <!-- record_attendance -->
                             <!-- Date is today or past - -->
@@ -140,7 +130,7 @@
                             <!-- record_player_skills -->
                             <!-- Date is today or past and all attendance is marked - -->
                             <?php if(hasPermission('record_player_skills') && $training['status'] === 'Skills'): ?>
-                                <?php if($training['status'] === 'Skills'): ?>
+                                <?php if((int)$training['pending_count'] === 0): ?>
                                     <li>
                                         <a href="/training/record_player_skills?training_session_id=<?=h(($training['training_session_id']))?>" 
                                             class="inline-flex items-center text-brand hover:text-brand-medium justify-center w-full p-2 hover:bg-neutral-tertiary-medium rounded">
@@ -150,9 +140,10 @@
                                 <?php endif; ?>
                             <?php endif; ?>
 
-                            <?php if(hasPermission('record_player_skills')): ?>
-                                <!-- Button if user has permission to record injury -->
-                                <?php if ((hasPermission('record_injury')) && !isFutureDate($training['date'])):?>
+                            <!-- record_injury -->
+                            <!-- attendance is completed -->
+                            <?php if(hasPermission('record_injury')): ?>
+                                <?php if (((int)$training['pending_count'] === 0) && !isFutureDate($training['date'])):?>
                                     <li>
                                         <a href="/injury?training_session_id=<?= $training['training_session_id']?>" 
                                             class="inline-flex items-center justify-center text-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded-md">

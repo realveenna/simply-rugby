@@ -1,17 +1,11 @@
 <?php
     namespace Test\Controllers;
 
-    use Test\Controller;
     use Test\Models\User;
-    use Test\Models\Role;
     use Test\Models\Address;
-    use Test\Models\MedicalInformation;
-    use Test\Models\Application;
-    use Test\Models\Doctor;
     use Test\Models\AccessControl;
     use Test\Models\Player;
     use Test\Models\Member;
-    use Test\Models\PlayerParent;
 
     use Test\Database;
     use PDO;
@@ -147,7 +141,6 @@
                         $pdo->rollBack();
                     }
                     alert('error', $e->getMessage(), '/account/reset-password');
-                    die($e->getMessage());
             }
             
             $this->render('account/reset-password', [
@@ -214,7 +207,7 @@
             ]);
         }
 
-        // Update member details
+        // render Update member details
         public function update()
         {
             // PDO connection

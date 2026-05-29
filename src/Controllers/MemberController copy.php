@@ -425,8 +425,8 @@
                         
                         // Valid age
                         $age = calcAge($member->dob);
-                        if ($age < 18) {
-                            $error['dob'] = 'Member must be at least 18 years old';
+                        if ($age < 5) {
+                            $error['dob'] = 'Member must be at least 5 years old';
                         }
 
                     // Filter array for empty/null

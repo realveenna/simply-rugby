@@ -46,7 +46,7 @@
                     value="<?= h($match->opposition_team_name) ?? '';?>"
                     class="<?= inputClass() ?>" placeholder="Opposition Team Name">
                 <div>
-                  <p class="<?= smallError() ?>"><?php echo $error['opposition_team'] ?? '';?></p>
+                  <p class="<?= smallError() ?>"><?php echo $error['opposition_team_name'] ?? '';?></p>
                 </div>
             </div>
 
@@ -105,7 +105,7 @@
                         name="kick_off_time" 
                         id="kick_off_time" 
                         value="<?= h($match->kick_off_time ?? '') ?>"
-                        class="block w-full p-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body" min="09:00" max="18:00" value="00:00" required />
+                        class="block w-full p-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body" min="09:00" max="18:00" value="00:00" />
                 </div>
                 <div>
                     <p class="<?= smallError() ?>"><?php echo h($error['kick_off_time'] ?? '');?></p>

@@ -2,12 +2,8 @@
     namespace Test\Controllers;
 
     use Test\Controller;
-    use Test\Models\User;
-    use Test\Models\Member;
-    use Test\Models\Role;
     use Test\Models\Squad;
     use Test\Models\AccessControl;
-    use Test\Database;
     use Test\Models\Training;
     use Test\Models\Attendance;
     use Test\Models\PlayerSkill;
@@ -24,6 +20,7 @@
         public function index()
         {
             $pdo = $this->pdo;
+            $title = 'All';
 
             // Get Training Details
             $trainings = AccessControl::getAuthorizedTraining($pdo, $this->member_id);
@@ -33,49 +30,38 @@
                abort(404, 'No Training Session Found');
             }
 
-            // Check for training status
+            // If squad selected then show squad trainings
+            $squad_id = $_GET['squad_id'] ?? null;
+            if(isset($squad_id)){
+                $get_training = [];
+                foreach ($trainings as $training) {
+                    if ($training['squad_id'] == $squad_id) {
+                        $get_training[] = $training;
+                    }
+                }
+                // Set training
+                $trainings = $get_training;
+                // Set title as squad name
+                $title = $trainings[0]['squad_name'];
+            }
+
+            // Check for training status and insert to array
             foreach ($trainings as &$training) {
                 $training['status'] = $this->checkTrainingStatus($pdo, $training);
             }
             unset($training);
 
+
             $this->render('/training/index',[
-                'trainings' => $trainings
+                'trainings' => $trainings,
+                'title' => $title
             ]);
-        }
-
-        private function checkTrainingStatus($pdo, $training){
-            // Future training
-            if (isFutureDate($training['date'])) 
-            {
-                return 'Upcoming';
-            }
-
-            // Attendance still pending
-            if ((int)$training['pending_count'] > 0) 
-            {
-                return 'Attendance';
-            }
-
-            // Skills not completed
-            if (!Training::hasSkillRatings($pdo,  $training['training_session_id'])) 
-            {
-                return 'Skills';
-            }
-
-            // Fully completed
-            return 'Completed';
-        }
-
-           
+        }      
 
         // Render create training with permission check
         public function create()
         {
             $pdo = $this->pdo;
-
-            // Permission Check
-            authorize('create_training_session');
 
             // Set error array
             $error = [];
@@ -206,7 +192,6 @@
                     $pdo->rollBack();
                 }
                 alert('error', $e->getMessage(), '/training/create');
-                die($e->getMessage());
             }
 
             // Render
@@ -279,7 +264,7 @@
 
                     // Commmit and success message
                     $pdo->commit();
-                    alert('success','Training Session Succesfully Updated!','/');
+                    alert('success','Training Session Succesfully Updated!','/training');
                 }
             }
             // Catch error
@@ -288,7 +273,6 @@
                     $pdo->rollBack();
                 }
                 alert('error', $e->getMessage(), '/training/update?training_session_id=' .$training->training_session_id);
-                die($e->getMessage());
             }
 
             // Render
@@ -303,38 +287,23 @@
         // Render record training attendance with permission check
         public function record()
         {
+            // PDO connection
             $pdo = $this->pdo;
 
-            // Permission Check
-            authorize('record_attendance');
-
-            // Set error array
+            // Set empty error array
             $error = [];
 
-            // Default training_session_id value
-            $training_session_id = $_GET['training_session_id'] ?? '';
-
             try{
-                // Only check if squad_id exists from GET request
-                if (!empty($_GET['training_session_id'])) {
-
-                    // Get Training Session
-                    $training = Training::getTrainingById($pdo, $training_session_id);
-                }
-                else{
-                    alert("error","Please select a squad", '/training');
-                }
+                // Mandatory training session id 
+                $training = self::checkTrainingSessionId($pdo);
 
                 // Get Players for Training Session
-                $players = Attendance::getPlayersById($pdo,$training_session_id);
+                $players = Attendance::getPlayersById($pdo,$training['training_session_id']);
 
                 // POST REQUEST FOR ATTENDANCE SHEET
                 if($_SERVER['REQUEST_METHOD'] === 'POST') {
-                    // Permission Check Again
-                    authorize('record_attendance');
-
-                    // Forbidden
-                    if (!hasSquadAccess($training['squad_id']) || !hasRole('Club Chairperson')){
+                    // Restrict access to only coach and club chairperson
+                    if (!(hasRole('Coach') || hasRole('Club Chairperson'))) {
                         abort(403);
                     }
 
@@ -386,10 +355,9 @@
                 alert(
                     'error', $e->getMessage(), 
                     '/training/record_attendance?training_session_id='.$training['training_session_id']);
-                die($e->getMessage());
             }
 
-            // Render
+            // Render training/record_attendance
             $this->render('training/record_attendance', [
                 'players' => $players,
                 'training' => $training,
@@ -425,6 +393,7 @@
                     // Check training_session_id  on POST
                     $training = self::checkTrainingSessionId($pdo);
 
+                    // set POST values
                     $action = trimPost('action');
                     $selectedIds = $_POST['categories'] ?? [];
 
@@ -564,7 +533,7 @@
 
                             // Commmit and success message
                             $pdo->commit();
-                            alert('success','All Player Training Skills Marked Successfuly!.','/training');
+                            alert('success','All Player Training Skills Marked Successfuly!','/training');
                         }
                     }
                     
@@ -608,20 +577,18 @@
             $error = [];
 
             try{
+                // Get session_id details from GET or POST request with permission check
                 $T = self::checkTrainingSessionId($pdo);
+
 
                 // POST REQUEST FOR ATTENDANCE SHEET
                 if($_SERVER['REQUEST_METHOD'] === 'POST') {
-                    // Permission Check Again
-                    authorize('update_training_session');
-
                     // Forbidden
-                    if (!hasSquadAccess($T['squad_id']) || !hasRole('Club Chairperson')){
+                    if (!(hasRole('Coach') || hasRole('Club Chairperson'))) {
                         abort(403);
                     }
 
                     $action = trimPost('action') ?? '';
-
                     if ($action === 'update') {
                         // Go to update training session page
                         header(
@@ -632,7 +599,7 @@
                     elseif ($action === 'delete') {
                         // Begin Transaction
                         $pdo->beginTransaction();
-
+                        
                         // delete training session
                         $deleted = Training::deleteTraining($pdo, $T['training_session_id']);
 
@@ -640,6 +607,7 @@
                         if(!$deleted){
                             throw new \ErrorException('Unable to delete training session');
                         }
+
 
                         // Commmit and success message
                         $pdo->commit();
@@ -664,9 +632,7 @@
                     $pdo->rollBack();
                 }
                 alert(
-                    'error', $e->getMessage(), 
-                    '/training/view?training_session_id='.$T['training_session_id']);
-                die($e->getMessage());
+                    'error', $e->getMessage(), '/training/view?training_session_id='.$T['training_session_id']);
             }
 
             // Render
@@ -678,8 +644,9 @@
         }
 
         // Private function if training session id is mandatory
-        // view and update
-        private function checkTrainingSessionId($pdo){
+        // for view and update render
+        private function checkTrainingSessionId($pdo)
+        {
             if(isset($_GET['training_session_id']) || isset($_POST['training_session_id'])){
 
                 // Default training_session_id value
@@ -700,8 +667,32 @@
                 return $training;
             }
             else{
-                alert("error","Please select a squad", '/training');
+                alert("error","Please select a squad ", '/training');
             }
+        }
+
+         // Private function to check training status badge for index render
+        private function checkTrainingStatus($pdo, $training){
+            // Future training
+            if (isFutureDate($training['date'])) 
+            {
+                return 'Upcoming';
+            }
+
+            // Attendance still pending
+            if ((int)$training['pending_count'] > 0) 
+            {
+                return 'Attendance';
+            }
+
+            // Skills not completed
+            if (!Training::hasSkillRatings($pdo,  $training['training_session_id'])) 
+            {
+                return 'Skills';
+            }
+
+            // Fully completed
+            return 'Completed';
         }
     }
 

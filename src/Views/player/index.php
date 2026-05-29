@@ -50,6 +50,7 @@
                                     </div>
                                 </div>
                             </li>
+                            
                             <!-- Dob -->
                             <li class="py-2 sm:py-2">
                                 <div class="flex items-center gap-1">
@@ -599,20 +600,37 @@
                 <!-- Injury Information -->
                 <?php if (!empty($injuries)):?>
                     <?= titleLeftSmall('Injuries')?>
-                    <div class="flex flex-col items-center gap-4 mt-4 bg-neutral-primary-soft p-6 border border-default rounded-base shadow-xs">
+                    <div id="injuries" class="flex flex-col items-center gap-4 mt-4 bg-neutral-primary-soft p-6 border border-default rounded-base shadow-xs">
                         <div class="flex flex-col justify-between md:p-4 leading-normal w-full">
                             <div class="flex-1 min-w-0 ms-1">
                                 <?php if($injuries):?>
                                     <?php foreach ($injuries as $injury): ?>
                                         <ul class="space-y-1 text-body list-disc list-inside">
                                             <li class="flex items-center justify-between">
-                                                <div class="flex flex-col">
-                                                    <span class="font-semibold text-heading">
-                                                        <?= h($injury['injury_name'] ?? '') ?>
-                                                    </span>
-                                                    <span class="text-sm text-body">
-                                                        <?= h($injury['injury_date'] ?? '') ?>
-                                                    </span>
+                                                <div class="flex items-center gap-4">
+                                                    
+                                                    <!-- Update Injury Button with Permission -->
+                                                    <?php if (hasPermission('record_injury')):?>
+                                                        <a href="/injury/update?player_injury_id=<?= $injury['player_injury_id'] ?>">
+                                                            <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"/>
+                                                            </svg>
+                                                        </a>
+                                                    <?php endif;?>
+
+                                                    <div class="flex flex-col">
+                                                        <span class="font-semibold text-heading">
+                                                            <?= h($injury['injury_name'] ?? '') ?>
+                                                        </span>
+                                                        <span class="text-sm text-body">
+                                                            Date of Injury: <?= h($injury['injury_date'] ?? '') ?>
+                                                        </span>
+                                                        <?php if (!empty($injury['recovery_date'])):?>
+                                                        <span class="text-sm text-body">
+                                                            Date Recovered: <?= h($injury['recovery_date'] ?? '') ?>
+                                                        </span>
+                                                        <?php endif;?>
+                                                    </div>
                                                 </div>
                                                 <span class="<?= $injury['injury_status'] === 'Active' ? badgeDanger() : badgeBlue() ?>">
                                                     <?= h($injury['injury_status'] ?? '') ?>

@@ -12,14 +12,14 @@
                     <div class="<?= formPadding() ?>">
                         <!-- Dropdown Button with Permission Access -->
                         <div class="relative bg-neutral-primary-soft w-full p-6 border border-default rounded-base shadow-xs">
-                            <button id="ddMatchMenuBtn" data-dropdown-toggle="ddMatchMenu" class="absolute top-2 end-2 text-body hover:text-heading bg-neutral-primary-soft box-border border border-transparent hover:bg-neutral-tertiary focus:ring-4 focus:ring-neutral-tertiary rounded-base p-1.5 focus:outline-none" type="button">
+                            <button id="ddMatchLineupBtn" data-dropdown-toggle="ddMatchLineup" class="absolute top-2 end-2 text-body hover:text-heading bg-neutral-primary-soft box-border border border-transparent hover:bg-neutral-tertiary focus:ring-4 focus:ring-neutral-tertiary rounded-base p-1.5 focus:outline-none" type="button">
                                 <span class="sr-only">Open dropdown</span>
                                 <svg class="w-6 h-6 text-brand" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-width="3" d="M6 12h.01m6 0h.01m5.99 0h.01"/></svg>
                             </button>
 
                             <!-- Dropdown menu -->
-                            <div id="ddMatchMenu" class="min-w-max z-10 bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg w-36 block hidden">
-                                <ul class="p-2 text-sm text-body font-medium" aria-labelledby="ddMatchMenuBtn">
+                            <div id="ddMatchLineup" class="min-w-max z-10 bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg w-36 block hidden">
+                                <ul class="p-2 text-sm text-body font-medium" aria-labelledby="ddMatchLineupBtn">
                                 <!-- If has hasPermission to update match show buttons -->
                                     <?php if (hasPermission('update_match')): ?>
                                         <!-- Update Match -->
@@ -146,6 +146,7 @@
                                                             <?= h($player['player_name']) ?>
                                                         </option>
                                                     <?php endforeach; ?>
+
                                                 </select>
                                             </span>
                                         <!-- Position error -->

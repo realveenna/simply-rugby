@@ -46,12 +46,15 @@ use Test\Models\Squad;
         protected function render($view, $data = [])
         {
             // add details to data array
-            $data['children'] = $this->children;
+            if (!isset($data['children'])) {
+                $data['children'] = $this->children;
+            }
             $data['allSquads'] = $this->allSquads;
             $data['navSquadAccess'] = $this->squads;
             $data['navSectionAccess'] = $this->sections;
             
             extract($data);
+            
 
             include '../src/includes/header.php';
             include '../src/includes/navbar.php';

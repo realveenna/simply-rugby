@@ -5,7 +5,7 @@
           <div class="<?= formPadding() ?>">
                 <a href="/" class="flex flex-col items-center justify-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
                     <img class="w-8 h-8 mr-2" src="/images/logo/main-logo.png" alt="logo">
-                    Record Training Player Skills
+                    Record Player Training Skills
                 </a>  
                 <!-- Training Session Details -->
                 <div>
@@ -52,15 +52,21 @@
                             </span>
                             <span> <?= h($training['start_time']) .' - ' .h($training['end_time'])?></span>
                         </li>
-                        <li class="flex items-center space-x-3 rtl:space-x-reverse">
+                        <!-- Skills and Activities -->
+                         <li class="flex space-x-3 rtl:space-x-reverse">
                             <!-- Svg Icon -->
                             <svg class="w-[15px] h-[15px] mr-2 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-6 5h6m-6 4h6M10 3v4h4V3h-4Z"/>
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-6 5h6m-6 4h6M10 3v4h4V3h-4Z"/>
                             </svg>
-                            <span class="font-medium text-heading mr-3">
-                                Activities & Skills: 
-                            </span>
-                            <span> <?= $training['skills_activities'] ?></span>
+
+                            <div>
+                                <span class="font-medium text-heading mr-3">
+                                    Activities & Skills: 
+                                </span>
+                                <p class="ml-8 mt-2 text-body">
+                                    <?= h($training['skills_activities']) ?>
+                                </p>
+                            </div>
                         </li>
                     </ul>
 
@@ -103,8 +109,8 @@
                                 </div>
                             </div>
 
-                            <div class="flex justify-end">
-                                <button type="submit" class="<?=primaryBtn()?>" name="action" value="next">
+                            <div class="flex ">
+                                <button type="submit" class="<?=primaryBtn()?> w-full" name="action" value="next">
                                     Confirm
                                 </button>   
                             </div>

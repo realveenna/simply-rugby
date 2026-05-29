@@ -236,7 +236,7 @@
 
                 // If selected role is a coach get assigned squad_id
                 if($data['selectedRole'] === 5){
-                    $data['squad'] = (int)$_POST['selectedSquad'] ?: 1;
+                    $data['squad'] = (int)$_POST['selectedSquad'];
 
                     if ($data['selectedSquad'] <= 0) {
                         $errors['selectedSquad'] = "Please select a squad";
@@ -248,6 +248,7 @@
                     try{
                         $pdo->beginTransaction();
 
+                        
                         $user = new User();
                         $user->email = $data['email'];
                         $user->password = $data['password'];
@@ -265,6 +266,7 @@
                             throw new \Exception("Failed to insert member login.");
                         }
 
+                        
                         //Insert role for member
                         $insert_role = Role::insertMemberRoles($pdo, $user->member_id, $data['selectedRole']);
                         if($insert_role === 0){
@@ -289,7 +291,7 @@
                                 throw new \Exception("Failed to insert coach to squad");
                             }    
                         }
-    
+
                         //Commit transaction
                         $pdo->commit();
 
@@ -325,6 +327,7 @@
 
             $member = $this->getMemberId($pdo);
 
+            // Render to this page if updating 
             $updateUrl = '/members/update?member_id=' . $member['member_id'];
 
             if(!empty($member['address_id'] )){
@@ -341,7 +344,7 @@
                     $childrenDetails[] = Player::playerProfile($pdo, $player_id);
                 }
             }
-
+            
 
             try{
                 if($_SERVER['REQUEST_METHOD'] === 'POST') {

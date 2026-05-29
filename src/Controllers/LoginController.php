@@ -83,6 +83,7 @@
             
         }
 
+        // Logout render destroy session
         public function logout(){
             // remove and destroy session
             session_unset();

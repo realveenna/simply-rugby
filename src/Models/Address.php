@@ -7,12 +7,12 @@
     
     class Address
     {
-        private $address_id;
-        private $line_1;
-        private $line_2;
-        private $city;
-        private $postcode;
-        private $country;
+        public $address_id;
+        public $line_1;
+        public $line_2;
+        public $city;
+        public $postcode;
+        public $country;
 
         public function __construct()
         {
@@ -71,6 +71,7 @@
             }
         }
 
+        // List of all countries
         public static function getCountries(){
             return
                 array(

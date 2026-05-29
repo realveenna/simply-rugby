@@ -91,11 +91,11 @@
                         'company_info_country' => $club->country,
                     ])
                 ;
+                
                 $response = $mailtrap->send($email);
                 $result = ResponseHelper::toArray($response);
                 if(!$response){
                     throw new \Exception("Email not sent");
-                    
                 }
             } catch (\Exception $e) {
                 // As comment for testing purposes
@@ -103,6 +103,7 @@
                 alert('error', $e->getMessage(), '/mail');
 
             }
+            alert('success', 'Message Sent Successfully!', '/mail');
         }
    
         public static function newResetPassword($fname, $email, $member_id, $password)

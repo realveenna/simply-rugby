@@ -2,12 +2,8 @@
     namespace Test\Controllers;
 
     use Test\Controller;
-    use Test\Models\User;
-    use Test\Models\Member;
-    use Test\Models\Role;
     use Test\Models\Squad;
     use Test\Models\AccessControl;
-    use Test\Database;
     
     class SquadController extends Controller
     {
@@ -21,10 +17,10 @@
         public function index()
         {
             $pdo = $this->pdo;
-
-            $squads = AccessControl::getAuthorizedSquads($pdo, $this->member_id);
-            
             $players = [];
+
+            // Get authorized squad access
+            $squads = AccessControl::getAuthorizedSquads($pdo, $this->member_id);
 
             // Forbidden Access
             if(!$squads ){
@@ -32,10 +28,23 @@
             }
             
             try{
+                // Higher Admin
+                if(isAdmin()){
+                    $title = 'All';
+                }
+                // Section or Membership
+                elseif (count($squads) > 1){
+                    $title = $squads[0]['section_name'];
+                }
+                // Coach
+                else{
+                    $title = $squads[0]['squad_name'];
+                }
+     
                 // If searching for squad players
-                if (isset($_GET['name']))
+                if (isset($_GET['type']))
                 {
-                    $squad_name = $_GET['name'];
+                    $squad_name = $_GET['type'];
 
                     // Get squad details
                     $squad = Squad::getSquadByName($pdo, $squad_name);
@@ -46,19 +55,25 @@
                     // Get squad players
                     $players = Squad::listSquadPlayer($pdo, $squad['squad_id']);
 
+                    // Set title
+                    $title = $squad['squad_name'];
+
+
                     // Go to page
                     $this->render('squad/name', [
                         'squad' => $squad,
-                        'players' => $players
+                        'players' => $players,
+                        'title' => $title
                     ]);
                     return;
                 }
                 $this->render('squad/index', [
-                    'squads' => $squads
+                    'squads' => $squads,
+                    'title' => $title ?? 'All'
                 ]);
             }
             catch (\Exception $e){
-                alert('errors', $e->getMessage(), '/');
+                alert('error', $e->getMessage(), '/');
             }
         }
 
@@ -85,7 +100,7 @@
                 ]);
             }
             catch (\Exception $e){
-                alert('errors', $e->getMessage(), '/');
+                alert('error', $e->getMessage(), '/');
             }
         }
     }

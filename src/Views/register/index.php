@@ -154,9 +154,11 @@
                         <?php include '../src/includes/address.php'?>
 
                         <div>
-                              <label for="applyCoach" class="flex items-center mb-5">
-                                <input id="applyCoach" aria-describedby="applyCoach" name="applyCoach" type="checkbox" value="1" 
-                                class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800">
+                              <label for="apply_coach" class="flex items-center mb-5">
+                                <input id="apply_coach" aria-describedby="apply_coach" 
+                                    <?= isset($_POST['apply_coach']) ? 'checked' : '' ?>
+                                    name="apply_coach" type="checkbox" value="1" 
+                                    class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800">
                                 <p class="ms-2 text-sm text-small text-heading select-none">
                                     Please tick the box if you wish to apply for a coach position
                                 </p>
@@ -444,6 +446,20 @@
                         </select>
                             <p class="<?= smallError() ?>"><?php echo h($countryDoctorErr);?></p>
                     </div>
+
+                    <div class="flex items-start mb-6">
+                        <div class="flex items-center h-5">
+                        <input id="tncs" name="tncs" 
+                            type="checkbox" value="1" class="w-4 h-4 border border-default-medium rounded-xs bg-neutral-secondary-medium focus:ring-2 focus:ring-brand-soft" />
+                        </div>
+                        <label for="tncs" class="ms-2 text-sm  text-heading">
+                            I Agree to Terms and Conditions
+                        </label>
+                    </div>
+                    <div>
+                        <p class="mt-2 text-sm font-xs text-red-500"><?= $error['tncs'] ?? '' ?></p>
+                    </div>
+
                     <div class="grid gap-2 mb-6 md:grid-cols-2">
                         <!-- Back Button -->
                         <button type="submit" name="action" value="back"

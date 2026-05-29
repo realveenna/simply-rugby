@@ -16,6 +16,108 @@
                         <?php require '../src/includes/match-card.php'; ?>
                     </div>
 
+                    <!-- Match Result -->
+                    <?php if(!isFutureDate($match['match_date'] && $match['result'] !== 'Pending')):?>
+                        <div class="<?= formPadding() ?>">
+                            <!-- First half -->
+                            <?= titleLeftSmall('First Half'); ?>
+                            <div class="grid gap-2 md:grid-cols-2 items-start">
+                                <div class="bg-neutral-primary-soft border border-default rounded-base shadow-xs h-full">
+                                    <ul role="list" class="space-y-3 p-6 divide-y divide-default">
+                                        <li class="flex flex-col pb-3">
+                                            <span class="font-bold mb-4">
+                                                <?= h($match['squad_name'])?>
+                                            </span>
+                                        
+                                            <span class="font-large">
+                                                Points: <?= h($halves[0]['our_points'])?>
+                                            </span>
+                                        </li>
+                                        <li class="flex flex-col pb-3">
+                                            <span>
+                                                Comments:
+                                            </span>
+                                            <span>
+                                                <?= h($halves[0]['our_comments'])?>
+                                            </span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="bg-neutral-primary-soft border border-default rounded-base shadow-xs h-full">
+                                    <ul role="list" class="space-y-3 p-6 divide-y divide-default">
+                                        <li class="flex flex-col pb-3">
+                                            <span class="font-bold mb-4">
+                                                <?= h($match['opposition_team_name'])?>
+                                            </span>
+                                        
+                                            <span class="font-large">
+                                                Points: <?= h($halves[0]['opponent_points'])?>
+                                            </span>
+                                        </li>
+                                        <li class="flex flex-col pb-3">
+                                            <span>
+                                                Comments:
+                                            </span>
+                                            <span>
+                                                <?= h($halves[0]['opponent_comments'])?>
+                                            </span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Second Half -->
+                         <div class="<?= formPadding() ?>">
+                            <?= titleLeftSmall('Second Half'); ?>
+                            <div class="grid gap-2 md:grid-cols-2 items-start">
+                                <div class="bg-neutral-primary-soft border border-default rounded-base shadow-xs h-full">
+                                    <ul role="list" class="space-y-3 p-6 divide-y divide-default">
+                                        <li class="flex flex-col pb-3">
+                                            <span class="font-bold mb-4">
+                                                <?= h($match['squad_name'])?>
+                                            </span>
+                                        
+                                            <span class="font-large">
+                                                Points: <?= h($halves[1]['our_points'])?>
+                                            </span>
+                                        </li>
+                                        <li class="flex flex-col pb-3">
+                                            <span>
+                                                Comments:
+                                            </span>
+                                            <span>
+                                                <?= h($halves[1]['our_comments'])?>
+                                            </span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="bg-neutral-primary-soft border border-default rounded-base shadow-xs h-full">
+                                    <ul role="list" class="space-y-3 p-6 divide-y divide-default">
+                                        <li class="flex flex-col pb-3">
+                                            <span class="font-bold mb-4">
+                                                <?= h($match['opposition_team_name'])?>
+                                            </span>
+                                        
+                                            <span class="font-large">
+                                                Points: <?= h($halves[1]['opponent_points'])?>
+                                            </span>
+                                        </li>
+                                        <li class="flex flex-col pb-3">
+                                            <span>
+                                                Comments:
+                                            </span>
+                                            <span>
+                                                <?= h($halves[1]['opponent_comments'])?>
+                                            </span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif;?>
+                        
+
                     <!-- Lineup -->
                     <div class="<?= formPadding() ?>">
                         <?= titleLeftSmall($match['squad_name']. ' Lineup'); ?>
@@ -24,7 +126,7 @@
                             <p class="text-danger mb-6 font-semibold"><?= $message ?? '' ?> </p>
                         <?php endif;?>
 
-                        <div class="bg-neutral-primary-soft border border-default rounded-base shadow-xs">
+                        <div class="bg-neutral-primary-soft border border-default rounded-base shadow-xs h-full">
                             <ul role="list" class="space-y-3 p-6 divide-y divide-default">
                                 <?php foreach ($lineup as $player): ?>
                                     <li class="flex items-center justify-between pb-3">
@@ -34,10 +136,7 @@
                                         <span class="text-body font-medium">
                                             <!-- If null position and has role access display badge -->
                                             <?php if (empty($player['position']) 
-                                                && (
-                                                    hasPermission('update_match_lineup') ||
-                                                    hasPermission('update_match')
-                                                    )): ?>
+                                                && (hasPermission('update_team'))): ?>
                                                 <span class="<?= badgeDanger() ?>">
                                                     Require Position
                                                 </span>
@@ -88,7 +187,7 @@
                     <!-- Coaches -->
                     <div class="<?= formPadding() ?>">
                         <?= titleLeftSmall($match['squad_name']. ' Coches'); ?>
-                        <div class="bg-neutral-primary-soft border border-default rounded-base shadow-xs">
+                        <div class="bg-neutral-primary-soft border border-default rounded-base shadow-xs h-full">
                             <?php foreach ($coaches as $coach): ?>
                                 <ul role="list" class="space-y-3 p-6 divide-y divide-default">
                                     <li class="flex items-center justify-between pb-3">

@@ -78,7 +78,7 @@
                       name="start_time" 
                       id="start_time" 
                       value="<?= h($training->start_time ?? '') ?>"
-                      class="block w-full p-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body" min="09:00" max="18:00" value="00:00" required />
+                      class="block w-full p-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body" min="09:00" max="18:00" value="00:00" />
                 </div>
                 <div>
                     <p class="<?= smallError() ?>"><?php echo h($error['start_time'] ?? '');?></p>
@@ -92,7 +92,7 @@
                     </div>
                     <input type="time" name="end_time" id="end_time" 
                       value="<?= h($training->end_time ?? '') ?>"
-                      class="block w-full p-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body" min="09:00" max="18:00" value="00:00" required />
+                      class="block w-full p-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body" min="09:00" max="18:00" value="00:00" />
                 </div>
                 <div>
                     <p class="<?= smallError() ?>"><?php echo h($error['end_time'] ?? '');?></p>

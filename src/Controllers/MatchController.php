@@ -290,7 +290,9 @@
                 'match' => $match,
                 'lineup' => $lineup,
                 'coaches' => $coaches,
-                'message' => $message ?? ''
+                'message' => $message ?? '',
+                'halves' => $halves ?? '',
+                
             ]);
         }
 
@@ -425,7 +427,6 @@
                     $pdo->rollBack();
                 }
                 alert('error', $e->getMessage(), '/match/create');
-                die($e->getMessage());
             }
 
             // Render
@@ -474,8 +475,10 @@
 
                     }
                 }
+
                 // POST REQUEST
                 if($_SERVER['REQUEST_METHOD'] === 'POST') {
+                    
                     // Validate Match Id
                     $match = new Matches($this->getMatchId($pdo));
 
@@ -484,7 +487,7 @@
                         abort(403, 'Unable to modify lineup. This match already has a result.');
                     }
 
-                    // filter  empty value from POST
+                    // filter empty value from POST
                     $selectedPlayers = array_filter($_POST);
 
                     // Unset match id from filtering post players
@@ -494,9 +497,9 @@
                     $selectedPlayers = array_filter($selectedPlayers);
 
                     // Check if any position select is empty
-                    foreach ($_POST as $position => $player_id) {
-                        if (empty($player_id)) {
-                            $errors[$position] = 'Please select a player.';
+                    foreach ($positions as $key => $position) {
+                        if (empty($_POST[$key])) {
+                            $errors[$key] = 'Please select a player.';
                         }
                     }
 
@@ -511,7 +514,7 @@
 
                         // Insert each selected player with position
                         foreach ($_POST as $key => $player_id) {
-                             // Skip match_id
+                            // Skip match_id
                             if ($key === 'match_id') {
                                 continue;
                             }
@@ -519,6 +522,7 @@
                             // Convert form key to match db ENUM value
                             $position = $positions[$key];
 
+                            // Update player position
                             $inserted = Matches::updatePlayerPosition
                                 ($pdo, $match->match_id, $player_id, $position);
 
@@ -544,7 +548,7 @@
                         }
                         // Commmit and success message
                         $pdo->commit();
-                        alert('success','Player Position for Match Lineup Succesfully Updated!','/');
+                        alert('success','Player Position for Match Lineup Successfully Updated!','/match');
                     }
                 }
             }
@@ -628,6 +632,26 @@
                         $redCards = (int)$playerStats['red_cards'] ?? 0;
                     }
 
+                    $hasError = false;
+                    // Valid input, Check for no input then if value is valid
+                    foreach ($stats as $player_id => $playerStats) {
+                        foreach ($playerStats as $input => $value) {
+                            // Empty input
+                            if ($value === '') {
+                                $errors['message'] = 'Please fill in all fields';
+                                $hasError = true;
+                                break;
+                            }
+
+                            // Invalid points or mins
+                            if (!is_numeric($value) || (int)$value < 0) {
+                                $errors['message'] = 'Please enter positive number';
+                                $hasError = true;
+                                break;
+                            }
+                        }
+                    }
+
                     // Get each match half
                     $halves = Matches::getMatchHalfById($pdo, $match['match_id']);
                     $match['halves'] = $halves;
@@ -638,18 +662,21 @@
                     $officialTotal =(int) $match['our_total_points'];
                     $total = 0;
 
-                    // Calculate Total points by each player stats
-                    foreach ($stats as $playerStats) {
-                        $total +=
-                            ((int)$playerStats['tries'] * 5) +
-                            ((int)$playerStats['conversions'] * 2) +
-                            ((int)$playerStats['penalties'] * 3) +
-                            ((int)$playerStats['drop_goals'] * 3);
-                    }
+                    // If no error from previous validation check if total are equal to official result
+                    if(!$hasError){
+                        // Calculate Total points by each player stats
+                        foreach ($stats as $playerStats) {
+                            $total +=
+                                ((int)$playerStats['tries'] * 5) +
+                                ((int)$playerStats['conversions'] * 2) +
+                                ((int)$playerStats['penalties'] * 3) +
+                                ((int)$playerStats['drop_goals'] * 3);
+                        }
 
-                    // Check if both points are equal
-                    if ((int)$total !== (int)$officialTotal){
-                        $errors['message'] = "Player stats total does not match official match score. Please try again";
+                        // Check if both points are equal
+                        if ((int)$total !== (int)$officialTotal){
+                            $errors['message'] = "Player stats total does not match official match score. Please try again";
+                        }
                     }
 
                     // No errors
@@ -668,7 +695,7 @@
 
                         // Commit
                         $pdo->commit();
-                        alert('success','Player Match Player Stats Succesfully Updated!','/');
+                        alert('success','Player Match Player Stats Succesfully Updated!','/match');
                     }
                 }
             }
@@ -705,14 +732,6 @@
 
                 // POST REQUEST
                 if($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-                    // Abort if match already has result 
-                    if($match->result !== 'Pending'){
-                        abort(403,'Unable to modify result of a past match');
-                    }
-                    
-                    // Set POST match_id
-                    $match = new Matches($this->getMatchId($pdo));
 
                     // Create Matches object, override the original
                     $match = new Matches([
@@ -783,7 +802,6 @@
                     $pdo->rollBack();
                 }
                 alert('error', $e->getMessage(), '/match/update');
-                die($e->getMessage());
             }
 
             // Render
@@ -802,6 +820,13 @@
 
             // Get match details
             $match = $this->getMatchId($pdo);
+
+
+            // Abort if match already has result 
+            if($match['result'] !== 'Pending'){
+                alert('error', 'Unable to modify result of a past match', '/match');
+                die();
+            }
 
             // Get each match half
             $halves = Matches::getMatchHalfById($pdo,$match['match_id']);
@@ -850,6 +875,23 @@
                         ($data['sh_our_comments'], 'Please enter our team comments');
                     $error['sh_opponent_comments'] = ifEmpty
                         ($data['sh_opponent_comments'], 'Please enter opponent comments');
+
+                    // Please enter a valid points
+                    if ($data['fh_our_points'] !== '' && $data['fh_our_points'] < 0) {
+                        $error['fh_our_points'] = 'Please enter a valid points.';
+                    }
+
+                    if ($data['fh_opponent_points'] !== '' && $data['fh_opponent_points'] < 0) {
+                        $error['fh_opponent_points'] = 'Please enter a valid points.';
+                    }
+
+                    if ($data['sh_our_points'] !== '' && $data['sh_our_points'] < 0) {
+                        $error['sh_our_points'] = 'Please enter a valid points.';
+                    }
+
+                    if ($data['sh_opponent_points'] !== '' && $data['sh_opponent_points'] < 0) {
+                        $error['sh_opponent_points'] = 'Please enter a valid points.';
+                    }
 
                     // Remove empty validation errors
                     $error = array_filter($error);

@@ -1,5 +1,6 @@
 <!-- Player Applications Table -->
 <section class="bg-gray-50 dark:bg-gray-900">
+    <?= title('Player',' Applications') ?>
     <table class="datatable">
         <thead>
             <tr>

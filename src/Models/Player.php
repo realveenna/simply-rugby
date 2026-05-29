@@ -90,13 +90,10 @@
                     sph.start_date,
                     sph.end_date
                 FROM member m
-                JOIN player_profile pp
-                    ON m.member_id = pp.member_id
-                LEFT JOIN squad_player_history sph 
-                    ON m.member_id = sph.member_id
+                JOIN player_profile pp ON m.member_id = pp.member_id
+                LEFT JOIN squad_player_history sph  ON m.member_id = sph.member_id 
                     AND sph.end_date IS NULL
-                LEFT JOIN squad s
-                    ON sph.squad_id = s.squad_id
+                LEFT JOIN squad s ON sph.squad_id = s.squad_id
                 WHERE m.member_id = :member_id
             ");
 

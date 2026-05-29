@@ -51,7 +51,7 @@
                 ':match_date' => $this->match_date,
                 ':opposition_team_name' => $this->opposition_team_name,
                 ':kick_off_time' => $this->kick_off_time,
-                ':result' => $this->result
+                ':result' => $this->result ?? 'Pending'
             ]);
 
             // Get Id

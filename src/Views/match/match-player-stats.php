@@ -69,7 +69,7 @@
                                     <td class="px-3 py-2">
                                         <input type="number" min="0" 
                                         name="stats[<?= $player['player_id'] ?>][minutes_played]"
-                                            value="<?= h($_POST['minutes_played'][$player['player_id']]['minutes_played'] ?? $player['minutes_played'] ?? 0) ?>"
+                                            value="<?= h($_POST['minutes_played'][$player['player_id']]['minutes_played'] ?? $player['minutes_played'] ?? 80) ?>"
                                             class="<?= inputClass() ?>">
                                     </td>
 
@@ -100,7 +100,7 @@
                                         <!-- Drop Goals -->
                                         <td class="px-3 py-2">
                                             <input type="number" min="0" 
-                                            name="stats[<?= $player['player_id'] ?>][drop_goals]"
+                                                name="stats[<?= $player['player_id'] ?>][drop_goals]"
                                                 value="<?= h($_POST['stats'][$player['player_id']]['drop_goals'] ?? $player['drop_goals'] ?? 0) ?>"
                                                 class="<?= inputClass() ?>">
                                         </td>
@@ -136,7 +136,7 @@
                             ($match['result'] !== 'Pending')):?>
                             <div class="flex justify-end">
                                 <button type="submit" class="<?=primaryBtn()?> ">
-                                    Update Match Player Stats
+                                    Add Player Match Stats
                                 </button>
                             </div>
                         <?php endif; ?>

@@ -151,10 +151,12 @@
                     s.season,
                     s.section_id,
                     sec.section_name,
-                    COUNT(sm.member_id) AS total_members
+                    COUNT(pp.member_id) AS total_members
                 FROM squad s
                 LEFT JOIN squad_member sm ON s.squad_id = sm.squad_id
+                LEFT JOIN player_profile pp ON pp.member_id = sm.member_id
                 LEFT JOIN section sec ON sec.section_id = s.section_id
+                WHERE sm.status = 'Active'
 
                 GROUP BY
                     s.squad_id, 
@@ -167,20 +169,20 @@
             return $statement->fetchAll(PDO::FETCH_ASSOC);
         }
 
-        public static function getAllSquadGlobal($pdo)
-        {
-            $statement = $pdo->prepare(
-                "SELECT
-                    squad_id,
-                    squad_name,
-                    section_id
-                FROM squad"
-            );
+        // public static function getAllSquadGlobal($pdo)
+        // {
+        //     $statement = $pdo->prepare(
+        //         "SELECT
+        //             squad_id,
+        //             squad_name,
+        //             section_id
+        //         FROM squad"
+        //     );
 
-            $statement->execute();
+        //     $statement->execute();
 
-            return $statement->fetchAll(PDO::FETCH_ASSOC);
-        }
+        //     return $statement->fetchAll(PDO::FETCH_ASSOC);
+        // }
 
 
         // Get squad by squad type

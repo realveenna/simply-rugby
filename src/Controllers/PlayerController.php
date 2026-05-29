@@ -45,9 +45,11 @@ use Test\Models\Squad;
                 if(!$player){
                     abort(404, 'Player Not Found.');
                 }
+                
 
                 // Authorization 
-                if (!AccessControl::canViewPlayer($player, $_SESSION['user']['member_id'], $member_id)) {
+                if (!AccessControl::canViewPlayer($player, (int)$_SESSION['user']['member_id'], 
+                    (int)$member_id)) {
                     abort(403);
                 }
 
@@ -115,7 +117,7 @@ use Test\Models\Squad;
                 if ($pdo->inTransaction()) {
                     $pdo->rollBack();
                 }
-                die($e->getMessage());
+                alert('error', $e->getMessage(), '/player/index');
             }
             
             $this->render('player/index', [

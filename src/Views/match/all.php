@@ -11,7 +11,7 @@
 
         <!-- Dropdown menu -->
         <div id="matchesCategory" class="min-w-max z-10 hidden bg-neutral-primary-medium border border-default-medium rounded-base divide-y divide-default-medium shadow-lg w-44">
-            <ul class="p-2 text-sm text-body font-medium" aria-labelledby="matchesCategoryButton">
+            <ul class="min-w-max p-2 text-sm text-body font-medium" aria-labelledby="matchesCategoryButton">
                 <!-- All -->
                 <li>
                     <a href="/match/all"
@@ -152,14 +152,63 @@
                     <!-- Dropdown menu -->
                     <div id="allMatchDots<?=h($match['match_id'])?>" class="z-10 hidden bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg w-44 dark:divide-gray-600">
                         <ul class="p-2 text-sm text-body font-medium" aria-labelledby="allMatch<?=h($match['match_id'])?>">
+                            <!-- View match details -->
                             <li>
                                 <a href="/match/view?match_id=<?= $match['match_id'] ?>"
                                     class="flex justify-center items-center text-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded-md">
                                     View Details
                                 </a>
                             </li>
+
+                            <!-- If user has permission to create_team and result is pending -->
+                            <?php if (hasPermission('create_team') 
+                                && isFutureDate($match['match_date'])
+                                && $match['result'] === 'Pending'): ?>
+                                <!-- Allow to create team -->
+                                <li>
+                                    <a href="/match/lineup?match_id=<?= $match['match_id'] ?>"
+                                        class="flex justify-center items-center text-center w-full p-2 hover:bg-neutral-tertiary-medium text-brand hover:text-heading rounded-md">
+                                        Create Match Team
+                                    </a>
+                                </li>
+                            <?php endif;?>
+
+                            <!-- Button if user has permission to record injury -->
+                            <?php if ((hasPermission('record_injury')) && $match['result'] !== 'Pending'):?>
+                                <li>
+                                    <a href="/injury?match_id=<?= $match['match_id']?>" 
+                                        class="inline-flex items-center justify-center text-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded-md">
+                                        Record Injury
+                                    </a>    
+                                </li>
+                            <?php endif; ?>
+
                             <!-- If has hasPermission to update match show buttons -->
                             <?php if (hasPermission('update_match')): ?>
+                                
+                                <!-- If result is pending and past date allow to add match result -->
+                                <?php if ($match['result'] === 'Pending' && !isFutureDate($match['match_date'])): ?>
+                                <!-- Add Match Result -->
+                                    <li>
+                                        <a href="/match/update-result?match_id=<?= $match['match_id'] ?>"
+                                            class="flex justify-center items-center text-center w-full p-2 text-brand hover:bg-neutral-tertiary-medium hover:text-heading rounded-md">
+                                            Add Match Result
+                                        </a>
+                                    </li>
+                                <?php endif; ?>
+                                
+
+                                <!-- Allow user to update player match stats if has permission to update match and has result  -->
+                                <?php if ((hasPermission('create_team')) && 
+                                    ($match['result'] !== 'Pending')):?>
+                                    <li>
+                                        <a href="/match/match-player-stats?match_id=<?= $match['match_id'] ?>"
+                                            class="inline-flex items-center text-brand text-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded-md">
+                                            Add Player Match Stats
+                                        </a>
+                                    </li>
+                                <?php endif; ?>
+
                                 <!-- Allow to update match details -->
                                 <li>
                                     <a href="/match/update?match_id=<?= $match['match_id'] ?>"
@@ -168,16 +217,6 @@
                                     </a>
                                 </li>
 
-                                <!-- If result is pending allow to add match result -->
-                                <?php if ($match['result'] === 'Pending'): ?>
-                                <!-- Add Match Result -->
-                                    <li>
-                                        <a href="/match/update-result?match_id=<?= $match['match_id'] ?>"
-                                            class="inline-flex items-center text-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded-md">
-                                            Add Match Result
-                                        </a>
-                                    </li>
-                                <?php endif; ?>
 
                                 <!-- If has permission to delete match -->
                                 <?php if (hasPermission('delete_match')): ?>

@@ -14,10 +14,10 @@
                     </label>
                     <select class="<?= inputClass()?>"
                         autocomplete="role_name" name="role_name">
-                        <option value="" disabled selected> Select Injury:</option>
+                        <option value="" selected  disabled> Select Member Categories:</option>
                         <?php foreach ($roles as $role): ?>
                             <option value="<?= $role['role_name'] ?>"
-                                <?= ((int)($_POST['role_name'] ?? 0) === (int)$role['role_name'])
+                                <?= ($recipient_role  ?? '' === (int)$role['role_name'])
                                      ? 'selected' : '' ?>>
                                 <?= h($role['role_name']) ?>
                             </option>
@@ -52,7 +52,7 @@
                   <!-- Submit Button -->
                   <button type="submit" 
                       class="<?=primaryBtn()?>">
-                      Submit
+                      Send
                   </button>
               </div>
             </form>

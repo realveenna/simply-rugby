@@ -1,7 +1,6 @@
 <div class="relative bg-neutral-primary-soft w-full p-6 border border-default rounded-base shadow-xs">
-   
 
-    <!-- If user has hasPermission to update match show buttons -->
+<!-- If user has hasPermission to update match show buttons -->
     <?php if (hasPermission('update_match') || hasPermission('create_team')): ?>
         <button id="ddMatchMenuBtn<?= $match['match_id'] ?>" data-dropdown-toggle="ddMatchMenu<?= $match['match_id'] ?>" class="absolute top-2 end-2 text-body hover:text-heading bg-neutral-primary-soft box-border border border-transparent hover:bg-neutral-tertiary focus:ring-4 focus:ring-neutral-tertiary rounded-base p-1.5 focus:outline-none" type="button">
             <span class="sr-only">Open dropdown</span>
@@ -79,7 +78,7 @@
                 <?= h(formatTime($match['kick_off_time']) ?? '') ?>
         </span>
         <!-- Team Names -->
-        <div class="flex justify-center gap-5 w-full py-4">
+        <div class="flex flex-col md:flex-row justify-center gap-5 w-full py-4">
             <!-- Simply Rugby Team -->
             <div class="flex flex-col items-center flex-1">
                 <img class="w-15 h-15" src="/images/logo/main-logo.png" alt="simply-rugby-logo">
@@ -89,7 +88,7 @@
             </div>
 
             <!-- Home or Away Badge  + Each Team Scores if available-->
-            <div class="flex items-center gap-3 justify-center text-center min-w-25 mx-5">
+            <div class="flex flex-col md:flex-row items-center gap-3 justify-center text-center min-w-25 mx-5">
 
                 <!-- Our Team Score -->
                 <?php if($match['result'] !== 'Pending'): ?>

@@ -132,15 +132,12 @@
             // Check if member already exist 
             $statement = $pdo->prepare(
                 "SELECT member_id FROM member 
-                WHERE first_name = :fname AND last_name = :lname AND dob = :dob 
-                AND mobile_num = :mobileNum
+                WHERE mobile_num = :mobile_num AND email = :email
                 LIMIT 1"
             );
             $statement->execute([
-                ':fname' => $this->first_name,
-                ':lname' => $this->last_name,
-                ':dob' => $this->dob,
-                ':mobileNum' => $this->mobile_num
+                ':mobile_num' => $this->mobile_num,
+                ':email' => $this->email,
             ]);
             return $statement->fetchColumn();
         }
@@ -243,15 +240,22 @@
                 "SELECT
                     m.*,
                     GROUP_CONCAT(DISTINCT r.role_name SEPARATOR ', ') AS roles,
+                    -- Group concat since members can have multiple roles
                     GROUP_CONCAT(DISTINCT sq.squad_name SEPARATOR ', ') AS squads,
-                    GROUP_CONCAT(DISTINCT s.section_name SEPARATOR ', ') AS sections
+                    GROUP_CONCAT(DISTINCT COALESCE(s.section_name, sec_ad.section_name)SEPARATOR ', ') AS sections
                 FROM member m
                 
                 LEFT JOIN member_role mr ON m.member_id = mr.member_id
                 LEFT JOIN role r ON mr.role_id = r.role_id
+
+                -- Squad_Member Joins
                 LEFT JOIN squad_member sm ON m.member_id = sm.member_id
                 LEFT JOIN squad sq ON sm.squad_id = sq.squad_id
                 LEFT JOIN section s ON sq.section_id = s.section_id
+
+                -- Section Admin Joins
+                LEFT JOIN section_admin sa ON m.member_id = sa.member_id
+                LEFT JOIN section sec_ad ON sa.section_id = sec_ad.section_id
 
                 WHERE m.member_id = :member_id
                 GROUP BY m.member_id"
@@ -259,7 +263,6 @@
 
             $statement->execute([':member_id' => $member_id]);
             $result = $statement->fetch(PDO::FETCH_ASSOC);
-
             return $result;
         }
 

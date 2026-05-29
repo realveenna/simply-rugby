@@ -12,14 +12,13 @@
     use Test\Models\Member;
     use Test\Models\Player;
     use Test\Models\Squad;
-    use Test\Database;
 
 
     class ApplicationController extends Controller
     {
         public function __construct()
         {
-            
+            parent::__construct();
         }
 
         // Display all player applications
@@ -36,7 +35,7 @@
         // Display full application details of a player
         // /player-applications/application-details with id
         public function applicationDetails(){
-            $pdo = Database::getInstance()->getConnection();
+            $pdo = $this->pdo;
 
             // Admin Access Only
             if(isset($_POST['id']) && isset($_POST['action'])){
@@ -83,6 +82,9 @@
             
             // Get application details
             $data = Application::getPlayerApplicationDetails($pdo, $data['application_id']);
+            if(!$data){
+                alert('error', 'There is a database error in fetching application details.', '/player-applications');
+            }
            
             // Get primary and secondary guardians
             $pGuardian = Guardian::getPrimaryApplicationGuardians
@@ -147,7 +149,7 @@
             if ($_POST) {
                 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 
-                $pdo = Database::getInstance()->getConnection();
+                $pdo = $this->pdo;
 
                  // Create member object for player
                 $member = new Member();
@@ -162,6 +164,7 @@
                 // Check if member already exist before inserting
                 $memberExists = $member->validateInsert($pdo);
 
+                
                 try{
                     $pdo->beginTransaction();
                     
@@ -170,10 +173,11 @@
                         if (!$memberExists) {
                             // Insert player to member table
                             $memberId = $member->insert($pdo);
+
                             if (!$memberId) {
                                 throw new \Exception('Failed to add member details.');
                             }
-                            // Store last indsert member_id
+                            // Store last insert member_id
                             $member->member_id = $memberId;
                         }
                         else{
@@ -211,14 +215,17 @@
                         $pContactMember->membership_status = $pGuardian['membership_status'] ?? 'active';
                         $pContactMember->email = $pGuardian['email'] ?: null;
 
-                        // Check if primargy guardian member already exist before inserting
+
+                         // Check if primary guardian member already exist before inserting
                         $memberExists = $pContactMember->validateInsert($pdo);
+
                         if (!$memberExists) {
                             // Insert primary guardian to member table
                             $pContactMember->member_id = $pContactMember->insert($pdo);
                             if (!$pContactMember->member_id) {
                                 throw new \Exception('Failed to add primary guardian/nok details.');
                             }
+
                         }
                         else{
                             // Set member_id
@@ -228,7 +235,6 @@
 
                         // Set primary guardian member id and access level
                         $pGuardian['contact_member_id'] = $pContactMember->member_id;
-
                         // If player is a junior 
                         if($isJunior){
                             // Set guardian access level to full access
@@ -273,7 +279,6 @@
                             Role::insertMemberRoles($pdo, $pContactMember->member_id, $roleId);
                         }
 
-
                         // Insert player to squad member table
                         $insertPlayer = Squad::insertSquadMember($pdo, $memberId, $squadId, $roleId);
                         if (!$insertPlayer) {
@@ -300,8 +305,8 @@
                             $sContactMember->email = $sGuardian['email'] ?: null;
 
                             // Check if member already exist before inserting
-                            $memberExists = $sContactMember->validateInsert($pdo);
-                            if (!$memberExists) {
+                            $sContactExist = $sContactMember->validateInsert($pdo);
+                            if (!$sContactExist) {
                                 // Insert second guardian to member table
                                 $sContactMember->member_id = $sContactMember->insert($pdo);
 
@@ -311,7 +316,7 @@
                             }
                             else{
                                 // Set member_id
-                                $sContactMember->member_id = $memberExists;
+                                $sContactMember->member_id = $sContactExist;
                             }
 
                             if (!$sContactMember->member_id) {
@@ -330,6 +335,7 @@
                                 throw new \Exception('Failed to add secondary guardian/nok to contact table.');
                             }
                         }
+
                         
                         // Insert player allergy to table
                         MedicalInformation::copyToPlayerAllergy($pdo, $data['application_id'], $memberId);
@@ -387,14 +393,14 @@
                             if (!$deleted) {
                                 throw new \Exception('Failed to delete player details.');
                             }
-                            $pdo->commit();
-                            // Success message
-                            alert('success', 'Application ' .ucfirst($action) . ' Successfully!', '/player-applications');
-                            exit();
                         }
                         else{
                             Application::updateStatus($pdo, $data['application_id'], 'rejected');
                         }
+                        $pdo->commit();
+                         // Success message
+                        alert('success', 'Application Rejected Successfully!', '/player-applications');
+                        exit();
                     }
                     else if ($action === 'back'){
                         header("Location: /player-applications");
@@ -410,7 +416,6 @@
                         $pdo->rollBack();
                     }
                     alert('error', $e->getMessage(), '/player-applications/application-details?id=' . $data['application_id']);
-                    die($e->getMessage());
                 }
             }
 
@@ -421,8 +426,8 @@
                 'allergies' => $allergies['applicationAllergies'] ?? null,
                 'currentConditions' => $currentCondition ?? null,
                 'pastConditions' => $pastCondition ?? null,
-                'doctor' => $doctor ?? null,
-                'doctorAddress' => $doctorAddress ?? null,
+                'doctor' => $doctor ?? [],
+                'doctorAddress' => $doctorAddress ?? [],
                 'isJunior' => $isJunior ?? true,
                 'nok' => $nok ?? 'Guardian',
                 'hasParentLogin' => $hasParentLogin ?? false
@@ -556,17 +561,32 @@
             $isJunior = false;
 
             if ($_POST) {
+                // Terms and Conditions 
+                if (isset($_POST['tncs'])) {
+                    $tncs = $_POST['tncs'];
+                } else {
+                    $tncs = 0;
+                }
+
+                // Apply coach
+                if (isset($_POST['apply_coach'])) {
+                    $apply_coach = $_POST['apply_coach'];
+                } else {
+                    $apply_coach = 0;
+                }
+
+
                 $fName = trimPost('fName') ?? '';
                 $lName = trimPost('lName') ?? '';
                 $dob = trimPost('dob') ?? '';
                 $playerNickname = trimPost('playerNickname') ?? '';
                 $playerHeight = trimPost('playerHeight') ?? '';
                 $playerWeight = trimPost('playerWeight') ?? '';
+                
 
                 $nokFName = trimPost('nokFName') ?? '';
                 $nokLName = trimPost('nokLName') ?? '';
                 $nokRelationship = trimPost('nokRelationship') ?? '';         
-                $apply_coach = isset($_POST['apply_coach']) ?? 0 ;         
                 
                 $nokFNameSecondary = trimPost('nokFNameSecondary') ?? '';
                 $nokLNameSecondary = trimPost('nokLNameSecondary') ?? '';
@@ -604,7 +624,6 @@
                 $cityDoctor = trimPost('cityDoctor');
                 $postcodeDoctor = strtoupper(trimPost('postcodeDoctor')); 
                 $countryDoctor = trimPost('countryDoctor'); 
-
 
                 // Default data to be passed
                 $data = [
@@ -696,7 +715,7 @@
                             $formNum = 1; 
                         }
                         else{
-                            if($age >= 5 && $age <= 12){
+                            if($age >= 5 && $age < 18){
                                 $isJunior = true;
                                 $nok = 'Guardian 1';
                             }
@@ -746,15 +765,21 @@
                     $cityDoctorErr = ifEmpty($cityDoctor, "City is required");
                     $postcodeDoctorErr = ifEmpty($postcodeDoctor, "Postcode is required");
                     $countryDoctorErr = ifEmpty($countryDoctor, "Country is required");
+                    
 
                     // Validate Guardian 2 Details
-                    if ($isJunior){
+                    if ($isJunior && !$sameAddress){
                         $nokFNameSecondaryErr = ifEmpty($nokFNameSecondary, "First name is required");
                         $nokLNameSecondaryErr = ifEmpty($nokLNameSecondary, "Last name is required");
                         $nokRelationshipSecondaryErr = ifEmpty($nokRelationshipSecondary, "Relationship is required");
                         $line1SecondaryErr = ifEmpty($line1Secondary, "Address line 1 is required");
                         $citySecondaryErr = ifEmpty($citySecondary, "City is required");
                         $postcodeSecondaryErr= ifEmpty($postcodeSecondary, "Postcode is required");
+                    }
+
+                    // Check for tnc box
+                    if((int)$tncs !== 1){
+                        $error['tncs'] = "Please tick the box to continue";
                     }
 
                     // Check for errors
@@ -768,10 +793,12 @@
                         empty($nokLNameErr) &&
                         empty($nokRelationshipErr) &&
                         empty($mobileNumErr) &&
-                        empty($mobileNumSecondaryErr))
+                        empty($mobileNumSecondaryErr) &&
+                        empty($error['tncs']))
                     {
-                        // Insert all information to database                        
-                    $pdo = Database::getInstance()->getConnection();
+
+                    // Insert all information to database                        
+                    $pdo = $this->pdo;
                         try{
                             $pdo->beginTransaction();
 
@@ -785,10 +812,10 @@
                             }
 
                             // Convert date to Y-m-d format
-                            formatDate($data['dob']);
+                            $data['dob'] = formatDate($data['dob']);
 
                             $age  = calcAge($data['dob']);
-                            
+
                              //  Determine recommended squad 
                             if($age >= 5 && $age <= 12){
                                 $data['recommended_squad'] = 'Mini';
@@ -811,12 +838,12 @@
 
                             // Insert doctor to db and store id
                             $doctor = new Doctor($doctorData);
-                            $insertDoctor = $doctor->insert($pdo);
-                            if(!$insertDoctor){
+                            $doctor_id = $doctor->insert($pdo);
+                            if(!$doctor_id){
                                 throw new \Exception("Doctor wasn't added");
                             }
 
-                            $data['doctor_id'] = $doctor->getDoctorId();
+                            $data['doctor_id'] = $doctor_id;
 
                             $primaryGuardianData = [
                                 'address_id' =>  !$isJunior ? null : $data['address_id'],
@@ -882,7 +909,7 @@
                                         // Insert second guardian address to db and get id
                                         $secondaryGuardianAddressId = Address::insert($pdo, $secondaryGuardianAddress);
                                         $secondaryGuardianData['address_id'] = $secondaryGuardianAddressId;
-                                        }
+                                    }
                                     // No guardian address is added go back to form
                                     else{
                                         $formNum = 2;
@@ -902,7 +929,6 @@
                             // Insert player application to db and store id
                             $playerApplicationId = Application::insert($pdo, $data);
                             $data['application_id'] = $playerApplicationId;
-                            $application_id = $data['application_id'];
 
                             // Medical Condition Data
                             // Ensure arrays are numeric
@@ -937,7 +963,6 @@
                             // Add all transaction to database
                             $pdo->commit();
 
-                            
                             unset($data);
                             unset($primaryGuardian);
                             unset($primaryGuardianData);
@@ -946,8 +971,9 @@
                             unset($secondaryGuardianAddress);
                             unset($doctorData);
                             unset($doctorAddress);
+
                             // Form successfully submitted
-                            alert('success', 'Form Submitted Successfully!','/register');
+                            alert('success', 'Your Registratiom Form was Submitted Successfully!','/');
                             exit();
                         }
                         catch (\Exception $e) {
@@ -955,7 +981,6 @@
                                 $pdo->rollBack();
                             }
                             alert('error',$e->getMessage(), '/register');
-                            die($e->getMessage());
                         }
                     }
                 } 
@@ -1055,6 +1080,8 @@
                 'countryDoctor' => $countryDoctor,
                 'countryDoctorErr' => $countryDoctorErr,
                 'apply_coach' => $apply_coach,
+
+                'error' => $error ?? '',
 
 
                 'relationships' => [

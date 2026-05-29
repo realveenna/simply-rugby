@@ -76,6 +76,7 @@
                 <td class="text-center"><?= h($player['weight']) ?></td>
                 <td class="text-center"><?= h($player['height']) ?></td>
                 <td class="text-center">
+
                     <!-- Include badge status -->
                     <?php require '../src/includes/player_availability_status.php'; ?>
                 </td>

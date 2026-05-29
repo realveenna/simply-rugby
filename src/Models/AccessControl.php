@@ -12,7 +12,7 @@
             $this->authorizedMatchIds = $this->getAuthorizedMatchIds($pdo);
         }
 
-        ## AUTHORIZATION FOR SQUAD, TRAINING AND MATCHES
+        ## AUTHORIZATION FOR SQUAD, TRAINING AND MATCHES###
 
         ### SQUAD ACCESS ###
         // Get Each Database Statement Role Access For Squad
@@ -36,8 +36,6 @@
         }
 
 
-    
-
         ### TRAINING ACCESS ###
         // Get Each Database Statement Role Access For Training Session Details
         public static function getAuthorizedTraining($pdo, $member_id = null)
@@ -59,6 +57,7 @@
                     s.squad_name,
                     sec.section_name,
                     CONCAT(coach.first_name, ' ', coach.last_name) AS coach_name,
+                    -- Get pending count to access other crud
                     SUM(ta.attendance_status = 'Pending') AS pending_count
 
 
@@ -84,7 +83,7 @@
         }
 
         ### MATCH ACCESS ###
-        // Get Each Database Statement Role Access For Match Details
+        // Get All Database Statement Role Access For Match Details
         public static function getAuthorizedMatches($pdo)
         {
             $matches = Matches::getMatches($pdo);
@@ -93,13 +92,28 @@
             $authorizedMatches = [];
 
             foreach ($matches as $match) {
-
                 if (in_array($match['match_id'], $authorizedMatchIds, true)) {
                     $authorizedMatches[] = $match;
                 }
             }
 
             return $authorizedMatches;
+        }
+
+        // Get Each Database Statement Role Access For Injury Squad
+        public static function getAuthorizedInjury($pdo, $member_id)
+        {
+            // Club Chairperson/Admin can access all Injury
+            if (isAdmin()) {
+                return Injury::getAllPlayerInjuries($pdo);
+            }
+
+            // Can acccess their own squad
+            if (hasRole('Coach')) {
+                return Injury::getAllPlayerInjuriesBySquad($pdo, $member_id);
+            }
+
+            return [];
         }
 
          // Get authorized match IDs
@@ -146,8 +160,10 @@
             return $authorizedMatchesId;
         }
 
+        #################################################################
+        ## GET ID of Player, Squad or Section a User/Member has access ##
+        #################################################################
 
-        # FOR LOGIN # 
         // Get junior player of Parent
         public static function getAccessPlayers($pdo, $member_id)
         {
@@ -218,7 +234,11 @@
             return $statement->fetch(PDO::FETCH_ASSOC);
         }
 
-        ## VALIDATES USER ACCESS FOR SINGLE DATA BY ID ##
+
+        #################################################################
+        ## VALIDATES USER ACCESS FOR SINGLE DATA BY ID AND RETURN DATA ##
+        #################################################################
+
         // Validates Single Squad Access and returns Squad Details
         public static function validateSquadAccess($pdo, $squad_id){
             // Get squad details
@@ -272,7 +292,10 @@
             return $member;
         }
 
+        #################################################
         ## RETURNS TRUE OF FALSE IF USER CAN VIEW DATA ##
+        #################################################
+
         // Check if user can access this player details
         public static function canViewPlayer($player, $currentUser, $member_id)
         {
@@ -309,7 +332,6 @@
             return false;
         }
 
-        ## RETURNS TRUE OF FALSE IF USER CAN VIEW DATA ##
         // Check if user can access this member details
         public static function canViewMember($currentUser, $member)
         {
@@ -331,7 +353,6 @@
         }
 
 
-
         // Validate single match access
         public static function canViewMatch($pdo, $match_id)
         {
@@ -346,40 +367,6 @@
             return false;
         }
         
-        // // Check if user can view this match details
-        // public static function canViewMatch($match)
-        // {
-        //     // If is higher admin
-        //     if (isAdmin()) {
-        //         return true;
-        //     }
-
-        //     // Public senior matches
-        //     if ($match['section_name'] === 'Senior') {
-        //         return true;
-        //     }
-
-        //     // User access own details
-        //     if (isOwner($_SESSION['user']['member_id'], $match['player_id'])) {
-        //         return true;
-        //     }
-
-        //     // User is parent 
-        //     if (hasPlayerAccess($match['player_id'])) {
-        //         return true;
-        //     }
-
-        //     // User is a coach, access own squad
-        //     if (hasSquadAccess($match['squad_id'])) {
-        //         return true;
-        //     }
-
-        //     // User has section access to own section junior/senior
-        //     if (hasSectionAccess($match['section_id'])) {
-        //         return true;
-        //     }
-        //     return false;
-        // }
 
         // Check ff user can view squad
         public static function canViewSquad($squad)
