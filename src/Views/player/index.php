@@ -26,7 +26,11 @@
                     </div>
 
                     <!-- Membership Renewal -->
-                    <?php if (!empty($renewalReminder)): ?>
+                    <?php if (!empty($renewalReminder) && 
+                        // If own account or child account
+                        (isOwner($_SESSION['user']['member_id'], $player['member_id']) ||
+                        hasPlayerAccess($player['member_id']))): ?>
+
                         <p class="text-danger font-semibold">
                             Your membership is ending soon! Click 
                             <a href="/members/renewal?member_id=<?= $player['member_id'] ?>" 

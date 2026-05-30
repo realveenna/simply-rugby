@@ -32,8 +32,8 @@ $router->post('/logout', LoginController::class, 'logout');
 
 
 // ACCOUNT REGISTRATION
-$router->get('/members/create-login', MemberController::class, 'createLogin');
-$router->post('/members/create-login', MemberController::class, 'createLogin');
+$router->get('/members/create-login', MemberController::class, 'createLogin',['create_member']);
+$router->post('/members/create-login', MemberController::class, 'createLogin',['create_member']);
 
 $router->get('/account/reset-password', AccountController::class, 'resetPassword');
 $router->post('/account/reset-password', AccountController::class, 'resetPassword');
@@ -51,17 +51,17 @@ $router->post('/account/update', AccountController::class, 'update');
 $router->get('/members', MemberController::class, 'index',['view_member']);
 $router->post('/members', MemberController::class, 'index',['view_member']);
 
-$router->get('/members/no-logins', MemberController::class, 'membersNoLogin',['create_member']);
-$router->post('/members/no-logins', MemberController::class, 'membersNoLogin',['create_member']);
+$router->get('/members/no-logins', MemberController::class, 'membersNoLogin',['assign_role']);
+$router->post('/members/no-logins', MemberController::class, 'membersNoLogin',['assign_role']);
 
 $router->get('/members/view', MemberController::class, 'view',['view_member']);
 $router->post('/members/view', MemberController::class, 'view',['view_member']);
 
-$router->get('/members/update', MemberController::class, 'update');
-$router->post('/members/update', MemberController::class, 'update');
+$router->get('/members/update', MemberController::class, 'update',['view_player_details']);
+$router->post('/members/update', MemberController::class, 'update',['view_player_details']);
 
-$router->get('/members/renewal', MemberController::class, 'renewal');
-$router->post('/members/renewal', MemberController::class, 'renewal');
+$router->get('/members/renewal', MemberController::class, 'renewal',['view_player_details']);
+$router->post('/members/renewal', MemberController::class, 'renewal',['view_player_details']);
 
 // APPLICATION CONTROLLER
 $router->get('/register', ApplicationController::class, 'index');

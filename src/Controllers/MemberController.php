@@ -409,7 +409,6 @@
             // Get player profile if member is a player
             $player = Player::playerProfile($pdo, $member->member_id);
 
-
             // Get address
             if(!empty($member->address_id )){
                 $address = Address::getAddressDetails($pdo, $member->address_id);
@@ -743,7 +742,6 @@
             }
 
         }
-
 
          // Protected function if member_id is mandatory
         // view and update
