@@ -89,6 +89,7 @@
             $matches = Matches::getMatches($pdo);
 
             $authorizedMatchIds = self::getAuthorizedMatchIds($pdo);
+            
             $authorizedMatches = [];
 
             foreach ($matches as $match) {
@@ -130,15 +131,9 @@
                     continue;
                 }
 
-                // Public senior
-                if ($match['section_name'] === 'Senior') {
-                    $authorizedMatchesId[] = $match['match_id'];
-                    continue;
-                }
-
                 // Parent access
                 if (hasRole('Parent') && self::lineupParentAccess
-                    ($pdo,$_SESSION['user']['member_id'], $match['match_id'])) 
+                    ($pdo, $_SESSION['user']['member_id'], $match['match_id'])) 
                 {
                     $authorizedMatchesId[] = $match['match_id'];
                     continue;
@@ -155,10 +150,18 @@
                     $authorizedMatchesId[] = $match['match_id'];
                     continue;
                 }
+
+                // Public senior
+                if ($match['section_name'] === 'Senior') {
+                    $authorizedMatchesId[] = $match['match_id'];
+                    continue;
+                }
+
             }
 
             return $authorizedMatchesId;
         }
+        
 
         #################################################################
         ## GET ID of Player, Squad or Section a User/Member has access ##

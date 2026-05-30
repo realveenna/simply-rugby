@@ -6,7 +6,7 @@
                 <img class="w-8 h-8 mr-2" src="/images/logo/main-logo.png" alt="logo">
             </a> 
 
-            <?= titleLeft('Member','Details')?>
+            <?= title('Update Member','Details')?>
              
             <!-- Personal Information -->
             <form method="post" class="mt-6">

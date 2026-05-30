@@ -172,8 +172,17 @@
                 exit();
             }
 
+            // Hide roles with no email
+            $exceptRole = ['Junior Player', 'Next of Kin', 'Club Chairperson', 'Parent', 'Senior Player'];
+
             // Get all roles for dropdown
             $roles = Role::getRole();
+
+            // Remove hidden roles
+            $roles = array_filter($roles, function($role) use ($exceptRole){
+                return !in_array($role['role_name'], $exceptRole);
+            });
+
 
              // Get all sqauds for dropdown
             $squads = Squad::getAllSquads($pdo);
@@ -349,7 +358,7 @@
             try{
                 if($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // If delete button is pressed
-                    $this->delete($pdo, $member->member_id);
+                    $this->delete($pdo, $member['member_id']);
                 }
             }
             // Catch error
@@ -617,10 +626,10 @@
                     $member_id = trimPost('member_id');
                     $renewal = trimPost('renewal');
 
+
                     if(!$member_id){
                         abort(500, 'Unable to update membership');
                     }
-
 
                     // If is a junior player
                     if($player['section_id'] !== 3){
@@ -629,6 +638,7 @@
                             $error['renewal'] = "Please tick the box to give consent.";
                         }
                     }
+
 
                     // No error
                     if(!array_filter($error)){
@@ -639,15 +649,45 @@
                             if(!$update){
                                 throw new \Exception("Unable to update membership status.");
                             }
+
                             // Update player squad status to inactive
                             $update = Squad::updateSquadStatus($pdo, $member_id, 'Inactive');
                             if(!$update){
                                 throw new \Exception("Unable to update squad status.");
                             }
+
+                            // Update player squad history end date
+                            $update = Player::updateHistoryEndDate($pdo, $member_id);
+                            if(!$update){
+                                throw new \Exception("Unable to update player history end date");
+                            }
+
                             // Commmit and success message
                             $pdo->commit();
-                            alert('success', 'Membership has been updated successfully!', '/');
+                            alert('success', 'Membership was not renewed for next season','/');
                             exit;
+                        }
+                        elseif($renewal === 'renew'){
+                            // Check age 
+                            $age = calcAge($player['dob']);
+
+                            // Check if promote to another squad
+                            $promote = $age >= $player['max_age'];
+                            if($promote){
+
+                                // Find next squad
+                                $squad = Squad::getNextSquad($pdo, $age);
+
+                                if(!$squad){
+                                    abort('500', 'Unable to find next squad');
+                                }
+
+                                // Alert message
+                                alert('success','Player will be promoted on '.$squad['squad_name'] .'next season!','/');
+                            }
+                            else{
+                                alert('success','Player membership has been extended!','/');
+                            }
                         }
                     }
                 }
@@ -669,21 +709,39 @@
         // delete a member 
         public static function delete($pdo, $member_id)
         {
-            // Begin Transaction
-            $pdo->beginTransaction();
+            try{
+                // Begin Transaction
+                $pdo->beginTransaction();
 
-            $action = trimPost('action');
-            if($action === 'delete'){
-                $delete = Member::delete($pdo,$member_id);
-                if(!$delete){
-                    abort(500,'Failed to delete member details');
+                if (!$member_id) {
+                    abort(404, 'Member not found');
+                }
+
+                $action = trimPost('action');
+                if($action === 'delete'){
+                
+                    $delete = Member::delete($pdo,$member_id);
+
+                    if(!$delete){
+                        throw new \Exception("Failed to delete member details");
+                    }
+                    else{
+                        // Commmit and success message
+                        $pdo->commit();
+                        alert('success', 'Member has been removed successfully!', '/members');
+                        exit;
+                    }
+                   
                 }
             }
+             catch (\Exception $e) {
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                alert('error',$e->getMessage(), '/members');
+                exit;
+            }
 
-            // Commmit and success message
-            $pdo->commit();
-            alert('success', 'Member has been removed successfully!', '/');
-            exit;
         }
 
 

@@ -632,7 +632,11 @@
                                                         <?php endif;?>
                                                     </div>
                                                 </div>
-                                                <span class="<?= $injury['injury_status'] === 'Active' ? badgeDanger() : badgeBlue() ?>">
+                                                <span class="
+                                                <?= 
+                                                    $injury['injury_status'] === 'Active' ? badgeDanger() :
+                                                    ($injury['injury_status'] === 'Recovering' ? badgeWarning() : badgeBlue())
+                                                ?>">
                                                     <?= h($injury['injury_status'] ?? '') ?>
                                                 </span>
                                             </li>

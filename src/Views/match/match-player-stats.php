@@ -132,7 +132,7 @@
                         </div>
 
                         <!-- Button if user has permission to update match  -->
-                        <?php if ((hasPermission('create_team')) && 
+                        <?php if ((hasPermission('update_match')) && 
                             ($match['result'] !== 'Pending')):?>
                             <div class="flex justify-end">
                                 <button type="submit" class="<?=primaryBtn()?> ">

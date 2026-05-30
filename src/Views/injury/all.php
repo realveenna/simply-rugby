@@ -70,7 +70,11 @@
                 <td class="text-center"><?= h($player['injury_date']) ?></td>
                 <td class="text-center"><?= h($player['recovery_date'] ?? 'N/A') ?></td>
                 <td class="text-center">
-                    <span class="<?= $player['injury_status'] === 'Active' ? badgeDanger() : badgeBlue() ?>">
+                    <span class="
+                        <?= 
+                            $player['injury_status'] === 'Active' ? badgeDanger() :
+                            ($player['injury_status'] === 'Recovering' ? badgeWarning() : badgeBlue())
+                        ?>">
                         <?= h($player['injury_status'] ?? '') ?>
                     </span>
                 </td>

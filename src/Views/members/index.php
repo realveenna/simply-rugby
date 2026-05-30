@@ -153,13 +153,13 @@
                     <div id="memberDots<?=h($member['member_id'])?>" class="min-w-max  z-10 hidden bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg w-44 dark:divide-gray-600">
                         <ul class="p-2 text-sm text-body font-medium" aria-labelledby="memberAction<?=h($member['member_id'])?>">
                             <li>
-                                <a href="/members/view?member_id=<?= $member['member_id'] ?>" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
+                                <a href="/members/view?member_id=<?= $member['member_id'] ?>" class="flex justify-center items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
                                     View Details
                                 </a>
                             </li>
                             <li>
-                                <a href="/members/view?member_id=<?= $member['member_id'] ?>" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
-                                    Remove
+                                <a href="/members/update?member_id=<?= $member['member_id'] ?>" class="flex justify-center items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">
+                                    Update Details
                                 </a>
                             </li>
                         </ul>

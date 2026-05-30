@@ -17,7 +17,7 @@
                     </div>
 
                     <!-- Match Result -->
-                    <?php if(!isFutureDate($match['match_date'] && $match['result'] !== 'Pending')):?>
+                    <?php if(isFutureDate($match['match_date'] && in_array($match['result'], ['Win', 'Lose', 'Draw']))):?>
                         <div class="<?= formPadding() ?>">
                             <!-- First half -->
                             <?= titleLeftSmall('First Half'); ?>
@@ -188,17 +188,31 @@
                     <div class="<?= formPadding() ?>">
                         <?= titleLeftSmall($match['squad_name']. ' Coches'); ?>
                         <div class="bg-neutral-primary-soft border border-default rounded-base shadow-xs h-full">
-                            <?php foreach ($coaches as $coach): ?>
-                                <ul role="list" class="space-y-3 p-6 divide-y divide-default">
+                            <ul role="list" class="space-y-3 p-6 divide-y divide-default">
+                                <?php foreach ($coaches as $coach): ?>
                                     <li class="flex items-center justify-between pb-3">
                                         <span>
                                             <?= h($coach['coach_name']) ?>
                                         </span>
                                     </li>
-                                </ul>
-                            <?php endforeach; ?>
+                                <?php endforeach; ?>
+                            </ul>
                         </div>
                     </div>
+
+                    <!-- If has permission to delete match -->
+                    <?php if (hasPermission('delete_match')): ?>
+                        <!-- Delete Button -->
+                        <li>
+                            <form method="post" action="/match/view" name="action" value="delete">
+                                <input type="hidden" name="match_id" value="<?= h($match['match_id'] ?? '') ?>">
+                                <button type="submit" name="action" value="delete" 
+                                class="<?= dangerBtn() ?>">
+                                    Delete Match
+                                </button>
+                            </form>
+                        </li>
+                    <?php endif;?>
 
                 <?php endif ;?>
             </div>

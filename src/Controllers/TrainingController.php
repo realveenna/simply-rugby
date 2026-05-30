@@ -20,7 +20,6 @@
         public function index()
         {
             $pdo = $this->pdo;
-            $title = 'All';
 
             // Get Training Details
             $trainings = AccessControl::getAuthorizedTraining($pdo, $this->member_id);
@@ -28,6 +27,15 @@
             // Not Found 
             if(!$trainings){
                abort(404, 'No Training Session Found');
+            }
+            
+            // Higher Admin
+            if(isAdmin()){
+                $title = 'All';
+            }
+            // Coach
+            else{
+                $title = $trainings[0]['squad_name'];
             }
 
             // If squad selected then show squad trainings
@@ -41,6 +49,7 @@
                 }
                 // Set training
                 $trainings = $get_training;
+                
                 // Set title as squad name
                 $title = $trainings[0]['squad_name'];
             }

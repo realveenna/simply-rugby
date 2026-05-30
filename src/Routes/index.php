@@ -51,8 +51,8 @@ $router->post('/account/update', AccountController::class, 'update');
 $router->get('/members', MemberController::class, 'index',['view_member']);
 $router->post('/members', MemberController::class, 'index',['view_member']);
 
-$router->get('/members/no-login', MemberController::class, 'membersNoLogin',['view_member']);
-$router->post('/members/no-login', MemberController::class, 'membersNoLogin',['view_member']);
+$router->get('/members/no-logins', MemberController::class, 'membersNoLogin',['create_member']);
+$router->post('/members/no-logins', MemberController::class, 'membersNoLogin',['create_member']);
 
 $router->get('/members/view', MemberController::class, 'view',['view_member']);
 $router->post('/members/view', MemberController::class, 'view',['view_member']);
@@ -122,8 +122,8 @@ $router->post('/match/update', MatchController::class, 'updateMatch', ['update_m
 $router->get('/match/update-result', MatchController::class, 'updateResult', ['create_match']);
 $router->post('/match/update-result', MatchController::class, 'updateResult', ['create_match']);
 
-$router->get('/match/all', MatchController::class, 'all', ['view_match']);
-$router->post('/match/all', MatchController::class, 'all', ['view_match']);
+$router->get('/match/all', MatchController::class, 'all', ['view_junior_match']);
+$router->post('/match/all', MatchController::class, 'all', ['view_junior_match']);
 
 $router->get('/match/match-player-stats', MatchController::class, 'matchPlayerStats', ['update_match','create_team']);
 $router->post('/match/match-player-stats', MatchController::class, 'matchPlayerStats', ['update_match','create_team']);

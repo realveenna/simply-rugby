@@ -27,7 +27,6 @@
                 </div>
             <?php endif; ?>
 
-     
 
             <!-- JUNIOR UPCOMING MATCH WITH PERMISSION -->
             <?php if(!empty($juniorUpcoming) || !empty($juniorPast)): ?>

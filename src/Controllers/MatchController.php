@@ -96,7 +96,8 @@
             $pdo = $this->pdo;
 
             // Get All Match Details
-            $matches = AccessControl::getAuthorizedMatches($pdo, $this->member_id);    
+            $matches = AccessControl::getAuthorizedMatches($pdo, $this->member_id);   
+            
 
             // Senior Matches
             $seniorUpcoming = [];
@@ -270,7 +271,7 @@
 
                         // Commmit and success message
                         $pdo->commit();
-                        alert('success', 'Match Details Deleted Successfully!', '/');
+                        alert('success', 'Match Details Deleted Successfully!', '/match/all');
                     }
                     else{
                         abort(404, "Undefined Action");
@@ -311,7 +312,8 @@
                 
                 // Get Squad Access
                 $squads = AccessControl::getAuthorizedSquads($pdo, $this->member_id);
-         
+
+        
                 if($squads){
                     // If multiple squads available
                     foreach($squads as $squad){
@@ -351,9 +353,8 @@
                         'match_date' => trimPost('match_date'),
                         'opposition_team_name' => trimPost('opposition_team_name'),
                         'kick_off_time' => trimPost('kick_off_time'),
-                        'result' => trimPost('result')
+                        'result' => 'Pending'
                     ]);
-
                  
                     // Validate inputs
                     if (empty($M->squad_id)) {
@@ -449,6 +450,9 @@
             try{
                 $match = new Matches($this->getMatchId($pdo));
                 $lineup = Matches::getLineup($pdo,$match->match_id);
+                
+                // Validate Squad Access Control
+                AccessControl::validateSquadAccess($pdo, $match->squad_id);
                
                 // If no existing lineup
                 if(!$lineup){
@@ -582,6 +586,10 @@
             try{
                 $match = $this->getMatchId($pdo);
                 $lineup = Matches::getLineup($pdo,$match['match_id']);
+
+                // Validate Squad Access Control
+                AccessControl::validateSquadAccess($pdo, $match->squad_id);
+
                
                 // If no existing lineup
                 if(!$lineup){
@@ -730,6 +738,10 @@
                 // Get match details as object with permission check
                 $match = new Matches($this->getMatchId($pdo));
 
+                // Validate Squad Access Control
+                AccessControl::validateSquadAccess($pdo, $match->squad_id);
+
+
                 // POST REQUEST
                 if($_SERVER['REQUEST_METHOD'] === 'POST') {
 
@@ -743,6 +755,9 @@
                         'kick_off_time' => trimPost('kick_off_time'),
                         'result' => trimPost('result')
                     ]);
+
+                    // Validate Squad Access Control
+                    AccessControl::validateSquadAccess($pdo, $match->squad_id);
                  
                     // Validate inputs
                     if (empty($match->match_venue)) {

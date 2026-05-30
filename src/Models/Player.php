@@ -103,6 +103,22 @@
             return $result;
         }
 
+        // History to end date
+        public static function updateHistoryEndDate($pdo, $member_id)
+        {
+            $statement = $pdo->prepare(
+                "UPDATE squad_player_history
+
+                INNER JOIN squad s ON s.squad_id = h.squad_id
+                SET h.end_date = s.end_date
+                WHERE h.member_id = :member_id"
+            );
+
+            return $statement->execute([
+                ':member_id' => $member_id
+            ]);
+        }
+
         public static function insertPlayerMatchStats($pdo, $match_id, $member_id, $stats){
             $statement = $pdo->prepare(
                 "INSERT INTO player_match_stats (

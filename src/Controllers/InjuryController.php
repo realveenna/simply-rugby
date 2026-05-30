@@ -33,6 +33,10 @@
 
                 // Get Match Details 
                 $match = AccessControl::validateMatchAccess($pdo, $match_id);
+
+                
+                // Validation of Squad Access
+                AccessControl::validateSquadAccess($pdo, $match['squad_id']);
                 
                 if(isFutureDate($match['match_date'])){
                     abort(500, 'Unable to select upcoming match');
@@ -137,6 +141,7 @@
                     if(!$data){
                         abort('404', 'Player injury not found');
                     } 
+
                     // Validation of Squad 
                     AccessControl::validateSquadAccess($pdo, $data['squad_id']);
                 }
@@ -161,7 +166,7 @@
                     // Commmit and success message
                     $pdo->commit();
 
-                    alert('success', 'Player Injury Successfully updated!', '/');
+                    alert('success', 'Player Injury Successfully updated!', '/injury/all');
                 }
             }
             catch (\Exception $e){

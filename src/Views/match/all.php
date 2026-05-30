@@ -199,7 +199,7 @@
                                 
 
                                 <!-- Allow user to update player match stats if has permission to update match and has result  -->
-                                <?php if ((hasPermission('create_team')) && 
+                                <?php if ((hasPermission('update_match')) && 
                                     ($match['result'] !== 'Pending')):?>
                                     <li>
                                         <a href="/match/match-player-stats?match_id=<?= $match['match_id'] ?>"
@@ -217,15 +217,14 @@
                                     </a>
                                 </li>
 
-
-                                <!-- If has permission to delete match -->
+                                 <!-- If has permission to delete match -->
                                 <?php if (hasPermission('delete_match')): ?>
                                     <!-- Delete Button -->
-                                    <li>
-                                        <form method="post" action="" name="action" value="delete">
+                                    <li class="flex items-center justify-center">
+                                        <form method="post" action="/match/view" name="action" value="delete">
                                             <input type="hidden" name="match_id" value="<?= h($match['match_id'] ?? '') ?>">
                                             <button type="submit" name="action" value="delete" 
-                                                class="flex justify-center items-center text-center w-full p-2 text-fg-danger hover:bg-neutral-tertiary-medium rounded-md">
+                                            class="inline-flex items-center text-center w-full p-2 text-danger hover:bg-neutral-tertiary-medium hover:text-heading rounded-md">
                                                 Delete Match
                                             </button>
                                         </form>

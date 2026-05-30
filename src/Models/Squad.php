@@ -141,6 +141,7 @@
             ]);
         }
 
+
         // Display all squads for Club Chairperson and Membership Secretary
         public static function getAllSquads($pdo){
             $statement = $pdo->prepare
@@ -235,24 +236,25 @@
 
 
 
-        // public static function getSectionName($pdo, $squad_id){
-        //     $statement = $pdo->prepare
-        //     (
-        //         "SELECT 
-        //             s.squad_name,
-        //             sec.section_name
-        //             LEFT JOIN squad s 
-        //             LEFT JOIN section sec ON s.section_id = sec.section_id
-        //             WHERE squad_id = :squad_id LIMIT 1"
-        //     );
+        // Find squad suitable for player's renewal
+        public static function getNextSquad($pdo, $player_age){
+            $statement = $pdo->prepare
+            (
+                "SELECT 
+                    *
+                    FROM squad
+                    WHERE :player_age BETWEEN min_age AND max_age"
+            );
 
-        //     $statement->execute([
-        //         ":squad_id" => $squad_id
-        //     ]);
+            $statement->execute([
+                ":player_age" => $player_age
+            ]);
 
-        //     $result = $statement->fetch(PDO::FETCH_ASSOC);
-        //     return $result;
-        // }
+            $result = $statement->fetch(PDO::FETCH_ASSOC);
+            return $result;
+        }
+
+
 
         public static function insertSectionAdmin($pdo, $member_id, $section_id){
             $statement = $pdo->prepare
@@ -334,7 +336,7 @@
                 JOIN squad_member sm  ON m.member_id = sm.member_id
                 WHERE h.squad_id = :squad_id 
                     AND sm.status = 'Active'
-                    AND h.end_date IS NULL"
+                    AND (h.end_date >= CURDATE() OR h.end_date  IS NULL)"
             );
 
             $statement->execute(['squad_id' => $squad_id]);

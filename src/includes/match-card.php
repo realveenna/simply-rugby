@@ -11,53 +11,63 @@
             <ul class="p-2 text-sm text-body font-medium" aria-labelledby="ddMatchMenuBtn<?= $match['match_id'] ?>">
                 <!-- Dropdown menu -->
                 <!-- Allow to update match details -->
-                <li>
-                    <a href="/match/update-result?match_id=<?= $match['match_id'] ?>"
-                        class="inline-flex items-center justify-center text-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded-md">
-                        Update Match Details
-                    </a>
-                </li>
-
-                <!-- If result is pending allow to add match result -->
-                <?php if ($match['result'] === 'Pending'): ?>
-                <!-- Add Match Result -->
+                <?php if(hasPermission('update_match')):?>
                     <li>
-                        <a href="/match/update-result?match_id=<?= $match['match_id'] ?>"
+                        <a href="/match/update?match_id=<?= $match['match_id'] ?>"
                             class="inline-flex items-center justify-center text-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded-md">
-                            Add Match Result
+                            Update Match Details
                         </a>
                     </li>
-
-                <!-- Update Match Result -->
+                <?php endif; ?>
+                
+                <?php if(hasPermission('create_match') && hasPermission('update_match')):?>
+                    <!-- If result is pending allow to add match result -->
+                    <?php if ($match['result'] === 'Pending' && !isFutureDate($match['match_date'])): ?>
+                    <!-- Add Match Result -->
+                        <li>
+                            <a href="/match/update-result?match_id=<?= $match['match_id'] ?>"
+                                class="inline-flex items-center justify-center text-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded-md">
+                                Add Match Result
+                            </a>
+                        </li>
+                    <?php endif; ?>
                 <?php else: ?>
-                    <li>
-                        <a href="/match/update-result?match_id=<?= $match['match_id'] ?>"
-                            class="inline-flex items-center justify-center text-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded-md">
-                            Update Match Result
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/match/match-player-stats?match_id=<?= $match['match_id'] ?>"
-                            class="inline-flex items-center justify-center text-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded-md">
-                            Add Match Player Stats
-                        </a>    
-                    </li>
+                <!-- Update Match Result -->
+                    <!-- permission -->
+                    <?php if(hasPermission('update_match')):?>
+                        <li>
+                            <a href="/match/update-result?match_id=<?= $match['match_id'] ?>"
+                                class="inline-flex items-center justify-center text-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded-md">
+                                Update Match Result
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="/match/match-player-stats?match_id=<?= $match['match_id'] ?>"
+                                class="inline-flex items-center justify-center text-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded-md">
+                                Add Match Player Stats
+                            </a>    
+                        </li>
+                    <?php endif; ?>
+
                     <!-- Button if user has permission to record injury -->
                     <?php if ((hasPermission('record_injury')) && $match['result'] !== 'Pending'):?>
                         <li>
                             <a href="/injury?match_id=<?= $match['match_id']?>" 
                                 class="inline-flex items-center justify-center text-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded-md">
                                 Record Injury
-                            </a>
+                            </a>    
                         </li>
                     <?php endif; ?>
                 <?php endif; ?>
+
+                
 
                 <!-- If has permission to delete match -->
                 <?php if (hasPermission('delete_match')): ?>
                     <!-- Delete Button -->
                     <li>
-                        <form method="post" action="" name="action" value="delete">
+                        <form method="post" action="/match/view" name="action" value="delete">
                             <input type="hidden" name="match_id" value="<?= h($match['match_id'] ?? '') ?>">
                             <button type="submit" name="action" value="delete" 
                                 class="flex justify-center items-center text-center w-full p-2 text-fg-danger hover:bg-neutral-tertiary-medium rounded-md">
