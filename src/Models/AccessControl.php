@@ -12,9 +12,9 @@
             $this->authorizedMatchIds = $this->getAuthorizedMatchIds($pdo);
         }
 
-        ## AUTHORIZATION FOR SQUAD, TRAINING AND MATCHES###
+        ## AUTHORIZATION FOR SQUAD, TRAINING AND MATCHES ##
 
-        ### SQUAD ACCESS ###
+        ## SQUAD ACCESS ##
         // Get Each Database Statement Role Access For Squad
         public static function getAuthorizedSquads($pdo, $member_id)
         {
@@ -36,7 +36,7 @@
         }
 
 
-        ### TRAINING ACCESS ###
+        ## TRAINING ACCESS ##
         // Get Each Database Statement Role Access For Training Session Details
         public static function getAuthorizedTraining($pdo, $member_id = null)
         {
@@ -82,7 +82,7 @@
             return $statement->fetchAll(PDO::FETCH_ASSOC);
         }
 
-        ### MATCH ACCESS ###
+        ## MATCH ACCESS ##
         // Get All Database Statement Role Access For Match Details
         public static function getAuthorizedMatches($pdo)
         {
@@ -163,9 +163,7 @@
         }
         
 
-        #################################################################
         ## GET ID of Player, Squad or Section a User/Member has access ##
-        #################################################################
 
         // Get junior player of Parent
         public static function getAccessPlayers($pdo, $member_id)
@@ -238,9 +236,7 @@
         }
 
 
-        #################################################################
         ## VALIDATES USER ACCESS FOR SINGLE DATA BY ID AND RETURN DATA ##
-        #################################################################
 
         // Validates Single Squad Access and returns Squad Details
         public static function validateSquadAccess($pdo, $squad_id){
@@ -295,9 +291,7 @@
             return $member;
         }
 
-        #################################################
         ## RETURNS TRUE OF FALSE IF USER CAN VIEW DATA ##
-        #################################################
 
         // Check if user can access this player details
         public static function canViewPlayer($player, $currentUser, $member_id)

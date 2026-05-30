@@ -1,7 +1,6 @@
 <?php
     namespace Test\Models;
 
-    use Exception;
     use Test\Database;
     use PDO;
     

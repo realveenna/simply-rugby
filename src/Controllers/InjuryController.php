@@ -200,6 +200,7 @@
         }
 
 
+        // Private method to get parameter for rendering injury related page 
         private function getParams(){
             // GET event type and id
             $event_type = null;

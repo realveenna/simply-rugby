@@ -20,7 +20,7 @@
             $pdo = $this->pdo;
 
             // Get All Match Details
-            $matches = AccessControl::getAuthorizedMatches($pdo, $this->member_id);           
+            $matches = AccessControl::getAuthorizedMatches($pdo);           
 
             // Senior Matches
             $seniorUpcoming = [];
@@ -96,7 +96,7 @@
             $pdo = $this->pdo;
 
             // Get All Match Details
-            $matches = AccessControl::getAuthorizedMatches($pdo, $this->member_id);   
+            $matches = AccessControl::getAuthorizedMatches($pdo);   
             
 
             // Senior Matches
@@ -188,8 +188,6 @@
                 'category' => $category,
             ]);
         }
-
- 
 
         //  Render view for single match details
         public function view()
@@ -984,7 +982,7 @@
             ]);
         }
 
-        // Private function if match_id is mandatory
+        // Private method if match_id is mandatory
         // view and update
         private function getMatchId($pdo){
             // IF match_id is requested by GET or POST

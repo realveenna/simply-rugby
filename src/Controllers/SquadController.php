@@ -77,7 +77,7 @@
             }
         }
 
-        // Display Senior squad for public
+        // Render Display Senior squad  page for public
         public function senior()
         {
             $pdo = $this->pdo;

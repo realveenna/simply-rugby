@@ -2,11 +2,7 @@
     use Test\Auth;
     use Test\Controllers\Error;
 
-    // Helper Authentication function to check if user is authorized else redirect
-    function authorize($permission)
-    {
-        return Auth::authorize($permission);
-    }
+    // HELPER FUNCTION FOR AUTH CLASS
 
     // Helper Authentication function to check if user has permission
     function hasPermission($permission)
@@ -48,6 +44,9 @@
         return Auth::hasPlayerAccess($member_id);
     }
 
+
+    // ERROR CONTROLLER HELPER
+
     // Function for error redirect
     function abort($response_code, $message = null)
     {
@@ -69,7 +68,7 @@
                 break;
             default:
                 $title = 'Unknown Error';
-                $message = $message ?? 'Somethingg went terribly wrong.';
+                $message = $message ?? 'Something went terribly wrong.';
         }
 
         // Redirect
@@ -78,14 +77,12 @@
         exit;
     }
 
-    function h($data){
-        $data = htmlspecialchars($data);
-        return $data;
-    }
-
+    // If logged in return true
     function isLoggedIn() {
         return isset($_SESSION['loggedIn']) && $_SESSION['loggedIn'] === true;
     }
+
+    // DATE RELATED HELPER FUNCTION
 
     function calcAge($dob){
         // Validate age
@@ -135,6 +132,8 @@
         return date('g:i A', strtotime($time));
     }
 
+    // POST VALUE HELPER FUNCTIONS
+
     // POST input validation if empty
     function ifEmpty($value, $message){
         return empty($value) ? $message : '';
@@ -148,9 +147,15 @@
         return trim($_POST[$value]);
     }
 
+    // htmlspecialchars shortcut function
+    function h($data){
+        $data = htmlspecialchars($data);
+        return $data;
+    }
 
 
-    // Page Title
+
+    // TEXT CLASS RETURN FUNCTION
     function title($text,$underline){
         return"
         <div class='flex flex-col items-center'>
@@ -173,14 +178,7 @@
             </h2>
         </div>";
     }
-    function titleLeftBrand($text){
-        return"
-        <div class='flex flex-col items-start text-left'>
-            <h2 class='mb-3 text-2xl font-semibold tracking-tight text-brand md:text-2l lg:text-3xl'>
-                $text 
-            </h2>
-        </div>";
-    }
+
      function titleLeftSmall($text){
         return"
         <div class='flex flex-col mt-6 items-start text-left'>
@@ -190,24 +188,11 @@
         </div>";
     }
 
-    function heading4(){
-        return "mb-2 text-2xl font-semibold tracking-tight text-heading";
-    }
     function heading5(){
         return "mb-2 text-xl font-semibold tracking-tight text-heading";
     }
 
  
-    function underline(){
-        return "underline underline-offset-3 decoration-4 decoration-brand";
-    }
-    function heading1(){
-        return "underline underline-offset-3 decoration-4 decoration-brand";
-    }
-    function h1($text) {
-        return "<h1 class='mb-4 text-4xl font-semibold tracking-tight text-heading md:text-4xl lg:text-5xl dark:text-white'>$text</h1>";
-    }
-
     function h2($text) {
         return "<h2 class='text-lg md:text-xl mb-4 font-medium text-gray-900 dark:text-white'>$text</h2>";
     }
@@ -223,19 +208,13 @@
         return "<h4 class='text-sm md:text-base font-medium text-gray-700 dark:text-gray-200'>$text</h4>";
     }
 
-    function h5($text) {
-        return "<h5 class='text-sm font-medium text-gray-600 dark:text-gray-300'>$text</h5>";
-    }
-
-    function h6($text) {
-        return "<h6 class='text-xs font-medium text-gray-500 dark:text-gray-400'>$text</h6>";
-    }
     function p($text) {
         return "<p class='text-sm text-gray-700 dark:text-gray-300'>$text</p>";
     }
     function small($text) {
         return "<p class='text-sm font-light text-gray-500 dark:text-gray-400'>$text</p>";
     }
+
     function smallError() {
         return "mt-2 text-sm font-xs text-red-500";
     }
@@ -275,19 +254,6 @@
         dark:hover:text-white dark:hover:bg-gray-700
            
     ";}
-
-     // text-body bg-neutral-secondary-medium box-border border border-default-medium 
-            // hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 
-            // focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm 
-            // px-4 py-2.5 focus:outline-none
-
-            
-    // function dangerBtn() {
-    //     return "
-    //         text-white bg-danger box-border border border-transparent hover:bg-danger-strong 
-    //         focus:ring-4 focus:ring-danger-medium shadow-xs font-medium leading-5 rounded-base text-sm 
-    //         px-4 py-2.5 focus:outline-none
-    // ";}
 
     function inputClass(){
         return "bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs placeholder:text-body
@@ -338,6 +304,8 @@
         return "bg-danger-soft border inline-flex  border-danger-subtle text-fg-danger-strong text-xs font-medium px-1.5 py-0.5 rounded";
     }
     
+
+    // ALERT DISPLAY HELPER FUNCTION
     function alert($session,$message, $view){
          // There is an error in the form
         $_SESSION[$session] = $message;
@@ -345,6 +313,7 @@
         exit;
     }
 
+    // Generate random passswodk 
     function randomPassword() {
         $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
         $pass = array(); //remember to declare $pass as an array
@@ -358,8 +327,9 @@
         return $pass; 
     }
 
-    function hashPassword($rawPassword){
+    // Hash password 
+    function hashPassword($pass){
         $salt ="4g£yc7!L(";
-        return md5($rawPassword.$salt);
+        return md5($pass.$salt);
     }
 ?>

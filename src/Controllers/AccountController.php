@@ -7,18 +7,9 @@
     use Test\Models\Player;
     use Test\Models\Member;
 
-    use Test\Database;
-    use PDO;
-
 
     class AccountController extends MemberController
     {
-
-        private $roles;
-        public $email;
-        public $password;
-        public $confirmPassword;
-
 
         public function __construct()
         {
@@ -87,14 +78,11 @@
                     $member = new User;
                     $member = $member->getCredentials($member_id);
                     
-                    // Check password       
-                    $salt ="4g£yc7!L(";
-
                     // Hash old password 
-                    $oldPasswordHash = md5($passwords['old'] . $salt);
+                    $oldPasswordHash = hashPassword($passwords['old']);
 
                     // Hash new password 
-                    $newPasswordHash = md5($passwords['new'] . $salt);
+                    $newPasswordHash = hashPassword($passwords['new']);
 
                     // Correct Password
                     if($member['pass'] === $oldPasswordHash){
@@ -373,16 +361,6 @@
                 'data' => $data,
                 'address' => $address,
                 'countries' => $countries
-            ]);
-        }
-
-        public function displayMembersNoLogin($view)
-        {
-            $member = new Member();
-            $members = $member->selectAllNoLogin();
-
-            $this->render($view, [
-                'members' => $members
             ]);
         }
     }

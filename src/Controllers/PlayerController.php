@@ -21,8 +21,8 @@ use Test\Models\Squad;
             parent::__construct();
         }
 
-        
-        // Render display player Details
+
+        // Render display player details
         public function displayPlayer()
         {
             $pdo = $this->pdo;

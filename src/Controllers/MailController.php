@@ -18,6 +18,7 @@
             parent::__construct();
         }
 
+        // render mail page
         public function sendMail()
         {
             $pdo = $this->pdo;
@@ -66,6 +67,7 @@
 
         }
 
+        // private reusable method for sending mail 
         private function send($email, $message, $first_name){
             try {
                 $club = new Club();
@@ -106,6 +108,7 @@
             alert('success', 'Message Sent Successfully!', '/mail');
         }
    
+        // Reset password message for new players and members
         public static function newResetPassword($fname, $email, $member_id, $password)
         {
             $club = new Club();
@@ -142,6 +145,8 @@
                 alert('error', $mailtrap->$result, '/');
             }
         }
+
+        // Send welcome message for new member with existing email/ more for parents
         public static function newMember($fname, $email)
         {
             $club = new Club();
@@ -175,6 +180,7 @@
             }
         }
 
+        // send new training email to players
         public static function newTraining($data)
         {
             $club = new Club();

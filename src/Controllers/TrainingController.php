@@ -33,6 +33,10 @@
             if(isAdmin()){
                 $title = 'All';
             }
+            // Section Secretary
+            elseif(hasRole('Section Secretary')){
+                $title = $trainings[0]['section_name'];
+            }
             // Coach
             else{
                 $title = $trainings[0]['squad_name'];
@@ -82,7 +86,7 @@
             $training = new Training(['squad_id' => $_GET['squad_id'] ?? '']);
 
             try{
-                // Auto select if only one squad [for coaches]
+                // Auto select if only one squad
                 if (empty($training->squad_id) && count($squads) === 1) {
                     $training->squad_id = $squads[0]['squad_id'];
                 }
@@ -652,7 +656,7 @@
             ]);
         }
 
-        // Private function if training session id is mandatory
+        // Private method if training session id is mandatory
         // for view and update render
         private function checkTrainingSessionId($pdo)
         {
@@ -680,7 +684,7 @@
             }
         }
 
-         // Private function to check training status badge for index render
+         // Private method to check training status badge for index render
         private function checkTrainingStatus($pdo, $training){
             // Future training
             if (isFutureDate($training['date'])) 

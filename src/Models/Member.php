@@ -20,7 +20,6 @@
 
         public $allNoLogin = [];
 
-
         public function __construct()
         {
             $this->member_id = null;
@@ -35,11 +34,7 @@
             $this->password = '';
         }
 
-        // Get member_id 
-        private function getMemberId()
-        {
-            return $this->member_id;
-        }
+ 
         public function registerPlayer($email, $rawPassword)
         {
      

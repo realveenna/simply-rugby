@@ -46,9 +46,8 @@
                             $member = new User;
                             $member = $member->getCredentials($isUser['member_id']);
 
-                            // Check password       
-                            $salt ="4g£yc7!L(";
-                            $password = md5($rawPassword.$salt);
+                            // Check and hash password    
+                            $password = hashPassword($rawPassword);
 
                             // Correct Password
                             if($member['pass'] !== $password){

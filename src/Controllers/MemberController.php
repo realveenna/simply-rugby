@@ -19,7 +19,7 @@
             parent::__construct();
         }
         
-        // List of all members
+        // Render page with list of all members
         public function index()
         {
             // Role filter
@@ -28,14 +28,12 @@
             // Select all members
             $members = Member::selectAll($role);
             
-            if($member_id = $_GET['member_id'] ?? null){
-
-            }
             $this->render('members/index', [
                 'members' => $members,
             ]);
         }
 
+        // Renders page with member without login details
         public function membersNoLogin()
         {
             $members = Member::selectAllNoLogin();
@@ -45,6 +43,7 @@
             ]);
         }
 
+        // Render player registration page
         public function registerMember()
         {
             $data =[
@@ -157,7 +156,7 @@
                 ]);
         }
 
-         // Create a login for a member
+         // Render reate a login for a member
         public function createLogin()
         {
              // PDO connection
@@ -326,7 +325,7 @@
             ]);
         }
 
-         // View each member 
+         // Render view member page 
         public function view()
         {
             // PDO connection
@@ -335,6 +334,7 @@
             // If this member has children get children player details
             $childrenDetails = [];
 
+            // member details with permission check
             $member = $this->getMemberId($pdo);
 
             // Render to this page if updating 
@@ -608,8 +608,7 @@
             ]);
         }
 
-
-        // Renewal
+        // Render renewal page
         public function renewal()
         {
             // PDO connection
@@ -744,7 +743,7 @@
 
         }
 
-         // Protected function if member_id is mandatory
+         // Protected method if member_id is mandatory
         // view and update
         protected function getMemberId($pdo){
             // IF member_id is requested by GET or POST
