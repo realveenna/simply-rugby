@@ -51,7 +51,7 @@
                             $password = md5($rawPassword.$salt);
 
                             // Correct Password
-                            if($member['pass'] === $password){
+                            if($member['pass'] !== $password){
                                 $_SESSION['loggedIn'] = true; 
                                 $_SESSION['user'] = $member;
                                 $_SESSION['id'] = session_id();

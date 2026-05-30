@@ -8,25 +8,6 @@
     
     class Player
     {
-        private $application_id;
-        private $address_id;
-        private $doctor_id;
-        private $first_name;  
-        private $last_name;
-        private $dob;
-        private $nickname;
-        private $playerHeight;
-        private $playerWeight;
-        private $email;
-        private $mobile_num;
-        private $sru_number;
-
-     
-        public function __construct()
-        {
-
-        }
-
         // Update Application Status
         public static function insert($pdo, $data, $member_id)
         {

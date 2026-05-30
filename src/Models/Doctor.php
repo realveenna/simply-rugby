@@ -47,10 +47,6 @@
                 return $this->doctor_id;
             }
         }   
-        public function getDoctorId()
-        {
-            return $this->doctor_id;
-        }
        
     }
 ?>

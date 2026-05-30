@@ -11,21 +11,6 @@
 
         }
 
-        public static function checkApplicationStatus($pdo, $application_id)
-        {
-            $statement = $pdo->prepare(
-                "SELECT application_status
-                FROM player_application
-                WHERE application_id = :application_id"
-            );
-
-            $statement->execute([
-                ':application_id' => $application_id
-            ]);
-
-            return $statement->fetch(PDO::FETCH_COLUMN);
-        }
-
         public static function updateStatus($pdo, $application_id, $new_status)
         {
             $statement = $pdo->prepare(

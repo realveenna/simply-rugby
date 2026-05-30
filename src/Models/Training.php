@@ -1,7 +1,6 @@
 <?php
     namespace Test\Models;
 
-    use Test\Database;
     use PDO;
     
     class Training
@@ -162,36 +161,6 @@
             return ((int)$statement->fetchColumn() > 0);
         }
                 
-        // Get training attendance all or by id
-        public static function getTrainingAttendance($pdo, $training_session_id = null){
-            // SQL query
-            $sql = 
-                "SELECT 
-                    ta.attendance_status,
-                    CONCAT(player.first_name, ' ', player.last_name) AS player_name,
-                    pp.player_availability_status
-
-                FROM training_attendance ta
-                -- Player Name
-                LEFT JOIN member player ON ta.member_id = player.member_id
-                -- Player Availability Status
-                LEFT JOIN player_profile pp ON player.member_id = pp.member_id";
-
-
-            // If selecting by training_session_id
-            if($training_session_id !== null){
-                $sql .= " WHERE ta.training_session_id = :training_session_id";
-            }
-
-            // Order result
-            $sql .= " ORDER BY date DESC";
-
-            $statement = $pdo->prepare($sql);
-            $statement->execute();
-
-            return $statement->fetchAll(PDO::FETCH_ASSOC);
-        }
-
         public static function deleteTraining($pdo, $training_session_id){
             $statement = $pdo->prepare
             (

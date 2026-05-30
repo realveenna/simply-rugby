@@ -17,16 +17,6 @@
  
         }
 
-        public static function registerPlayer($email, $rawPassword)
-        {
-            
-        }
-
-        public static function validate($email, $rawPassword)
-        {
-            
-        }
-
         // Find a member by email
         public static function findEmail($email)
         {

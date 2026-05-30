@@ -170,21 +170,6 @@
             return $statement->fetchAll(PDO::FETCH_ASSOC);
         }
 
-        // public static function getAllSquadGlobal($pdo)
-        // {
-        //     $statement = $pdo->prepare(
-        //         "SELECT
-        //             squad_id,
-        //             squad_name,
-        //             section_id
-        //         FROM squad"
-        //     );
-
-        //     $statement->execute();
-
-        //     return $statement->fetchAll(PDO::FETCH_ASSOC);
-        // }
-
 
         // Get squad by squad type
         public static function getSquadByName($pdo, $squad_name){
@@ -217,24 +202,6 @@
             return $statement->fetch(PDO::FETCH_ASSOC);
         }
         
-        // // Get squad by squad by member id
-        // public static function getSquadOfMember($pdo, $member_id){
-        //     $statement = $pdo->prepare
-        //     (
-        //         "SELECT * FROM squad 
-        //         WHERE member_id = :member_id LIMIT 1"
-        //     );
-
-        //     $statement->execute([
-        //         ":member_id" => $member_id
-        //     ]);
-
-        //     $result = $statement->fetch(PDO::FETCH_ASSOC);
-        //     return $result;
-        // }
-
-
-
 
         // Find squad suitable for player's renewal
         public static function getNextSquad($pdo, $player_age){
@@ -256,6 +223,7 @@
 
 
 
+        // inserts section/fixture secretary to section admin
         public static function insertSectionAdmin($pdo, $member_id, $section_id){
             $statement = $pdo->prepare
             (
@@ -271,6 +239,7 @@
             return $result;
         }
 
+        // insert member to a squad
         public static function insertSquadMember($pdo, $member_id, $squad_id, $role_id){
             $statement = $pdo->prepare
             (
@@ -287,36 +256,7 @@
             return $result;
         }
 
-        public static function countSquad($pdo){
-            $statement = $pdo->prepare("SELECT COUNT(*) FROM squad_member");
-            $statement->execute();
-
-            return $statement->fetchAll(PDO::FETCH_ASSOC);
-        }
-
-        // List all player for each squad
-        // public static function listSquadPlayer($pdo, $squad_id){
-        //     $statement = $pdo->prepare
-        //     (
-        //         "SELECT
-        //             s.squad_name,
-        //             m.member_id, m.first_name, m.last_name,
-        //             pp.*
-        //         FROM squad_member sm
-        //         JOIN squad s ON s.squad_id = sm.squad_id
-        //         JOIN member m ON m.member_id = sm.member_id
-        //         JOIN player_profile pp ON pp.member_id = m.member_id
-        //         WHERE sm.squad_id = :squad_id"
-        //     );
-        //     $statement->execute(['squad_id' => $squad_id]);
-        //     $squadPlayer =  $statement->fetchAll(PDO::FETCH_ASSOC);
-
-        //     var_dump($squadPlayer);
-        //     exit;
-        //     return;
-        // }
-
-        // 
+        // list squad players
         public static function listSquadPlayer($pdo, $squad_id)
         {
 

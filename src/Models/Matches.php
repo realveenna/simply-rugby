@@ -179,26 +179,6 @@
             return $statement->fetchAll(PDO::FETCH_ASSOC);
         }
 
-        // // Get Coach of a Squad
-        // public static function getCoachLineup($pdo, $match_id)
-        // {
-        //     $statement = $pdo->prepare
-        //     (
-        //         "SELECT 
-        //             CONCAT(player.first_name, ' ', player.last_name) AS player_name,
-        //             ml.position
-
-        //         FROM match_lineup ml
-        //         INNER JOIN member player ON player.member_id = ml.member_id
-
-        //         WHERE ml.match_id = :match_id"
-        //     );
-
-        //     $statement->execute([':match_id' => $match_id]);
-
-        //     return $statement->fetchAll(PDO::FETCH_ASSOC);
-        // }
-
         // Delete Match
         public static function delete($pdo, $match_id){
             $statement = $pdo->prepare
@@ -337,38 +317,6 @@
                 ':our_comments' => $half['our_comments'],
                 ':opponent_comments' => $half['opponent_comments']
             ]);
-        }
-
-        // Get player match stats
-        public static function getMatchStats($pdo,$member_id){
-            $statement = $pdo->prepare(
-                "SELECT
-                    pms.*,
-                    m.match_date,
-                    m.opposition_team_name,
-                    s.squad_name
-
-                FROM player_match_stats pms
-
-                INNER JOIN matches m
-                    ON pms.match_id = m.match_id
-
-                INNER JOIN squad s
-                    ON m.squad_id = s.squad_id
-
-                WHERE pms.member_id = :member_id
-
-                ORDER BY
-                    m.match_date DESC"
-            );
-
-            $statement->execute([
-                ':member_id' => $member_id
-            ]);
-
-            return $statement->fetchAll(
-                PDO::FETCH_ASSOC
-            );
         }
 
         // Get player stats

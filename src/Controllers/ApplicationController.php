@@ -362,8 +362,8 @@
                         }
 
                         // Generate and hash password
-                        // $password = randomPassword(); ###
-                        $password = 'Password123!';
+                        // $password = 'Password123!';
+                        $password = randomPassword();
                         $hashedPassword = hashPassword($password);
 
                         if(empty($recipient)){

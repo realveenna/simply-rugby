@@ -6,22 +6,6 @@
     
     class MedicalInformation
     {
-          public function insertApplication($application_id, $condition_id, $condition_status)
-        {
-            $pdo = Database::getInstance()->getConnection();
-            $statement = $pdo->prepare("INSERT INTO application_condition 
-                (application_id, condition_id, condition_status)
-            VALUES (:application_id, :condition_id, :condition_status)");
-
-            $statement->bindValue(':application_id', $application_id, PDO::PARAM_INT);
-            $statement->bindValue(':condition_id', $condition_id, PDO::PARAM_INT);
-            $statement->bindValue(':condition_status', $condition_status, PDO::PARAM_STR);
-
-            $statement->execute();
-            // return TRUE or FALSE
-            return $statement->fetch(PDO::FETCH_ASSOC);
-        }
-
 
         // View Medical Condition Table
         public static function viewAllCondition()
@@ -205,33 +189,6 @@
             catch (\PDOException $e) {
                 // Handle any database errors
                 throw new \Exception('Something went wrong in fetching doctor details.');
-            }
-        }
-
-        // Get doctor address details for a specific player/application id
-        // Existing Player
-        // $table = player, $id_name = player_id
-        // $view = /players
-        // New Player Application
-        // $table = player_application, $id_name = application_id
-        // $view = /player-applications 
-        public static function getPlayerDoctorAddress($pdo, $table, $player_id, $id_name, $view)
-        {
-            try{
-                $statement = $pdo->prepare(
-                    "SELECT address.* FROM $table
-                    JOIN doctor ON $table.doctor_id = doctor.doctor_id
-                    JOIN address ON doctor.address_id = address.address_id
-                    WHERE $table.$id_name = :id"
-                    );
-
-                $statement->execute([':id' => $player_id]);
-                return $statement->fetch(PDO::FETCH_ASSOC);
-            }
-            catch (\PDOException $e) {
-                // Handle any database errors
-                alert('error', 'Something went wrong in fetching doctor address details.', '/'.$view);   
-                return null;
             }
         }
 

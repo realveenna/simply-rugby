@@ -61,21 +61,6 @@
             return  $statement->fetchAll(PDO::FETCH_ASSOC);
         }
 
-        // Get all members that has email but do not have a login account 
-        public static function selectMember($pdo, $member_id)
-        {
-            $statement = $pdo->prepare(
-                "SELECT * FROM member 
-                WHERE member_id = :member_id"
-            );
-
-            $statement->execute([
-                ':member_id' => $member_id
-            ]);
-            
-            return $statement->fetch(PDO::FETCH_ASSOC);
-        }
-
         // Select all members no senior nok
         public static function selectAll($role = null)
         {
@@ -207,8 +192,6 @@
         }
 
     
-
-
         public static function selectEmail($member_id)
         {
             $pdo = Database::getInstance()->getConnection();
@@ -307,25 +290,5 @@
             ]);
         }
 
-        // Get child of a member
-        public static function getMemberChildren($pdo, $member_id)
-        {
-            $statement = $pdo->prepare(
-                "SELECT 
-                    m.member_id,
-                    CONCAT(m.first_name, ' ', m.last_name) AS child_name,
-                    cp.relationship
-
-                FROM contact_player cp
-                INNER JOIN member m  ON cp.contact_member_id = m.member_id
-                WHERE cp.member_id = :member_id"
-            );
-
-            $statement->execute([
-                ':member_id' => $member_id
-            ]);
-
-            return $statement->fetchAll(PDO::FETCH_ASSOC);
-        }
     }
 ?>

@@ -213,7 +213,8 @@
 
             if ($_POST) {
                 // Generate and hash password
-                $password = 'Password123!';
+                // $password = 'Password123!';
+                $password = randomPassword();
                 $hashedPassword = hashPassword($password);
                 
                 $data['password'] = trim($hashedPassword);
