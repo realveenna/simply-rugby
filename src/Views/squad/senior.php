@@ -6,14 +6,14 @@
 
         <!-- Players -->
         <?= titleLeftSmall('Squad Players') ?>
-        <div class="grid w-full grid-cols-1 gap-4 mt-4 xl:grid-cols-2 2xl:grid-cols-3">
+        <div class="grid w-full grid-cols-2 gap-4 mt-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             <?php foreach ($players as $player): ?>
-            <div class="flex flex-col items-center justify-between bg-white border border-gray-200 rounded-lg shadow-sm sm:flex dark:border-gray-700 p-2 dark:bg-gray-800">
+            <div class="flex flex-col items-center justify-between bg-white border border-gray-200 rounded-sm shadow-sm sm:flex dark:border-gray-700 pb-2 dark:bg-gray-800">
                     <!-- Player Image -->
                     <?php if (isset($player) || $player['section_id'] === 3): ?>
-                        <img class="object-cover rounded-lg overflow-hidden" 
+                        <img class="object-cover rounded-sm overflow-hidden" 
                             src="https://images.unsplash.com/photo-1581403341630-a6e0b9d2d257?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
-                            alt="player-image">
+                            alt="<?= $player['first_name'] ?>-player-image">
                     <?php endif; ?>
 
                     <!-- Player Details -->
@@ -40,13 +40,13 @@
 
         <!-- Coaches -->
         <?= titleLeftSmall('Squad Coaches') ?>
-        <div class="grid w-full grid-cols-1 gap-4 mt-4 xl:grid-cols-2 2xl:grid-cols-3">
+        <div class="grid w-full grid-cols-2 gap-4 mt-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             <?php foreach ($coaches as $coach): ?>
-            <div class="flex flex-col items-center justify-between bg-white border border-gray-200 rounded-lg shadow-sm sm:flex dark:border-gray-700 p-2 dark:bg-gray-800">
+            <div class="flex flex-col items-center justify-between bg-white border border-gray-200 rounded-sm shadow-sm dark:border-gray-700 pb-2 dark:bg-gray-800">
                 <!-- Coach Image -->
-                <img class="object-cover rounded-lg overflow-hidden" 
+                <img class="object-cover rounded-sm overflow-hidden" 
                     src="https://images.unsplash.com/photo-1581403341630-a6e0b9d2d257?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
-                    alt="coach-image">
+                    alt="<?= $player['coach_name'] ?>-coach-image">
 
                 <!-- Coach Details -->
                 <div class="flex-1 p-2 text-center">

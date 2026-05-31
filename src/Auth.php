@@ -51,14 +51,5 @@
         {
             return isset($_SESSION['rbac']) && $_SESSION['rbac']->hasRole($roleName);
         }
-
-        // Check if user is authorize for a permission else redirect 
-        public static function authorize($permission)
-        {
-            if (!self::hasPermission($permission))
-            {
-                abort(403);
-            }
-        }
     }
 ?>

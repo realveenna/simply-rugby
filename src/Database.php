@@ -18,7 +18,7 @@
         {
             //Set variables for the Server Name / Address, Database Name and Username & Password details.
             $my_host = "localhost";
-            $my_db = 'simply_rugby_new';
+            $my_db = 'simply_rugby';
             $my_db_username = "root";
             $my_db_passwd = "";
 

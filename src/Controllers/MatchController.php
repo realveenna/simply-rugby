@@ -98,7 +98,6 @@
             // Get All Match Details
             $matches = AccessControl::getAuthorizedMatches($pdo);   
             
-
             // Senior Matches
             $seniorUpcoming = [];
             $seniorPast = [];
@@ -586,9 +585,8 @@
                 $lineup = Matches::getLineup($pdo,$match['match_id']);
 
                 // Validate Squad Access Control
-                AccessControl::validateSquadAccess($pdo, $match->squad_id);
+                AccessControl::validateSquadAccess($pdo, $match['squad_id']);
 
-               
                 // If no existing lineup
                 if(!$lineup){
                     abort(500, 'Unable to update match player stats. There is no exisiting lineup in this match.');
@@ -626,7 +624,7 @@
                         abort(403, 'Unable to modify lineup. This match has no exisint result yet.');
                     }
 
-                    // Chech POSTs Values
+                    // Chech POST value
                     $stats = $_POST['stats'];
                     foreach ($stats as $player_id => $playerStats) {
                         $minutesPlayed = (int)$playerStats['minutes_played'] ?? 0;
@@ -639,6 +637,7 @@
                     }
 
                     $hasError = false;
+
                     // Valid input, Check for no input then if value is valid
                     foreach ($stats as $player_id => $playerStats) {
                         foreach ($playerStats as $input => $value) {

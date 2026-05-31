@@ -7,8 +7,8 @@
             </a> 
 
             <?= titleLeft('Player','Details')?>
-             
-            <!-- Personal Information -->
+
+			<!-- Personal Information -->
             <div class="flex flex-col items-center gap-4 bg-neutral-primary-soft p-6 border border-default rounded-base shadow-xs md:flex-row">
                 <!-- Image -->
                 <?php if ($player['section_id'] === 3 ): ?>
@@ -17,12 +17,13 @@
                         alt="player-image">
                 <?php endif; ?>
 
+                
                 <!-- Personal information -->
                 <div class="flex flex-col justify-between md:p-4 leading-normal w-full">
                     <div class="flex justify-between">
                         <h5 class="<?= heading5()?>">Personal Information</h5>
                          <!-- Include badge status -->
-                        <?php require '../src/includes/player_availability_status.php'; ?>
+                        <?php require __DIR__ . '/../../includes/player_availability_status.php'; ?>
                     </div>
 
                     <!-- Membership Renewal -->
@@ -139,7 +140,7 @@
             <?php if (!empty($matchAttendance) || !empty($trainingAttendance)):?>
                 <!-- Match and Training  Attendance -->
                 <?= titleLeftSmall('Player Attendance')?>
-                <div class="grid gap-6 mb-6 xl:grid-cols-2 items-start">
+                <div class="grid gap-6 mb-6 grid-cols-1 xl:grid-cols-2 items-start">
                     <div class="flex flex-col items-start gap-4 mt-4 bg-neutral-primary-soft p-6 border border-default rounded-base shadow-xs md:flex-row h-full">
                         <div class="w-full">
                             <h5 class="<?= heading5()?>">
@@ -148,7 +149,7 @@
                             <div class="flow-root">
                                 <ul role="list">
                                     <?php foreach ($matchAttendance as $match): ?>
-                                        <li class="flex justify-between pb-3 items-start">
+                                        <li class="flex flex-col sm:flex-row sm:justify-between pb-3 items-start">
                                             <span>
                                                 <p class="font-medium text-heading truncate">
                                                     <?= h($player['squad_name'] .'-'. $match['opposition_team_name']) ?>
@@ -176,7 +177,7 @@
                             <div class="flow-root">
                                 <ul role="list">
                                     <?php foreach ($trainingAttendance as $training): ?>
-                                        <li class="flex items-center justify-between pb-3 items-start">
+                                        <li class="flex flex-col sm:flex-row sm:justify-between pb-3 items-start">
                                             <span>
                                                 <p class="font-medium text-heading truncate max-w-xs">
                                                     <?= h($training['skills_activities'])?>
@@ -821,108 +822,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script>
-
-// FLOWBITE APEXCHART
-
-  // Get the CSS variable --color-brand and convert it to hex for ApexCharts
-  const getBrandColor = () => {
-    // Get the computed style of the document's root element
-    const computedStyle = getComputedStyle(document.documentElement);
-    
-    // Get the value of the --color-brand CSS variable
-    return computedStyle.getPropertyValue('--color-fg-brand').trim() || "#1447E6";
-  };
-
-  const getWarningColor = () => {
-    const computedStyle = getComputedStyle(document.documentElement);
-    return computedStyle.getPropertyValue('--color-warning').trim() || "#1447E6";
-  };
-
-  const getSuccessColor = () => {
-    const computedStyle = getComputedStyle(document.documentElement);
-    return computedStyle.getPropertyValue('--color-success').trim() || "#1447E6";
-  };
-
-  const getNeutralSecondaryMediumColor = () => {
-    const computedStyle = getComputedStyle(document.documentElement);
-    return computedStyle.getPropertyValue('--color-neutral-secondary-medium').trim() || "#1447E6";
-  };
-
-  const brandColor = getBrandColor();
-  const warningColor = getWarningColor();
-  const successColor = getSuccessColor();
-  const neutralSecondaryMediumColor = getNeutralSecondaryMediumColor();
-
-  const getChartOptions = () => {
-    return {
-      series: <?= json_encode($ratings) ?>,
-      colors: [brandColor, warningColor, successColor],
-      chart: {
-        height: "350px",
-        width: "100%",
-        type: "radialBar",
-        sparkline: {
-          enabled: true,
-        },
-      },
-      plotOptions: {
-        radialBar: {
-          track: {
-            background: neutralSecondaryMediumColor,
-          },
-          dataLabels: {
-            value: {
-                formatter: function(val) {
-                    return (val / 20).toFixed(1) + "/5";
-                }
-            }
-        },
-          hollow: {
-            margin: 0,
-            size: "32%",
-          }
-        },
-      },
-      grid: {
-        show: false,
-        strokeDashArray: 4,
-        padding: {
-          left: 2,
-          right: 2,
-          top: -23,
-          bottom: -20,
-        },
-      },
-      labels: <?= json_encode($skillLabels) ?>,
-      legend: {
-        show: true,
-        position: "bottom",
-        fontFamily: "Inter, sans-serif",
-      },
-      tooltip: {
-        enabled: true,
-        x: {
-          show: false,
-        },
-      },
-      yaxis: {
-        show: false,
-        labels: {
-          formatter: function (value) {
-            return value + '%';
-          }
-        }
-      }
-    }
-  }
-
-  if (document.getElementById("radial-chart") && typeof ApexCharts !== 'undefined') {
-    const chart = new ApexCharts(document.querySelector("#radial-chart"), getChartOptions());
-    chart.render();
-  }
-</script>
-
+<!-- FLOWBITE APEXCHART -->
 <script>
 const data = {
   labels: <?= json_encode($skillLabels) ?>,

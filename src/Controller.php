@@ -1,7 +1,6 @@
 <?php
 namespace Test;
 use Test\Base;
-use Test\Models\AccessControl;
 use Test\Models\Player;
 use Test\Models\Squad;
 
@@ -54,11 +53,11 @@ use Test\Models\Squad;
             $data['navSectionAccess'] = $this->sections;
             
             extract($data);
-            
 
             include '../src/includes/header.php';
             include '../src/includes/navbar.php';
         ?>
+
         <?php
             // On load clear success message
             $success = $_SESSION['success'] ?? "";
@@ -70,7 +69,7 @@ use Test\Models\Squad;
 
             $alertOn = (!empty($success) || !empty($sessionError));
         ?>
-        <!-- add overflow-y-auto  div class -->
+
         <div id="main-content" class="relative w-full min-h-screen flex flex-col bg-gray-50 lg:ml-64 dark:bg-gray-900">
             <?php if($alertOn) :?>
                 <div id="alertMessage" class="absolute w-11/12 md:w-1/2 z-30 top-5 left-1/2 -translate-x-1/2">
@@ -115,13 +114,16 @@ use Test\Models\Squad;
                 </div>
             <?php endif ;?>
 
+            <!-- Reders view page -->
             <main>
                 <div class="max-w-7xl mx-auto p-1 sm:p-2 md:p-6 lg:p-8 my-4 sm:my-8">
                     <?php include "../src/Views/$view.php"; ?>
                 </div>
             </main>
+
+
             <p class="my-10 text-sm text-center text-gray-500">
-                &copy; 2019-2025 <a href="https://flowbite.com/" class="hover:underline" target="_blank">Flowbite.com</a>. All rights reserved.
+                &copy; 2010-2026 <a href="/" class="hover:underline" target="_blank">Simply Rugby </a>. All rights reserved.
             </p>
         </div>
         <?php

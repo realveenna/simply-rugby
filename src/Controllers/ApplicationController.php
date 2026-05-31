@@ -624,53 +624,6 @@
                 $cityDoctor = trimPost('cityDoctor');
                 $postcodeDoctor = strtoupper(trimPost('postcodeDoctor')); 
                 $countryDoctor = trimPost('countryDoctor'); 
-                $fName = 'Oliver';
-$lName = 'Campbell';
-$dob = '04/12/2021';
-$playerNickname = 'Ollie';
-$playerHeight = '108';
-$playerWeight = '18';
-
-$nokFName = 'Sarah';
-$nokLName = 'Campbell';
-$nokRelationship = 'Mother';
-
-$nokFNameSecondary = 'Mark';
-$nokLNameSecondary = 'Campbell';
-$nokRelationshipSecondary = 'Father';
-
-$email = 'sarah.campbell@example.com';
-$mobileNum = '07700111223';
-$mobileNumSecondary = '07700111323';
-
-$line1 = '12 Oak Road';
-$line2 = '';
-$city = 'Glasgow';
-$postcode = 'G12 8AA';
-$country = 'Scotland';
-
-$line1Secondary = '12 Oak Road';
-$line2Secondary = '';
-$citySecondary = 'Glasgow';
-$postcodeSecondary = 'G12 8AA';
-$countrySecondary = 'Scotland';
-
-$sameAddress = true;
-$isJunior = true;
-
-$currentCondition = [1]; // Asthma
-$pastCondition = [];
-
-$allergyData = [7]; // Milk
-
-$doctor = 'Dr Andrew Wilson';
-$doctorNum = '01292555123';
-$line1Doctor = 'Riverside Medical Centre';
-$line2Doctor = '';
-$cityDoctor = 'Glasgow';
-$postcodeDoctor = 'G12 9AA';
-$countryDoctor = 'Scotland';
-                
 
                 // Default data to be passed
                 $data = [

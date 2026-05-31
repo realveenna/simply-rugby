@@ -279,7 +279,7 @@
 
     function cardClassXLNoBg(){
         return "w-full max-w-5xl rounded-lg xl:p-0
-            dark:bg-gray-800 ";
+            dark:bg-gray-900 ";
     }
 
     function centerContainer() {

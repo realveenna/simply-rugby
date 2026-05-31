@@ -12,6 +12,14 @@
         {
             $this->permissions = array();
         }
+
+###############
+        public function hasPermission($permission)
+        {
+            return isset($this->permissions[$permission]) &&
+                $this->permissions[$permission] === true;
+        }
+    ######################
         
          // return a role object with associated permissions
         public static function getRolePerms($role_id)
@@ -33,6 +41,29 @@
             return $role;
         }
 
+        // check if a permission is set
+        public function hasPerm($permission)
+        {
+            return isset($this->permissions[$permission]);
+        }
+
+        // check if role already exist
+        public static function hasRole($role_name)
+        {
+            $pdo = Database::getInstance()->getConnection();
+
+            $sql = "SELECT count(role_id) AS role_count, role_id FROM roles WHERE role_name = :role_name";
+            $statement = $pdo->prepare($sql);
+            $statement->execute(array(":role_name" => $role_name));
+
+            while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+                if ($row["role_count"] > 0) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         // insert array of roles for specified member id
         public static function insertMemberRoles($pdo, $member_id, $role_id)
         {
@@ -50,12 +81,57 @@
             return $statement->rowCount();
         }
 
+        // delete ALL roles for specified member id
+        public static function deleteMemberRoles($member_id)
+        {
+            $pdo = Database::getInstance()->getConnection();
+
+            $sql = "DELETE FROM member_role WHERE member_id = :member_id";
+            $statement = $pdo->prepare($sql);
+            return $statement->execute(array(":member_id" => $member_id));
+        }
+
         // Fetch all role name and id from the database and return as an array
         public static function getRole(){
             $pdo = Database::getInstance()->getConnection();
             $statement = $pdo->prepare("SELECT * FROM role");
             $statement->execute();
             return $statement->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        // Fetch member role name
+        public static function getMemberRoleName($member_id){
+            $pdo = Database::getInstance()->getConnection();
+            $statement = $pdo->prepare
+            (
+                "SELECT r.role_name FROM member_role mr
+                JOIN role r ON mr.role_id = r.role_id
+                WHERE mr.member_id = :member_id
+            ");
+
+            $statement->execute([
+                ':member_id' => $member_id
+            ]);
+            return $statement->fetchAll(PDO::FETCH_COLUMN);
+        }
+        
+
+
+
+        /////
+        //// mine below
+
+        public static function insertRole($pdo, $data)
+        {
+            $pdo = Database::getInstance()->getConnection();
+
+            $statement = $pdo->prepare("INSERT INTO member_role(member_id, role_id)
+                VALUES (:member_id, :role_id)");
+
+            $statement->bindValue(':member_id', $data['member_id'], PDO::PARAM_INT);
+            $statement->bindValue(':role_id', $data['selectedRole'], PDO::PARAM_INT);
+
+            return $statement->execute();
         }
 
         // Get member role id
@@ -85,6 +161,45 @@
                 return null;
             }
             return $result;
+        }
+
+        // public static function getRoleIdFromRoleName($pdo, $role_name)
+        // {
+        //     switch ($role_name) {
+        //         case 'Club Chairperson':
+        //             return self::getRoleIdByName($pdo, 'Senior Player');
+        //         case 'Membership Secretary':
+        //             return self::getRoleIdByName($pdo, 'Membership Secretary');
+        //         case 'Section Secretary':
+        //             return self::getRoleIdByName($pdo, 'Section Secretary');
+        //         case 'Fixture Secretary':
+        //             return self::getRoleIdByName($pdo, 'Fixture Secretary');
+        //         case 'Coach':
+        //             return self::getRoleIdByName($pdo, 'Coach');
+        //         case 'Senior Player':
+        //             return self::getRoleIdByName($pdo, 'Senior Player');
+        //         case 'Parent':
+        //             return self::getRoleIdByName($pdo, 'Parent');
+        //         default:
+        //             throw new \Exception('Invalid role type.');
+        //     }             
+        // }
+
+        // Get all Permissions
+        public static function getAllPermissions($pdo)
+        {
+            $pdo = Database::getInstance()->getConnection();
+
+            try{
+                $statement = $pdo->prepare("SELECT * FROM permission");
+                $statement->execute();
+                $result = $statement->fetchAll(PDO::FETCH_ASSOC);
+                return $result;
+            }
+            catch (\Exception $e)
+            {
+                echo $e->getMessage();
+            }
         }
     }
 ?>

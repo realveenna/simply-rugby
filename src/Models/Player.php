@@ -88,7 +88,7 @@
         public static function updateHistoryEndDate($pdo, $member_id)
         {
             $statement = $pdo->prepare(
-                "UPDATE squad_player_history
+                "UPDATE squad_player_history h
 
                 INNER JOIN squad s ON s.squad_id = h.squad_id
                 SET h.end_date = s.end_date

@@ -50,13 +50,16 @@
                             $password = hashPassword($rawPassword);
 
                             // Correct Password
-                            if($member['pass'] !== $password){
+                            if($member['pass'] === $password){
+                                // Set SESSIONS
+
                                 $_SESSION['loggedIn'] = true; 
                                 $_SESSION['user'] = $member;
                                 $_SESSION['id'] = session_id();
                                 $_SESSION['rbac'] = PrivilegedUser::getPrivilegedMember
                                     ($_SESSION['user']['member_id']) ?? null;
 
+                                // Set sessions for access
                                 $_SESSION['player_access'] = 
                                     AccessControl::getAccessPlayers($pdo, $_SESSION['user']['member_id']);
                                 $_SESSION['squad_access'] = 

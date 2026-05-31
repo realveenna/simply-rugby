@@ -38,10 +38,13 @@
                     s.section_id,
                     s.season,
                     sec.section_name,
-                    COUNT(own.member_id) AS total_members
+                    COUNT(pp.member_id) AS total_members
+
                 FROM squad s
                 LEFT JOIN section sec ON s.section_id = sec.section_id
                 LEFT JOIN squad_member own ON s.squad_id = own.squad_id
+                LEFT JOIN player_profile pp ON pp.member_id = own.member_id
+
                 WHERE own.member_id = :member_id
 
                 GROUP BY
@@ -112,9 +115,11 @@
                     s.section_id,
                     s.season,
                     sec.section_name,
-                    COUNT(sm.member_id) AS total_members
+                    COUNT(pp.member_id) AS total_members
+
                 FROM squad s
                 LEFT JOIN squad_member sm ON s.squad_id = sm.squad_id
+                LEFT JOIN player_profile pp ON pp.member_id = sm.member_id
                 LEFT JOIN section sec ON s.section_id = sec.section_id
                 LEFT JOIN section_admin sa ON s.section_id = sa.section_id
                 WHERE sa.member_id = :member_id"
@@ -276,7 +281,7 @@
                 JOIN squad_member sm  ON m.member_id = sm.member_id
                 WHERE h.squad_id = :squad_id 
                     AND sm.status = 'Active'
-                    AND (h.end_date >= CURDATE() OR h.end_date  IS NULL)"
+                    AND (h.end_date >= CURDATE() OR h.end_date IS NULL)"
             );
 
             $statement->execute(['squad_id' => $squad_id]);

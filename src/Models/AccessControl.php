@@ -131,6 +131,12 @@
                     continue;
                 }
 
+                // Public senior
+                if ($match['section_name'] === 'Senior') {
+                    $authorizedMatchesId[] = $match['match_id'];
+                    continue;
+                }
+
                 // Parent access
                 if (hasRole('Parent') && self::lineupParentAccess
                     ($pdo, $_SESSION['user']['member_id'], $match['match_id'])) 
@@ -147,12 +153,6 @@
 
                 // Section access
                 if (hasSectionAccess($match['section_id'])) {
-                    $authorizedMatchesId[] = $match['match_id'];
-                    continue;
-                }
-
-                // Public senior
-                if ($match['section_name'] === 'Senior') {
                     $authorizedMatchesId[] = $match['match_id'];
                     continue;
                 }

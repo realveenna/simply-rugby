@@ -104,6 +104,7 @@ $router->get('/player', PlayerController::class, 'displayPlayer', ['view_player_
 
 // MATCH CONTROLLER
 $router->get('/match', MatchController::class, 'index');
+
 $router->get('/match/junior', MatchController::class, 'juniorMatch', ['view_junior_match']);
 $router->get('/match/senior', MatchController::class, 'seniorMatch');
 

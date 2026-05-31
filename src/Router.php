@@ -75,6 +75,7 @@
                 $controller->$action();
                 
             } else {
+                // redirect to 404 error page
                 http_response_code(404);
                 abort(404);
             } 
