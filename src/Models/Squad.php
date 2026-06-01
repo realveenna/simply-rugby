@@ -43,9 +43,12 @@
                 FROM squad s
                 LEFT JOIN section sec ON s.section_id = sec.section_id
                 LEFT JOIN squad_member own ON s.squad_id = own.squad_id
-                LEFT JOIN player_profile pp ON pp.member_id = own.member_id
+                LEFT JOIN squad_member sm ON sm.squad_id = s.squad_id
+                LEFT JOIN player_profile pp ON pp.member_id = sm.member_id
+                INNER JOIN squad_player_history h ON h.member_id = pp.member_id
 
-                WHERE own.member_id = :member_id
+                WHERE own.member_id = :member_id 
+                    AND (h.end_date >= CURDATE() OR h.end_date IS NULL)
 
                 GROUP BY
                     s.squad_id, 
@@ -116,13 +119,18 @@
                     s.season,
                     sec.section_name,
                     COUNT(pp.member_id) AS total_members
+                    
 
                 FROM squad s
                 LEFT JOIN squad_member sm ON s.squad_id = sm.squad_id
                 LEFT JOIN player_profile pp ON pp.member_id = sm.member_id
                 LEFT JOIN section sec ON s.section_id = sec.section_id
                 LEFT JOIN section_admin sa ON s.section_id = sa.section_id
-                WHERE sa.member_id = :member_id"
+                INNER JOIN squad_player_history h ON h.member_id = pp.member_id
+
+                WHERE sa.member_id = :member_id
+                    AND (h.end_date >= CURDATE() OR h.end_date IS NULL)"
+
             );
 
             $statement->execute([
@@ -162,7 +170,10 @@
                 LEFT JOIN squad_member sm ON s.squad_id = sm.squad_id
                 LEFT JOIN player_profile pp ON pp.member_id = sm.member_id
                 LEFT JOIN section sec ON sec.section_id = s.section_id
-                WHERE sm.status = 'Active'
+                INNER JOIN squad_player_history h ON h.member_id = pp.member_id
+
+                WHERE sm.status = 'Active' 
+                    AND (h.end_date >= CURDATE() OR h.end_date IS NULL)
 
                 GROUP BY
                     s.squad_id, 
@@ -276,8 +287,8 @@
                     sm.status
                 FROM squad_player_history h
                 JOIN member m ON h.member_id = m.member_id
-                JOIN squad s ON h.squad_id = s.squad_id
-                JOIN player_profile pp  ON m.member_id = pp.member_id
+                JOIN squad s ON s.squad_id = h.squad_id
+                JOIN player_profile pp ON m.member_id = pp.member_id
                 JOIN squad_member sm  ON m.member_id = sm.member_id
                 WHERE h.squad_id = :squad_id 
                     AND sm.status = 'Active'

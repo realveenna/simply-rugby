@@ -142,7 +142,7 @@
                 }
                 $result = ResponseHelper::toArray($response);
             } catch (\Exception $e) {
-                alert('error', $mailtrap->$result, '/');
+                // alert('error', $mailtrap->$result, '/');
             }
         }
 
@@ -176,6 +176,7 @@
                 $result = ResponseHelper::toArray($response);
 
             } catch (\Exception $e) {
+                // As comment for testing purposes
                 // alert('error', $mailtrap->$result, '/player-applications');
             }
         }
@@ -219,7 +220,8 @@
                 $result = ResponseHelper::toArray($response);
 
             } catch (\Exception $e) {
-                alert('error', $mailtrap->$result, '/training/create');
+                // As comment for testing purposes
+                // alert('error', $mailtrap->$result, '/training/create');
             }
         }
     }

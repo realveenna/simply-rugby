@@ -163,28 +163,6 @@
             return $result;
         }
 
-        // public static function getRoleIdFromRoleName($pdo, $role_name)
-        // {
-        //     switch ($role_name) {
-        //         case 'Club Chairperson':
-        //             return self::getRoleIdByName($pdo, 'Senior Player');
-        //         case 'Membership Secretary':
-        //             return self::getRoleIdByName($pdo, 'Membership Secretary');
-        //         case 'Section Secretary':
-        //             return self::getRoleIdByName($pdo, 'Section Secretary');
-        //         case 'Fixture Secretary':
-        //             return self::getRoleIdByName($pdo, 'Fixture Secretary');
-        //         case 'Coach':
-        //             return self::getRoleIdByName($pdo, 'Coach');
-        //         case 'Senior Player':
-        //             return self::getRoleIdByName($pdo, 'Senior Player');
-        //         case 'Parent':
-        //             return self::getRoleIdByName($pdo, 'Parent');
-        //         default:
-        //             throw new \Exception('Invalid role type.');
-        //     }             
-        // }
-
         // Get all Permissions
         public static function getAllPermissions($pdo)
         {

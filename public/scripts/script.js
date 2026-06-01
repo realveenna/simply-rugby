@@ -17,47 +17,6 @@ function nextPlayerForm(){
     currentForm.classList.add('hidden');
 }
 
-// Event listener for the checkbox to toggle the guardian 2 address field
-// const birthdayInput = document.getElementById('dobRegister');
-// birthdayInput.addEventListener("change", calculateAge);
-
-// function calculateAge(){
-//     const dob = birthdayInput.value;
-
-//     alert(dob);
-
-//     if (!dob) {
-//         return;
-//     }
-//     const today = new Date();
-//     const birthday = new Date(dob);
-
-//     let age = today.getFullYear() -  birthday.getFullYear();
-
-//     const monthDifference = today.getMonth() -  birthday.getMonth();
-//     // Adjust age if the birthday hasn't occurred yet this year
-//     if (monthDifference < 0 || (monthDifference === 0 && today.getDate() <  birthday.getDate())) {
-//         age--;
-//     }
-
-//     // Open the exisiting parental login radio button
-//      if(age > 4 && age <= 12){
-//         openParentExisting(age);
-//     }
-//     // https://www.geeksforgeeks.org/javascript/age-calculator-design-using-html-css-and-javascript/
-// }
-
-// function openParentExisting(age){
-//     const radioInputs = document.getElementById('if-existing-login');
-//     const yes = document.getElementById('existing-login');
-//     const email = document.getElementById('if-existing-email');
-
-//     // Check if YES radio is selected
-//     if (yes.checked) {
-//         console.log(yes.value);
-//     }
-// }
-
 
 // Toggle existing parental login details
 const existingParentRadios = document.getElementsByName('existing-login');
@@ -77,15 +36,11 @@ function toggleExistingParentDetails() {
     }
 };
 
-// Event listener for the checkbox to toggle the guardian 2 address field
+// Event listener for the checkbox to toggle the guardian 2 address 
 document.addEventListener("DOMContentLoaded", (event) => {
     const checkbox = document.getElementById('sameAddress');
     const address = document.getElementById('guardian2-address');
 
-    if (!checkbox || !address) {
-        console.log('Element not found');
-        return;
-    }
 
     checkbox.addEventListener('change', function () {
         if (this.checked) {

@@ -455,54 +455,7 @@
                         }
                     }
 
-                    // edit player_details
-                    if($edit === 'player_details'){
-                        $data = [];
-                        
-                        $member_id = trimPost('member_id');
-                        $height = trimPost('height');
-                        $weight = trimPost('weight');
-                        $position = trimPost('position');
-                        $player_availability_status = trimPost('player_availability_status');
-
-                        // Validate no input
-                        $error['height'] = 
-                            ifEmpty($height, 'Height is required');
-                        $error['weight'] = 
-                            ifEmpty($weight, 'Weight is required');
-                        $error['position'] = 
-                            ifEmpty($position, 'Position is required');
-                        $error['player_availability_status'] = 
-                            ifEmpty($player_availability_status, 'Availability status is required');
-
-                        // Filter array for empty/null
-                        $error = array_filter($error);
-
-                        // No error then update
-                        if(empty($error)){
-                            // Set data to pass
-                            $data = [
-                                'height' => $height,
-                                'weight' => $weight,
-                                'position' => $position ?? '',
-                                'player_availability_status' => $player_availability_status,
-                                'member_id' => $member_id
-                            ];
-
-
-                            $updated = Player::updatePlayerProfile($pdo, $data);
-                            if(!$updated){
-                                throw new \ErrorException('Failed to update player profile');
-                            }
-
-                            // Commmit and success message
-                            $pdo->commit();
-                            
-                            alert('success', 'Player Details Updated Successfully!', '/');
-                            exit;
-                        }
-
-                    }
+                    // contact edit
                     if($edit === 'contact'){
                         $member->email = trimPost('email');
                         $member->mobile_num = trimPost('mobile_num');

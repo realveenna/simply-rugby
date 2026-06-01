@@ -108,7 +108,7 @@
 
                         // Commmit and success message
                         $pdo->commit();
-                        alert('success', 'Player Injury Successfully Added!', '/');
+                        alert('success', 'Player Injury Successfully Added!', '/injury/all');
                     }
                 }
             }

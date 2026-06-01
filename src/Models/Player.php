@@ -8,6 +8,22 @@
     
     class Player
     {
+
+        public int $member_id;
+        public string $player_availability_status;
+        public float $height;
+        public int $weight;
+        public string $position;
+
+        public function __construct($data = [])
+        {
+            $this->height = $data['height'] ?? 0;
+            $this->player_availability_status = $data['player_availability_status'] ?? 'Available';
+            $this->member_id = $data['member_id'] ?? 0;
+            $this->weight = $data['weight'] ?? 0;
+            $this->position = $data['position'] ?? '';
+        }
+
         // Update Application Status
         public static function insert($pdo, $data, $member_id)
         {
@@ -137,7 +153,7 @@
         }
 
         // Update player profile
-        public static function updatePlayerProfile($pdo, $data)
+        public function updatePlayerProfile($pdo)
         {
             $statement = $pdo->prepare(
                 "UPDATE player_profile
@@ -150,11 +166,11 @@
             );
 
             return $statement->execute([
-                ':height' => $data['height'] ?? null,
-                ':weight' => $data['weight'] ?? null,
-                ':position' => $data['position'] ?? null,
-                ':player_availability_status' => $data['player_availability_status'] ?? 'Available',
-                ':member_id' => $data['member_id']
+                ':height' => $this->height ?? null,
+                ':weight' => $this->weight ?? null,
+                ':position' => $this->position ?? null,
+                ':player_availability_status' => $this->player_availability_status ?? 'Available',
+                ':member_id' => $this->member_id
             ]);
         }
     }

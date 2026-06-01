@@ -131,11 +131,11 @@
                     continue;
                 }
 
-                // Public senior
-                if ($match['section_name'] === 'Senior') {
-                    $authorizedMatchesId[] = $match['match_id'];
-                    continue;
-                }
+                // // Public senior
+                // if ($match['section_name'] === 'Senior') {
+                //     $authorizedMatchesId[] = $match['match_id'];
+                //     continue;
+                // }
 
                 // Parent access
                 if (hasRole('Parent') && self::lineupParentAccess

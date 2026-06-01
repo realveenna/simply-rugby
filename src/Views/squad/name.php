@@ -1,7 +1,7 @@
 <!-- Squad Table -->
 <section class="bg-gray-50 dark:bg-gray-900">
     <!-- Title -->
-    <?= title($squad['squad_name'],'Squad')?>
+    <?= title($title ?? 'My','Squad')?>
     
     <!-- Datatable -->
     <table class="datatable">

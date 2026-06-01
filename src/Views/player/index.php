@@ -126,12 +126,22 @@
                             </li>
                         </ul>
                     </div>
-                   <!-- Modify Button -->
-                    <div class="flex justify-end">
-                        <a href="/members/update?member_id=<?= $player['member_id'] ?>" class="inline-flex items-center w-auto text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none">
-                            Modify
-                            <svg class="w-4 h-4 ms-1.5 rtl:rotate-180 -me-0.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 12H5m14 0-4 4m4-4-4-4"/></svg>
-                        </a>
+                    <div class="flex gap-4 justify-end">
+                        <!-- Modify Player personal details Button -->
+                        <?php if (hasPermission('update_player_details')):?>
+                            <a href="/members/update?member_id=<?= $player['member_id'] ?>" class="inline-flex items-center w-auto text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none">
+                                Update Personal Details
+                                <svg class="w-4 h-4 ms-1.5 rtl:rotate-180 -me-0.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 12H5m14 0-4 4m4-4-4-4"/></svg>
+                            </a>
+                        <?php endif;?>
+
+                        <!-- Modify Player details Button -->
+                        <?php if (hasPermission('update_player_details') || hasPermission('update_player_availability')):?>
+                            <a href="/player/update?member_id=<?= $player['member_id'] ?>" class="inline-flex items-center w-auto text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none">
+                                    Update Player Profile
+                                <svg class="w-4 h-4 ms-1.5 rtl:rotate-180 -me-0.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 12H5m14 0-4 4m4-4-4-4"/></svg>
+                            </a>
+                        <?php endif;?>
                     </div>
                 </div>
             </div>
@@ -374,13 +384,16 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Modify Button -->
-                        <div class="flex justify-end">
-                            <a href="/members/update?member_id=<?= $player['member_id'] ?>" class="inline-flex items-center w-auto text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none">
-                                Modify
-                                <svg class="w-4 h-4 ms-1.5 rtl:rotate-180 -me-0.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 12H5m14 0-4 4m4-4-4-4"/></svg>
-                            </a>
-                        </div>
+                        
+                        <?php if (hasPermission('update_player_details')):?>
+                            <!-- Modify Address Button -->
+                            <div class="flex justify-end">
+                                <a href="/members/update?member_id=<?= $player['member_id'] ?>" class="inline-flex items-center w-auto text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none">
+                                    Modify
+                                    <svg class="w-4 h-4 ms-1.5 rtl:rotate-180 -me-0.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 12H5m14 0-4 4m4-4-4-4"/></svg>
+                                </a>
+                            </div>
+                        <?php endif;?>
                     </div>
                 </div>
                 
@@ -803,7 +816,7 @@
             <?php endif;?>
       
             <!-- Permission to update_player_details -->
-            <?php if(!hasPermission('update_player_details')):?>
+            <?php if(hasPermission('update_player_details')):?>
                 <form method="post" class="mt-6">
                     <input type="hidden" name="application_id" value="<?= h($player['member_id']) ?>">
                     <div class="flex flex-col gap-2">

@@ -144,6 +144,7 @@
                         // Validate Squad Access
                         $squad = AccessControl::validateSquadAccess($pdo, $training->squad_id);
 
+
                         // Get all squad players
                         $players = Squad::getSquadPlayers($pdo, $training->squad_id);
                         if(!$players){
@@ -151,7 +152,7 @@
                         }
 
                         // Check section
-                        $isJunior = $squad['section_name'] !== 'Senior';
+                        $isJunior = $squad['section_id'] !== 2;
 
                         // Insert training session details to db
                         $training->training_session_id = $training->insert($pdo);

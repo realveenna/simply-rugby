@@ -1,6 +1,5 @@
 <!-- Squad Table -->
 <section class="bg-gray-50 dark:bg-gray-900 dark:text-white">
-
     <?= title($title ?? 'All', 'Trainings') ?>
 
     <table class="datatable">
@@ -143,7 +142,7 @@
                             <!-- record_injury -->
                             <!-- attendance is completed -->
                             <?php if(hasPermission('record_injury')): ?>
-                                <?php if (((int)$training['pending_count'] === 0) && !isFutureDate($training['date'])):?>
+                                <?php if (((int)$training['pending_count'] === 0) && $training['status'] === 'Completed'):?>
                                     <li>
                                         <a href="/injury?training_session_id=<?= $training['training_session_id']?>" 
                                             class="inline-flex items-center justify-center text-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded-md">

@@ -66,16 +66,16 @@
                                 Update
                             </a>
                         </button>
-                    <?php endif; ?>
-                    
+                        
                     <!-- Delete Button -->
                     <button type="submit" name="action" value="delete"
                         class="<?=dangerBtn()?> ">
                         Delete
                     </button>
+                    <?php endif; ?>
                 </div>
 
-                    <?php if((int)$training['pending_count'] > 0):?>
+                    <?php if((int)$training['pending_count'] > 0 && (hasPermission('record_attendance'))):?>
                         <!-- Record Attendance Button -->
                         <a href="/training/record_attendance?training_session_id=<?=h($training['training_session_id'])?>">
                             <button type="button"

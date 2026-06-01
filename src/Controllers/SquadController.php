@@ -40,7 +40,7 @@
                 else{
                     $title = $squads[0]['squad_name'];
                 }
-     
+
                 // If searching for squad players
                 if (isset($_GET['type']))
                 {
@@ -57,7 +57,6 @@
 
                     // Set title
                     $title = $squad['squad_name'];
-
 
                     // Go to page
                     $this->render('squad/name', [

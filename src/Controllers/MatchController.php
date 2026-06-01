@@ -14,21 +14,17 @@
             parent::__construct();
         }
 
-        // Render Match index with permission check
+        // Render Senior Matches for index
         public function index()
         {
             $pdo = $this->pdo;
 
             // Get All Match Details
-            $matches = AccessControl::getAuthorizedMatches($pdo);           
+            $matches = Matches::getMatches($pdo, 3);           
 
             // Senior Matches
             $seniorUpcoming = [];
             $seniorPast = [];
-
-            // Junior Matches
-            $juniorUpcoming = [];
-            $juniorPast = [];
 
             // Today's date
             $today = date('Y-m-d');
@@ -57,25 +53,14 @@
                         $seniorPast[] = $match;
                     }
                 }
-                // Junior matches and has permission
-                elseif (hasPermission('view_junior_match')) {
-                    if ($isUpcoming) {
-                        $juniorUpcoming[] = $match;
-                    } else {
-                        $juniorPast[] = $match;
-                    }
-                }
             }
 
             // Update matches data with halves
             $matches = $matchesAndHalves;
 
             // Limit to 4 each match details
-            $seniorUpcoming = array_slice($seniorUpcoming, 0, 4);
-            $seniorPast = array_slice($seniorPast, 0, 4);
-
-            $juniorUpcoming = array_slice($juniorUpcoming, 0, 4);
-            $juniorPast = array_slice($juniorPast, 0, 4);
+            $seniorUpcoming = array_slice($seniorUpcoming, 0, 6);
+            $seniorPast = array_slice($seniorPast, 0, 6);
 
             // Not Found 
             if(!$matches){
@@ -85,8 +70,6 @@
             $this->render('/match/index',[
                 'seniorUpcoming' => $seniorUpcoming,
                 'seniorPast' => $seniorPast,
-                'juniorUpcoming' => $juniorUpcoming,
-                'juniorPast' => $juniorPast
             ]);
         }
 

@@ -99,8 +99,12 @@ $router->post('/training/view', TrainingController::class, 'view', ['view_traini
 $router->get('/training/update', TrainingController::class, 'update', ['update_training_session']);
 $router->post('/training/update', TrainingController::class, 'update', ['update_training_session']);
 
-// PLAYER INFORMATION
+// PLAYER CONTROLLER
 $router->get('/player', PlayerController::class, 'displayPlayer', ['view_player_details']);
+
+$router->get('/player/update', PlayerController::class, 'update', ['update_player_details','update_player_availability']);
+$router->post('/player/update', PlayerController::class, 'update', ['update_player_details','update_player_availability']);
+
 
 // MATCH CONTROLLER
 $router->get('/match', MatchController::class, 'index');
