@@ -1,6 +1,6 @@
 # Simply Rugby
 
-Developed a full-stack, database-driven rugby club management system using PHP OOP and MySQL. Implemented authentication and role-based access control with dedicated functionality for administrators, coaches, players and parents. Developed security controls to prevent unauthorised access to protected pages, data and functionality, including direct URL access attempts. Developed parent and player dashboards, player reports, training scheduling, injury management and match management features. Designed and integrated database structures to manage players, teams, training sessions, injuries and matches.
+A full-stack, database-driven rugby club management system using PHP OOP and MySQL, featuring authentication and role-based access control for administrators, coaches, players and parents. Implemented security controls to prevent unauthorised access to protected pages, data and functionality, including direct URL access attempts. The system includes dedicated parent and player dashboards, player reports, training scheduling, injury management and match management, supported by structured database designs for players, teams, training sessions, injuries and matches.
 
 
 ## Overview
