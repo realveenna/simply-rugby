@@ -7,6 +7,21 @@
  # Live Application
 
  Live Website: https://simply-rugby.infinityfree.io/
+ 
+ # Login Credentials 
+ 
+ | Role | Squad | Section | Email | Password |
+|---|---|---|---|---|
+| Parent | | | `sarah.Murray14@gmail.com` | `Password123!` |
+| Coach | Mini | | `gary@test.com` | `Password123!` |
+| Coach/Parent | Midi | Junior | `laura.mcgregor@example.com` | `Password123!` |
+| Coach | Senior | | `johnnybravo@email.com` | `Password123!` |
+| Fixture Secretary | | Senior | `brooke.perry@email.com` | `Password123!` |
+| Section Secretary | | Junior | `mark.lauren@test.com` | `Password123!` |
+| Senior Player | | | `hamish.mcneill04@gmail.com` | `Password123!` |
+| Club Chairman | | | `jane.doe@temp.com` | `Password123!` |
+| Membership Secretary | | | `jennifer123@test.com` | `Password123!` |
+
 
  # Overview
 
@@ -183,3 +198,6 @@ Access to records and features is controlled according to the user's role and re
 - Improved reporting functionality
 - Mobile-specific enhancements
 - Integration with external rugby competition or fixture systems
+
+# Disclaimer:
+This project has been developed solely for educational and academic purposes as part of a college project. The information, content, and materials presented are intended for demonstration and learning purposes only and should not be considered professional advice or an official representation of any organization.
