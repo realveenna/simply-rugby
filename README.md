@@ -1,215 +1,224 @@
-Simply Rugby
+Simply Rugby Club Management System
 
-A full-stack, database-driven rugby club management system developed using PHP OOP, a custom MVC architecture, custom routing and MySQL. The system provides authentication and role-based access control for administrators, coaches, players and parents.
+Simply Rugby Club Management System is a web-based application developed for Simply Rugby, a rugby club based in Glasgow. The system provides a centralised platform for managing the club's administrative and rugby-related activities while also providing an online presence for the club.
 
-The application includes dedicated dashboards, player management, reports, training scheduling, injury management and match management. Security controls were implemented to prevent unauthorised access to protected pages, data and functionality, including attempts to bypass the application through direct URL access.
+The application supports multiple users in real time and provides role-specific access to features for club administrators, club secretaries, coaches, senior players, parents of junior players, and members of the public.
+
+Live Application
+
+Live Website: https://simply-rugby.infinityfree.io/
 
 Overview
 
-Simply Rugby is a database-driven web application developed using Object-Oriented PHP with a custom-built MVC (Model-View-Controller) architecture rather than relying on an existing MVC framework.
+The Simply Rugby Club Management System was developed to provide an efficient and centralised way of managing club members, players, training activities, fixtures, injuries, attendance, and player performance.
 
-A custom routing system handles incoming requests and directs them to the appropriate controllers and actions. The application also uses the Singleton design pattern for controlled access to shared resources such as the database connection.
+The system allows authorised users to manage and access information relevant to their role while using access-control mechanisms to protect sensitive records.
 
-The system supports multiple user roles, with functionality and permissions tailored to administrators, coaches, players and parents.
+Main Features
 
-Features
+Member registration and management
 
-🔐 Authentication & Role-Based Access
+Player profile management
 
-* Secure user authentication
-* Role-based access control (RBAC)
-* Separate functionality for administrators, coaches, players and parents
-* Role-specific permissions
-* Protected routes and pages
-* Server-side authorisation checks
-* Prevention of unauthorised direct URL access
+Training session management
 
-🏗️ Custom MVC Architecture
+Match fixture management
 
-* Custom MVC architecture developed in PHP
-* Separation of Models, Views and Controllers
-* Models responsible for database interaction and data operations
-* Controllers responsible for application logic and request handling
-* Views responsible for presentation and user interface
-* Separation of concerns to improve maintainability
+Training attendance tracking
 
-🛣️ Custom Routing
+Player injury records
 
-* Custom application routing system
-* Routes mapped to controllers and actions
-* Centralised request handling
-* Protected routes for authenticated users
-* Role-based route authorisation
+Player skills and performance records
 
-🔄 Singleton Design Pattern
+Role-based access to system features
 
-* Implemented the Singleton design pattern
-* Controlled creation and access of shared application resources
-* Used for managing the database connection
+Attribute-based access control for sensitive records
 
-🗄️ Database Transactions & Data Integrity
+Online club information and public-facing content
 
-* Implemented SQL database transactions using BEGIN, COMMIT and ROLLBACK
-* Ensures related database operations are completed atomically
-* Automatically rolls back changes when an operation fails
-* Prevents partially completed database operations
-* Uses validation and database constraints to help prevent duplicate records
-* Maintains data consistency and integrity across related tables
-* Helps ensure related records are created, updated or deleted safely as a single operation
+Dashboard and data visualisation
 
-👨‍👩‍👧 Parent & Player Management
+Secure database transactions
 
-* Parent dashboard
-* Player dashboard
-* Player profiles
-* Player information management
-* Player reports
-* Parent access to relevant player information
-* Parent-child player relationships
+Real-time access through a web browser
 
-🏉 Team & Squad Management
+User Roles
 
-* Manage rugby squads and teams
-* Organise players within teams
-* Manage team membership
-* Manage player information and squad structures
+The system is designed to support several types of users:
 
-📅 Training Management
+User Role	Example Access
+Club Administrator	Manage users, members, players, and system information
+Club Secretary	Manage administrative information, members, and fixtures
+Coach	Manage training sessions, attendance, injuries, and player performance
+Senior Player	Access relevant player and training information
+Parent of Junior Player	Access information relating to their junior player
+Public User	View publicly available club information
 
-* Create and manage training sessions
-* Schedule training activities
-* Manage training information
-* Associate players with training sessions
-* Track relevant player participation
+Access to records and features is controlled according to the user's role and relevant attributes.
 
-🩹 Injury Management
+System Architecture
 
-* Record player injuries
-* Manage injury information
-* Monitor player injury records
-* Associate injuries with individual players
-* Restrict injury information based on user permissions
-
-🏆 Match Management
-
-* Create and manage matches
-* Manage match information
-* Associate matches with teams
-* Track match-related data
-* Manage participating players
-
-📊 Player Reports
-
-* Generate and view player reports
-* Manage player performance-related information
-* Present player information in an organised format
-* Provide role-specific access to player reports
-
-🛡️ Security & Data Protection
-
-* Authentication and authorisation controls
-* Role-based access to sensitive information
-* Server-side validation
-* Protected routes
-* Prevention of direct URL access to restricted pages
-* Controlled access to player and injury information
-* GDPR-conscious handling of children’s personal data
-
-Technologies
-
-* PHP
-* PHP OOP
-* Custom MVC Architecture
-* Custom Routing
-* Singleton Design Pattern
-* MySQL
-* SQL Transactions
-* HTML5
-* CSS3
-* JavaScript
-* Tailwind CSS
-* Composer
-* NPM
-* Git
-
-Architecture
-
-The application follows a custom MVC architecture designed to separate application responsibilities.
+The application follows the Model-View-Controller (MVC) architectural pattern.
 
 Model
 
-* Handles database interaction and data-related operations
-* Communicates with the MySQL database
-* Provides structured access to application data
+The Model layer manages the application's data and communication with the MySQL database.
 
 View
 
-* Handles the presentation layer
-* Displays application data to users
-* Provides role-specific dashboards and interfaces
+The View layer provides the user interface and presentation of information to users.
 
 Controller
 
-* Processes incoming requests
-* Coordinates models and views
-* Handles application logic
-* Performs authentication and authorisation checks
+The Controller layer handles user requests, application logic, and communication between the Models and Views.
 
-Router
+This structure helps separate application responsibilities and makes the system easier to maintain and extend.
 
-* Processes incoming URLs and requests
-* Maps routes to the appropriate controllers and actions
-* Controls access to protected application routes
+Security and Access Control
 
-Database Layer
+The system incorporates Role-Based Access Control (RBAC), Attribute-Based Access Control (ABAC), and routing to control access to system features and records.
 
-* Uses a Singleton pattern for controlled access to the database connection
-* Uses SQL transactions for operations involving multiple related queries
-* Uses validation and database constraints to maintain data integrity and reduce duplicate records
+Role-Based Access Control
+
+RBAC controls access to system features based on the user's assigned role. For example, coaches can access coaching-related functionality while public users are restricted to publicly available information.
+
+Attribute-Based Access Control
+
+ABAC provides more detailed control by considering attributes associated with users, records, or other contextual information when determining whether access should be permitted.
+
+Routing
+
+Routing controls access to different pages and functions. Protected routes verify that users are authorised before allowing access.
+
+Together, these approaches help ensure that users can only access authorised features and records.
 
 Database
 
-The application uses a relational MySQL database to manage structured rugby club data, including:
+The application uses MySQL for database management.
 
-* Users
-* Parents
-* Players
-* Teams
-* Squads
-* Training sessions
-* Injuries
-* Matches
-* Player participation
-* Player-related reports
+A Singleton design pattern is used to maintain a single database connection throughout the application. This provides a consistent approach to database connectivity across different parts of the application.
 
-Relationships between entities allow information to be associated and retrieved efficiently while maintaining data integrity.
+Database transactions are also used when multiple related database operations need to be performed together. This helps maintain data integrity by ensuring that related operations are completed consistently.
 
-Key Learning Outcomes
+Technologies Used
+Backend
 
-Through this project, I developed practical experience in:
+PHP
 
-* Object-oriented software development
-* Designing and implementing a custom MVC architecture
-* Developing a custom routing system
-* Applying the Singleton design pattern
-* Implementing SQL database transactions
-* Using COMMIT and ROLLBACK for atomic database operations
-* Database design and relational modelling
-* SQL and MySQL
-* Authentication and authorisation
-* Role-based access control
-* CRUD operations
-* Database constraints and data integrity
-* Form handling and validation
-* Server-side security
-* Protected routing
-* Data protection considerations
-* Full-stack web application development
-* Separation of concerns
-* Software architecture and maintainability
-* Git-based version control
-* Designing software for multiple user types
+MySQL
 
-Project
+Object-Oriented Programming (OOP)
 
-GitHub: https://github.com/realveenna/simply-rugby
+MVC Architecture
+
+Frontend
+
+HTML
+
+JavaScript
+
+Tailwind CSS
+
+Flowbite
+
+Data Visualisation
+
+Chart.js
+
+Flowbite ApexCharts
+
+Dependency Management
+
+Composer
+
+Data Visualisation
+
+The system uses charts and graphical representations to help users understand club and player information.
+
+The application uses:
+
+Chart.js
+
+Flowbite ApexCharts
+
+These libraries are used to present relevant statistics and performance information in an accessible format.
+
+Object-Oriented Programming
+
+The application was developed using Object-Oriented Programming principles in PHP.
+
+OOP is used to structure the application into reusable classes and objects, helping improve:
+
+Maintainability
+
+Code organisation
+
+Reusability
+
+Separation of responsibilities
+
+Scalability
+
+The application also makes use of design patterns, including the Singleton pattern for database connectivity.
+
+Deployment
+
+The application is currently hosted online and can be accessed through a web browser on a range of devices.
+
+Live application:
+
+https://simply-rugby.infinityfree.io/
+
+Browser and Device Support
+
+The system is designed as a web-based application and can be accessed through modern web browsers on different device types, including:
+
+Desktop computers
+
+Laptops
+
+Tablets
+
+Mobile devices
+
+The user interface uses Tailwind CSS and Flowbite components to support a responsive and accessible design.
+
+Project Objectives
+
+The main objectives of the Simply Rugby Club Management System are to:
+
+Centralise club administration and rugby-related information
+
+Reduce manual management of club records
+
+Provide authorised users with access to relevant information
+
+Improve the management of training sessions and attendance
+
+Maintain player injury and performance records
+
+Manage fixtures and player information efficiently
+
+Provide useful data visualisation for club information
+
+Improve the club's online presence
+
+Provide a system that can be accessed through a web browser
+
+Future Improvements
+
+Potential future improvements could include:
+
+Email and notification functionality
+
+Automated fixture reminders
+
+More advanced player performance analytics
+
+Online membership and payment processing
+
+Improved reporting functionality
+
+Mobile-specific enhancements
+
+Integration with external rugby competition or fixture systems
